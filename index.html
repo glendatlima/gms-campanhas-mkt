@@ -380,7 +380,7 @@ function pgVendas(){
   var total=allVendas.length;
   var rc=allVendas.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
   var ticket=total>0?(rc/total):0;
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">💰 Vendas</div><div style="display:flex;gap:8px" class="no-print"><button class="btn bp bs" onclick="omUploadVendas()"><span class="icon icon-sm">upload_file</span> Importar Planilha</button>'+(total>0?'<button class="btn bd bs" onclick="limparVendas()"><span class="icon icon-sm">delete_sweep</span> Excluir Tudo</button>':'')+'</div></div>';
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><div class="st" style="margin:0">💰 Vendas</div><div style="display:flex;gap:8px" class="no-print"><button class="btn bo bs" onclick="baixarModelo()"><span class="icon icon-sm">download</span> Modelo CSV</button><button class="btn bp bs" onclick="omUploadVendas()"><span class="icon icon-sm">upload_file</span> Importar Planilha</button></div></div>';
   h+='<div class="kg" style="margin-bottom:16px">';
   h+='<div class="card kpi" style="border-top-color:var(--em)"><div class="kl">🆕 Total Vendas</div><div class="kv">'+F(total)+'</div></div>';
   h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">💵 Receita Total</div><div class="kv">R$ '+fmtBR(rc)+'</div></div>';
@@ -388,30 +388,107 @@ function pgVendas(){
   h+='</div>';
   h+='<div class="g2" style="margin-bottom:16px"><div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">Por Origem</div><canvas id="v-orig" height="220"></canvas></div><div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">Evolução Mensal</div><canvas id="v-evo" height="220"></canvas></div></div>';
   if(!allVendas.length){
-    h+='<div class="card emp"><span class="icon">monetization_on</span><p style="font-weight:500">Nenhuma venda importada</p><p style="font-size:12px">Clique em "Importar Planilha" para subir seu CSV</p></div>';
+    h+='<div class="card emp"><span class="icon">monetization_on</span><p style="font-weight:500">Nenhuma venda importada</p><p style="font-size:12px">Clique em "Modelo CSV" para baixar o formato, preencha e importe</p></div>';
     return h;
   }
-  // Agrupar por mês
-  var byM={};allVendas.forEach(function(v){var m=v.data_contrato?v.data_contrato.substring(0,7):'?';if(!byM[m])byM[m]=[];byM[m].push(v)});
-  var meses=Object.keys(byM).sort(function(a,b){return b.localeCompare(a)});
-  var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  meses.forEach(function(m){
-    var items=byM[m];var p=m.split('-');var mLabel=mn[parseInt(p[1])]+' '+p[0];
-    var mRc=items.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
-    // Por origem neste mês
-    var origens={};items.forEach(function(v){var o=v.origem||'Não identificado';origens[o]=(origens[o]||0)+1});
-    var oriList=Object.entries(origens).sort(function(a,b){return b[1]-a[1]}).map(function(e){return e[0]+': '+e[1]}).join(' · ');
-    h+='<div class="card" style="overflow-x:auto;margin-bottom:16px"><div style="padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g200);background:var(--g100);border-radius:10px 10px 0 0"><div><span style="font-size:15px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+mLabel+'</span><span style="font-size:12px;color:var(--g500);margin-left:12px">'+items.length+' vendas · R$ '+fmtBR(mRc)+'</span></div><div style="font-size:10px;color:var(--g500)">'+oriList+'</div></div>';
-    h+='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--bg)"><th style="padding:6px 10px;text-align:left">Data</th><th style="padding:6px 10px;text-align:left">Cliente</th><th style="padding:6px 10px">Plano</th><th style="padding:6px 10px;text-align:right">Valor</th><th style="padding:6px 10px">Tipo Venda</th><th style="padding:6px 10px">Origem</th><th style="padding:6px 10px">Vendedor</th><th style="padding:6px 10px">Status</th></tr></thead><tbody>';
-    items.forEach(function(v){
-      var stC=(v.status_contrato==='active'||v.status_contrato==='Em dia'||v.status_contrato==='Em Dia')?'var(--ok)':v.status_contrato==='Cancelado'?'var(--err)':'var(--g500)';
-      h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:6px 10px">'+v.data_contrato+'</td><td style="padding:6px 10px;font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.cliente||'—')+'</td><td style="padding:6px 10px;font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.plano||'—')+'</td><td style="padding:6px 10px;text-align:right;font-weight:600;color:var(--em)">R$ '+fmtBR(Number(v.valor_assinatura||0))+'</td><td style="padding:6px 10px;font-size:10px">'+(v.tipo_venda||'—')+'</td><td style="padding:6px 10px;font-size:10px">'+(v.origem||'—')+'</td><td style="padding:6px 10px;font-size:10px">'+(v.vendedor||'—')+'</td><td style="padding:6px 10px"><span style="color:'+stC+';font-size:10px;font-weight:600">'+(v.status_contrato||'—')+'</span></td></tr>'});
-    h+='</tbody></table></div>';
+  // Agrupar por lote de importação
+  var lotes={};allVendas.forEach(function(v){var l=v.lote_importacao||'sem_lote';if(!lotes[l])lotes[l]=[];lotes[l].push(v)});
+  var loteKeys=Object.keys(lotes).sort(function(a,b){return b.localeCompare(a)});
+  // Dentro de cada lote, agrupar por mês
+  loteKeys.forEach(function(lote){
+    var loteItems=lotes[lote];
+    var loteRc=loteItems.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
+    var loteLabel=lote==='sem_lote'?'Importação anterior':lote;
+    // Card do lote com botão excluir
+    h+='<div class="card" style="margin-bottom:16px;overflow:hidden">';
+    h+='<div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:10px 10px 0 0"><div><span style="font-size:13px;font-weight:600">📋 '+loteLabel+'</span><span style="font-size:11px;opacity:.7;margin-left:12px">'+loteItems.length+' vendas · R$ '+fmtBR(loteRc)+'</span></div><button class="btn bd bs no-print" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="excluirLote(\''+lote+'\')"><span class="icon icon-sm">delete</span> Excluir</button></div>';
+    // Agrupar por mês dentro do lote
+    var byM={};loteItems.forEach(function(v){var m=v.data_contrato?v.data_contrato.substring(0,7):'?';if(!byM[m])byM[m]=[];byM[m].push(v)});
+    var meses=Object.keys(byM).sort(function(a,b){return b.localeCompare(a)});
+    var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    meses.forEach(function(m){
+      var items=byM[m];var p=m.split('-');var mLabel=mn[parseInt(p[1])]+' '+p[0];
+      var mRc=items.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
+      var origens={};items.forEach(function(v){var o=v.origem||'—';origens[o]=(origens[o]||0)+1});
+      var oriList=Object.entries(origens).sort(function(a,b){return b[1]-a[1]}).map(function(e){return e[0]+': '+e[1]}).join(' · ');
+      h+='<div style="padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g200);background:var(--g100)"><div><span style="font-size:13px;font-weight:600;color:var(--navy)">'+mLabel+'</span><span style="font-size:11px;color:var(--g500);margin-left:8px">'+items.length+' vendas · R$ '+fmtBR(mRc)+'</span></div><div style="font-size:10px;color:var(--g500)">'+oriList+'</div></div>';
+      h+='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--bg)"><th style="padding:5px 10px;text-align:left">Data</th><th style="padding:5px 10px;text-align:left">Cliente</th><th style="padding:5px 10px;text-align:right">MRR</th><th style="padding:5px 10px">Origem</th><th style="padding:5px 10px">Vendedor</th></tr></thead><tbody>';
+      items.forEach(function(v){
+        h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:5px 10px">'+v.data_contrato+'</td><td style="padding:5px 10px;font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.cliente||'—')+'</td><td style="padding:5px 10px;text-align:right;font-weight:600;color:var(--em)">R$ '+fmtBR(Number(v.valor_assinatura||0))+'</td><td style="padding:5px 10px;font-size:10px">'+(v.origem||'—')+'</td><td style="padding:5px 10px;font-size:10px">'+(v.vendedor||'—')+'</td></tr>'});
+      h+='</tbody></table>';
+    });
+    h+='</div>';
   });
   return h;
 }
 
-async function limparVendas(){if(!confirm('Tem certeza que deseja EXCLUIR TODAS as '+allVendas.length+' vendas?\n\nEssa ação não pode ser desfeita.'))return;tst('Excluindo...');await db.from('vendas').delete().neq('id','00000000-0000-0000-0000-000000000000');tst('Vendas excluídas');await ldVendas();rHome()}
+// Baixar modelo CSV
+function baixarModelo(){
+  var csv='Data,Cliente,MRR,Origem da Venda,Vendedor\n2026-03-15,João Silva ME,69.90,Página de Planos,Glenda Lima\n2026-03-16,Maria Souza,69.90,Link Direto Vendedor(a),Ramona Saraiva\n';
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='modelo_vendas_gms.csv';link.click();
+  tst('Modelo baixado!');
+}
+
+// Upload vendas (novo formato simplificado)
+function omUploadVendas(){om('Importar Planilha de Vendas','<p style="font-size:13px;color:var(--g700);margin-bottom:8px">Formato do CSV (5 colunas):</p><div class="card" style="padding:12px;font-family:monospace;font-size:11px;background:var(--bg);margin-bottom:12px">Data,Cliente,MRR,Origem da Venda,Vendedor<br>2026-03-15,João Silva,69.90,Página de Planos,Glenda</div><p style="font-size:11px;color:var(--g500);margin-bottom:12px">💡 A data pode ser dd/mm/aaaa ou aaaa-mm-dd</p><div class="ua" onclick="document.getElementById(\'vf\').click()"><span class="icon icon-lg" style="color:var(--g300);display:block;margin-bottom:8px">upload_file</span><p style="font-size:14px;font-weight:500;color:var(--g700)">Arraste ou clique</p><input type="file" id="vf" accept=".csv,.txt" onchange="hUploadV(this.files[0])"></div><div id="v-pv" style="margin-top:16px"></div>','<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" id="v-ok" onclick="cUploadV()" disabled>Importar</button>')}
+var csvVendas=[];
+function hUploadV(f){if(!f)return;var r=new FileReader();r.onload=function(e){
+  var ls=e.target.result.split('\n').map(function(l){return l.trim()}).filter(function(l){return l});
+  if(ls.length<2){tst('Arquivo vazio');return}
+  var hd=ls[0].split(',').map(function(x){return x.trim().toLowerCase()});
+  // Detectar colunas flexivelmente
+  var iData=hd.findIndex(function(x){return x.includes('data')});
+  var iCli=hd.findIndex(function(x){return x.includes('cliente')||x.includes('nome')});
+  var iMRR=hd.findIndex(function(x){return x.includes('mrr')||x.includes('valor')});
+  var iOrig=hd.findIndex(function(x){return x.includes('origem')});
+  var iVend=hd.findIndex(function(x){return x.includes('vendedor')});
+  if(iData<0){tst('Coluna "Data" não encontrada');return}
+  csvVendas=[];
+  for(var i=1;i<ls.length;i++){
+    var cols=[];var cur='';var inQ=false;
+    for(var j=0;j<ls[i].length;j++){var ch=ls[i][j];if(ch==='"'){inQ=!inQ}else if(ch===','&&!inQ){cols.push(cur.trim());cur=''}else{cur+=ch}}
+    cols.push(cur.trim());
+    if(cols.length<2)continue;
+    var dataRaw=cols[iData]||'';
+    var dp=dataRaw.split('/');
+    var dataISO=dp.length===3?(dp[2]+'-'+dp[1].padStart(2,'0')+'-'+dp[0].padStart(2,'0')):dataRaw;
+    if(!dataISO||dataISO.length<10)continue;
+    var parseVal=function(s){if(!s)return 0;return parseFloat(s.replace('R$','').replace('.','').replace(',','.').trim())||0};
+    csvVendas.push({
+      data_contrato:dataISO,
+      cliente:iCli>=0?cols[iCli]:'',
+      valor_assinatura:iMRR>=0?parseVal(cols[iMRR]):0,
+      origem:iOrig>=0?cols[iOrig]:'',
+      vendedor:iVend>=0?cols[iVend]:''
+    });
+  }
+  document.getElementById('v-pv').innerHTML='<div class="card" style="padding:12px"><p style="font-weight:600;color:var(--navy)">✅ '+csvVendas.length+' venda(s) encontradas</p><p style="font-size:11px;color:var(--g500);margin-top:4px">'+csvVendas[0]?.data_contrato+' a '+csvVendas[csvVendas.length-1]?.data_contrato+'</p></div>';
+  document.getElementById('v-ok').disabled=false;
+};r.readAsText(f,'utf-8')}
+async function cUploadV(){
+  if(!csvVendas.length)return;
+  var lote='Importação '+new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  tst('Importando '+csvVendas.length+' vendas...');
+  var rows=csvVendas.map(function(r){return Object.assign({},r,{lote_importacao:lote})});
+  for(var i=0;i<rows.length;i+=100){
+    var batch=rows.slice(i,i+100);
+    var res=await db.from('vendas').insert(batch);
+    if(res.error){tst('Erro: '+res.error.message);return}
+  }
+  cm();tst(csvVendas.length+' vendas importadas!');csvVendas=[];await ldVendas();rHome();
+}
+async function excluirLote(lote){
+  var items=allVendas.filter(function(v){return(v.lote_importacao||'sem_lote')===lote});
+  if(!confirm('Excluir '+items.length+' vendas desta importação?\n\n"'+lote+'"\n\nEssa ação não pode ser desfeita.'))return;
+  tst('Excluindo...');
+  if(lote==='sem_lote'){
+    await db.from('vendas').delete().is('lote_importacao',null);
+  } else {
+    await db.from('vendas').delete().eq('lote_importacao',lote);
+  }
+  tst('Importação excluída');await ldVendas();rHome();
+}
 
 function chVendas(){
   var po={};allVendas.forEach(function(v){var o=v.origem||'Não identificado';po[o]=(po[o]||0)+1});
@@ -424,90 +501,6 @@ function chVendas(){
   var cx2=document.getElementById('v-evo');
   if(cx2&&ms.length)new Chart(cx2,{type:'bar',data:{labels:ms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+'/'+p[0].slice(2)}),datasets:[{label:'Vendas',data:ms.map(function(m){return pm[m]}),backgroundColor:'rgba(5,150,105,0.7)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
 }
-// Upload planilha vendas
-function omUploadVendas(){om('Importar Planilha de Vendas','<p style="font-size:13px;color:var(--g700);margin-bottom:12px">Suba o CSV no mesmo formato da planilha de Leads/Negócios Ganhos.</p><div class="ua" onclick="document.getElementById(\'vf\').click()"><span class="icon icon-lg" style="color:var(--g300);display:block;margin-bottom:8px">upload_file</span><p style="font-size:14px;font-weight:500;color:var(--g700)">Arraste ou clique</p><input type="file" id="vf" accept=".csv,.txt" onchange="hUploadV(this.files[0])"></div><div id="v-pv" style="margin-top:16px"></div>','<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" id="v-ok" onclick="cUploadV()" disabled>Importar</button>')}
-var csvVendas=[];
-function hUploadV(f){if(!f)return;var r=new FileReader();r.onload=function(e){
-  var ls=e.target.result.split('\n').map(function(l){return l.trim()}).filter(function(l){return l});
-  if(ls.length<2){tst('Arquivo vazio');return}
-  var hd=ls[0].split(',');
-  var iData=hd.findIndex(function(x){return x.includes('Data Contrato')});
-  var iPlat=hd.findIndex(function(x){return x.includes('Plataforma')});
-  var iNum=hd.findIndex(function(x){return x.includes('Contrato')&&x.includes('N')});
-  var iCli=hd.findIndex(function(x){return x.includes('Cliente')});
-  var iEmail=hd.findIndex(function(x){return x.includes('Email')});
-  var iTel=hd.findIndex(function(x){return x.includes('telefone')});
-  var iPlano=hd.findIndex(function(x){return x.includes('Plano')});
-  var iDoc=hd.findIndex(function(x){return x.includes('Docto')});
-  var iInt=hd.findIndex(function(x){return x.includes('intervalo')});
-  var iPag=hd.findIndex(function(x){return x.includes('Forma Pag')});
-  var iVal=hd.findIndex(function(x){return x.includes('Valor Assinatura')});
-  var iMRR=hd.findIndex(function(x){return x.includes('MRR')});
-  var iTipo=hd.findIndex(function(x){return x.includes('Tipo de Venda')});
-  var iOrig=hd.findIndex(function(x){return x.includes('Origem')});
-  var iVend=hd.findIndex(function(x){return x.includes('Vendedor')});
-  var iAdes=hd.findIndex(function(x){return x.includes('Ades')});
-  var iAnot=hd.findIndex(function(x){return x.includes('Anota')});
-  var iSeg=hd.findIndex(function(x){return x.includes('Segmento')});
-  var iMes=hd.findIndex(function(x){return x.includes('Mes')});
-  var iStat=hd.findIndex(function(x){return x.includes('Status')});
-  var iQtd=hd.findIndex(function(x){return x.includes('Qtd')});
-  var iChurn=hd.findIndex(function(x){return x.includes('Churn')});
-  if(iData<0){tst('Coluna "Data Contrato" não encontrada');return}
-  csvVendas=[];
-  for(var i=1;i<ls.length;i++){
-    // Parse CSV respeitando aspas
-    var cols=[];var cur='';var inQ=false;
-    for(var j=0;j<ls[i].length;j++){var ch=ls[i][j];if(ch==='"'){inQ=!inQ}else if(ch===','&&!inQ){cols.push(cur.trim());cur=''}else{cur+=ch}}
-    cols.push(cur.trim());
-    if(cols.length<3)continue;
-    var dataRaw=cols[iData]||'';
-    // Converter dd/mm/yyyy para yyyy-mm-dd
-    var dp=dataRaw.split('/');
-    var dataISO=dp.length===3?(dp[2]+'-'+dp[1].padStart(2,'0')+'-'+dp[0].padStart(2,'0')):dataRaw;
-    if(!dataISO||dataISO.length<10)continue;
-    var parseVal=function(s){if(!s)return 0;return parseFloat(s.replace('R$','').replace('.','').replace(',','.').trim())||0};
-    csvVendas.push({
-      data_contrato:dataISO,
-      plataforma:iPlat>=0?cols[iPlat]:'',
-      num_contrato:iNum>=0?cols[iNum]:'',
-      cliente:iCli>=0?cols[iCli]:'',
-      email:iEmail>=0?cols[iEmail]:'',
-      telefone:iTel>=0?cols[iTel]:'',
-      plano:iPlano>=0?cols[iPlano]:'',
-      documento:iDoc>=0?cols[iDoc]:'',
-      tipo_intervalo:iInt>=0?cols[iInt]:'month',
-      forma_pagamento:iPag>=0?cols[iPag]:'',
-      valor_assinatura:iVal>=0?parseVal(cols[iVal]):0,
-      valor_mrr:iMRR>=0?parseVal(cols[iMRR]):0,
-      tipo_venda:iTipo>=0?cols[iTipo]:'',
-      origem:iOrig>=0?cols[iOrig]:'',
-      vendedor:iVend>=0?cols[iVend]:'',
-      valor_adesao:iAdes>=0?parseVal(cols[iAdes]):0,
-      anotacoes:iAnot>=0?cols[iAnot]:'',
-      segmento:iSeg>=0?cols[iSeg]:'',
-      mes_ano:iMes>=0?cols[iMes]:'',
-      status_contrato:iStat>=0?cols[iStat]:'active',
-      qtd_cobranca:iQtd>=0?parseInt(cols[iQtd])||0:0,
-      churn_data:iChurn>=0&&cols[iChurn]?(function(){var d2=cols[iChurn].split('/');return d2.length===3?(d2[2]+'-'+d2[1].padStart(2,'0')+'-'+d2[0].padStart(2,'0')):null})():null
-    });
-  }
-  document.getElementById('v-pv').innerHTML='<div class="card" style="padding:12px"><p style="font-weight:600;color:var(--navy)">✅ '+csvVendas.length+' venda(s) encontradas</p><p style="font-size:11px;color:var(--g500);margin-top:4px">Período: '+csvVendas[0]?.data_contrato+' a '+csvVendas[csvVendas.length-1]?.data_contrato+'</p></div>';
-  document.getElementById('v-ok').disabled=false;
-};r.readAsText(f,'utf-8')}
-async function cUploadV(){
-  if(!csvVendas.length)return;
-  tst('Importando '+csvVendas.length+' vendas...');
-  // Importar em lotes de 100
-  for(var i=0;i<csvVendas.length;i+=100){
-    var batch=csvVendas.slice(i,i+100);
-    var res=await db.from('vendas').insert(batch);
-    if(res.error){tst('Erro no lote '+(i/100+1)+': '+res.error.message);return}
-  }
-  cm();tst(csvVendas.length+' vendas importadas!');csvVendas=[];await ldVendas();rHome();
-}
-
-// ==================== OCORRÊNCIAS ====================
 function pgOcor(){
   var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">📋 Diário de Ocorrências</div><button class="btn bp" onclick="omNewOc()"><span class="icon icon-sm">add</span> Nova</button></div>';
   if(!ocors.length)return h+'<div class="card emp"><span class="icon">event_note</span><p style="font-weight:500">Nenhuma ocorrência</p></div>';
