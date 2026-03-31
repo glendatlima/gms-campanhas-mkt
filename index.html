@@ -121,10 +121,15 @@ label{font-size:11px;color:var(--g500);font-weight:500;margin-bottom:3px;display
 <script>
 const SB='https://rziulhxiwgjcizieqcae.supabase.co',SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aXVsaHhpd2dqY2l6aWVxY2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDM5OTksImV4cCI6MjA5MDQ3OTk5OX0.UeOfPqM6Gn1zTsnV6WmsNO8uCtdnjux3gEqwUrM2DBM';
 const db=supabase.createClient(SB,SK);
-let vw='home',mainTab='campanhas',cCamp=null,cTab='timeline',cFeat=null,fTab='overview';
-let camps=[],ems=[],wps=[],socs=[],ress=[],feats=[],fLinks=[],fFbs=[];
+let vw='home',mainTab='dashboard',cCamp=null,cTab='timeline',cFeat=null,fTab='overview';
+let camps=[],ems=[],wps=[],socs=[],ress=[],feats=[],fLinks=[],fFbs=[],ocors=[],allRes=[];
 const $=id=>document.getElementById(id),P=(n,d)=>d>0?(n/d*100).toFixed(1):'0.0',F=n=>(n||0).toLocaleString('pt-BR');
 const ORI={email_campanha:'E-mail',whatsapp:'WhatsApp',rede_social:'Rede Social',indicacao:'Indicação',comercial:'Comercial',google:'Google',outro:'Outro'};
+
+const OCOR_TIPOS={promocao:'Promoção/Oferta',ausencia:'Ausência/Férias',problema_tecnico:'Problema Técnico',evento_externo:'Evento Externo',mudanca_preco:'Mudança de Preço',concorrente:'Concorrente',leads:'Leads',mudanca_time:'Mudança no Time',outro:'Outro'};
+const OCOR_ICONS={promocao:'sell',ausencia:'person_off',problema_tecnico:'error',evento_externo:'event',mudanca_preco:'price_change',concorrente:'groups',leads:'trending_up',mudanca_time:'swap_horiz',outro:'more_horiz'};
+const OCOR_COLORS={promocao:'var(--cyan)',ausencia:'var(--orange)',problema_tecnico:'var(--err)',evento_externo:'var(--info)',mudanca_preco:'var(--yellow)',concorrente:'var(--pink)',leads:'var(--purp)',mudanca_time:'var(--navy)',outro:'var(--g500)'};
+const IMPACTO_BADGE={positivo:'b-ok',negativo:'b-err',neutro:'b-info'};
 const ORIC={email_campanha:'#2563EB',whatsapp:'#16A34A',rede_social:'#DB2777',indicacao:'#7C3AED',comercial:'#EA580C',google:'#45E5E5',outro:'#666'};
 function tst(m){const t=$('tst');t.innerHTML=`<span class="i is">check_circle</span>${m}`;t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>t.classList.remove('show'),2500)}
 function om(t,b,f){$('mt').textContent=t;$('mmb').innerHTML=b;$('mmf').innerHTML=f;$('mo').classList.add('open')}
@@ -133,6 +138,8 @@ function sb2(p){$('bc').innerHTML=p.map((x,i)=>i<p.length-1?`<span onclick="${x.
 
 // DATA
 async function ldCamps(){const{data}=await db.from('campanhas').select('*').order('created_at',{ascending:false});camps=data||[]}
+async function ldOcors(){const{data}=await db.from('ocorrencias').select('*').order('data_inicio',{ascending:false});ocors=data||[]}
+async function ldAllRes(){const{data}=await db.from('resultados_campanha').select('*').order('data',{ascending:false});allRes=data||[]}
 async function ldFeats(){const{data}=await db.from('features').select('*').order('created_at',{ascending:false});feats=data||[]}
 async function ldCampD(id){const[e,w,s,r]=await Promise.all([db.from('emails_campanha').select('*').eq('campanha_id',id).order('ordem'),db.from('whatsapp_campanha').select('*').eq('campanha_id',id).order('created_at'),db.from('social_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),db.from('resultados_campanha').select('*').eq('campanha_id',id).order('data')]);ems=e.data||[];wps=w.data||[];socs=s.data||[];ress=r.data||[]}
 async function ldFeatD(id){const[l,f]=await Promise.all([db.from('feature_campanhas').select('*,campanhas(*)').eq('feature_id',id),db.from('feature_feedbacks').select('*').eq('feature_id',id).order('data',{ascending:false})]);fLinks=l.data||[];fFbs=f.data||[]}
@@ -143,16 +150,21 @@ function rHome(){
   let h=`<div style="margin-bottom:20px"><h1 style="font-size:24px;font-weight:700;color:var(--navy);font-family:'Poppins',sans-serif;margin:0">📊 Marketing Intelligence</h1><p style="font-size:13px;color:var(--g500);margin-top:4px">Gerencie campanhas, features e resultados em um só lugar</p></div>`;
   // Nav tabs
   h+=`<div class="nav">
+    <button class="nav-btn ${mainTab==='dashboard'?'active':''}" onclick="mainTab='dashboard';rHome()"><span class="i is">dashboard</span> Dashboard</button>
     <button class="nav-btn ${mainTab==='campanhas'?'active':''}" onclick="mainTab='campanhas';rHome()"><span class="i is">campaign</span> Campanhas (${camps.length})</button>
     <button class="nav-btn ${mainTab==='features'?'active':''}" onclick="mainTab='features';rHome()"><span class="i is">extension</span> Features (${feats.length})</button>
     <button class="nav-btn ${mainTab==='comparativo'?'active':''}" onclick="mainTab='comparativo';rHome()"><span class="i is">compare_arrows</span> Comparativo</button>
+    <button class="nav-btn ${mainTab==='ocorrencias'?'active':''}" onclick="mainTab='ocorrencias';rHome()"><span class="i is">event_note</span> Ocorrências (${ocors.length})</button>
   </div><div class="nav-panel">`;
-  if(mainTab==='campanhas')h+=rCampList();
+  if(mainTab==='dashboard')h+=rDashboard();
+  else if(mainTab==='campanhas')h+=rCampList();
   else if(mainTab==='features')h+=rFeatList();
   else if(mainTab==='comparativo')h+=rComparativo();
+  else if(mainTab==='ocorrencias')h+=rOcorrencias();
   h+=`</div><div class="ft"><p>© 2026 Sismais Tecnologia · GMS — Gestão Mais Simples</p></div>`;
   $('app').innerHTML=h;
   if(mainTab==='comparativo')renderCompCharts();
+  if(mainTab==='dashboard')renderDashCharts();
 }
 
 // CAMPAIGNS LIST
@@ -270,11 +282,20 @@ function rTimeline(){
   const rd={};
   ress.forEach(r=>{if(!rd[r.data])rd[r.data]={n:0,u:0,rc:0,o:{}};const x=rd[r.data];if(r.tipo==='nova_assinatura')x.n++;else x.u++;x.rc+=Number(r.valor_mensal)||0;x.o[r.origem]=(x.o[r.origem]||0)+1});
   Object.entries(rd).forEach(([d,x])=>{const ot=Object.entries(x.o).map(([k,v])=>`${ORI[k]||k}: ${v}`).join(', ');ev.push({d,t:'res',cat:'💰',title:`${x.n} nova(s), ${x.u} upgrade(s)`,det:`R$ ${x.rc.toFixed(2)} · ${ot}`,c:'var(--em)'})});
+  // Adicionar ocorrências do período
+  const cIni=cCamp.data_inicio,cFim=cCamp.data_fim;
+  ocors.forEach(o=>{
+    const oIni=o.data_inicio,oFim=o.data_fim||o.data_inicio;
+    if(!cIni||!cFim||(oIni<=cFim&&oFim>=cIni)){
+      const impEmoji={positivo:'🟢',negativo:'🔴',neutro:'🔵'}[o.impacto]||'🔵';
+      ev.push({d:o.data_inicio,t:'ocor',cat:impEmoji+' '+(OCOR_TIPOS[o.tipo]||'Outro'),title:o.titulo,det:o.descricao||'',c:OCOR_COLORS[o.tipo]||'var(--g500)'});
+    }
+  });
   ev.sort((a,b)=>a.d.localeCompare(b.d));
   let h=`<div class="st">📅 Timeline — Ações x Resultados</div>`;
   if(!ev.length)return h+`<div class="card emp"><span class="i">timeline</span><p style="font-weight:500">Nenhum evento</p><p style="font-size:12px">Cadastre e-mails com data e importe resultados</p></div>`;
   h+='<div class="tw">';let ld='';
-  ev.forEach(e=>{const sd=e.d!==ld;ld=e.d;h+=`<div class="ti"><div class="tdot" style="background:${e.c};box-shadow:0 0 0 2px ${e.c}"></div>${sd?`<div class="tdt">${e.d}</div>`:''}<div class="tc ${e.t==='res'?'res':'act'}"><div class="ttg" style="color:${e.c}">${e.cat} ${e.t==='res'?'RESULTADO':'AÇÃO'}</div><div class="ttt">${e.title}</div><div class="ttd">${e.det}</div></div></div>`});
+  ev.forEach(e=>{const sd=e.d!==ld;ld=e.d;h+=`<div class="ti"><div class="tdot" style="background:${e.c};box-shadow:0 0 0 2px ${e.c}"></div>${sd?`<div class="tdt">${e.d}</div>`:''}<div class="tc ${e.t==='res'?'res':e.t==='ocor'?'':'act'}" ${e.t==='ocor'?'style="border-left:3px solid '+e.c+';background:var(--g50)"':''}><div class="ttg" style="color:${e.c}">${e.cat} ${e.t==='res'?'RESULTADO':'AÇÃO'}</div><div class="ttt">${e.title}</div><div class="ttd">${e.det}</div></div></div>`});
   h+='</div>';return h;
 }
 
@@ -349,6 +370,184 @@ function rRes(){
   ress.forEach(r=>{h+=`<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px">${r.data}</td><td style="padding:8px 12px"><span class="badge ${r.tipo==='nova_assinatura'?'b-ok':'b-purp'}">${r.tipo==='nova_assinatura'?'Nova':'Upgrade'}</span></td><td style="padding:8px 12px">${r.plano||'—'}</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--em)">R$ ${Number(r.valor_mensal||0).toFixed(2)}</td><td style="padding:8px 12px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ORIC[r.origem]||'#666'};margin-right:4px"></span>${ORI[r.origem]||r.origem}</td><td style="padding:8px 12px" class="no-print"><button class="btn bi bd bs" onclick="dRes('${r.id}')"><span class="i is">delete</span></button></td></tr>`});
   h+=`</tbody></table></div>`;return h;
 }
+
+
+// ==================== DASHBOARD GERAL ====================
+function rDashboard(){
+  const now=new Date();const curMonth=now.toISOString().substring(0,7);
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <div class="st" style="margin:0">🏠 Dashboard Geral</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="margin:0;font-size:12px">Período:</label>
+      <input type="month" id="dash-month" value="${curMonth}" onchange="rHome()" style="width:auto;padding:5px 10px;font-size:12px">
+    </div></div>`;
+
+  const selMonth=document.getElementById('dash-month')?.value||curMonth;
+  const mStart=selMonth+'-01';
+  const mEnd=selMonth+'-31';
+
+  // Filter data by month
+  const mRes=allRes.filter(r=>r.data>=mStart&&r.data<=mEnd);
+  const mOcor=ocors.filter(o=>o.data_inicio>=mStart&&o.data_inicio<=mEnd);
+  const mCamps=camps.filter(c=>(c.data_inicio&&c.data_inicio<=mEnd)&&(!c.data_fim||c.data_fim>=mStart));
+  const activeCamps=camps.filter(c=>c.status==='ativa');
+
+  const mNovas=mRes.filter(r=>r.tipo==='nova_assinatura').length;
+  const mUps=mRes.filter(r=>r.tipo==='upgrade').length;
+  const mReceita=mRes.reduce((a,r)=>a+Number(r.valor_mensal||0),0);
+  const mNeg=mOcor.filter(o=>o.impacto==='negativo').length;
+  const mPos=mOcor.filter(o=>o.impacto==='positivo').length;
+
+  // KPIs
+  h+=`<div class="kg">
+    <div class="card kpi" style="border-top-color:var(--em)"><div class="kl">🆕 Novas Assinaturas</div><div class="kv">${mNovas}</div><div class="ks" style="color:var(--em)">no período</div></div>
+    <div class="card kpi" style="border-top-color:var(--purp)"><div class="kl">⬆️ Upgrades</div><div class="kv">${mUps}</div><div class="ks" style="color:var(--purp)">no período</div></div>
+    <div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">💵 Receita Mensal</div><div class="kv">R$ ${mReceita.toFixed(2)}</div></div>
+    <div class="card kpi" style="border-top-color:var(--cyan)"><div class="kl">📢 Campanhas Ativas</div><div class="kv">${activeCamps.length}</div></div>
+    <div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">🟢 Ocorrências +</div><div class="kv">${mPos}</div></div>
+    <div class="card kpi" style="border-top-color:var(--err)"><div class="kl">🔴 Ocorrências -</div><div class="kv">${mNeg}</div></div>
+  </div>`;
+
+  // Grid: Campanhas do período + Resultados por origem
+  h+=`<div class="g2" style="margin-top:20px">`;
+
+  // Campanhas do período
+  h+=`<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📢 Campanhas no Período</div>`;
+  if(!mCamps.length)h+=`<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma campanha neste período</p>`;
+  mCamps.forEach(c=>{
+    const st={ativa:'b-ok',concluida:'b-info',pausada:'b-warn',rascunho:'b-purp'}[c.status]||'b-info';
+    h+=`<div style="padding:10px;border:1px solid var(--g200);border-radius:8px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--cyan)" onclick="oCamp('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:var(--navy)">${c.nome}</span><span class="badge ${st}">${c.status}</span></div>
+      ${c.data_inicio?`<div style="font-size:10px;color:var(--g500);margin-top:4px">📅 ${c.data_inicio} → ${c.data_fim||'...'}</div>`:''}
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // Resultados por origem
+  h+=`<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📊 Resultados por Origem</div>`;
+  if(!mRes.length)h+=`<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhum resultado neste período</p>`;
+  else{
+    const po={};mRes.forEach(r=>{if(!po[r.origem])po[r.origem]={n:0,u:0,r:0};const o=po[r.origem];if(r.tipo==='nova_assinatura')o.n++;else o.u++;o.r+=Number(r.valor_mensal||0)});
+    h+=`<canvas id="dash-chart-origem" height="200"></canvas>`;
+  }
+  h+=`</div></div>`;
+
+  // Grid: Ocorrências recentes + Features
+  h+=`<div class="g2" style="margin-top:16px">`;
+
+  // Ocorrências
+  h+=`<div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="st" style="margin:0">📋 Ocorrências no Período</div><button class="btn bp bs" onclick="mainTab=\'ocorrencias\';rHome()">Ver todas</button></div>`;
+  if(!mOcor.length)h+=`<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma ocorrência</p>`;
+  mOcor.slice(0,5).forEach(o=>{
+    const color=OCOR_COLORS[o.tipo]||'var(--g500)';
+    const icon=OCOR_ICONS[o.tipo]||'more_horiz';
+    const impEmoji={positivo:'🟢',negativo:'🔴',neutro:'🔵'}[o.impacto]||'🔵';
+    h+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g100)">
+      <span class="i is" style="color:${color}">${icon}</span>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--navy)">${impEmoji} ${o.titulo}</div><div style="font-size:10px;color:var(--g500)">${o.data_inicio}${o.data_fim?' → '+o.data_fim:''}</div></div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // Features
+  h+=`<div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="st" style="margin:0">🚀 Features</div><button class="btn bp bs" onclick="mainTab=\'features\';rHome()">Ver todas</button></div>`;
+  if(!feats.length)h+=`<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma feature</p>`;
+  feats.slice(0,5).forEach(f=>{
+    const st={lancada:'b-ok',em_desenvolvimento:'b-warn',em_teste:'b-info',descontinuada:'b-err'}[f.status]||'b-info';
+    const stL={lancada:'Lançada',em_desenvolvimento:'Em dev',em_teste:'Em teste',descontinuada:'Desc.'}[f.status]||f.status;
+    h+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g100);cursor:pointer" onclick="oFeat('${f.id}')">
+      <span class="i is" style="color:var(--purp)">extension</span>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--navy)">${f.nome}</div>${f.data_lancamento?`<div style="font-size:10px;color:var(--g500)">🚀 ${f.data_lancamento}</div>`:''}</div>
+      <span class="badge ${st}">${stL}</span>
+    </div>`;
+  });
+  h+=`</div></div>`;
+
+  // Timeline resumida
+  h+=`<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📅 Linha do Tempo do Período</div>`;
+  const tlEvents=[];
+  mOcor.forEach(o=>{tlEvents.push({d:o.data_inicio,icon:OCOR_ICONS[o.tipo]||'more_horiz',color:OCOR_COLORS[o.tipo]||'var(--g500)',title:o.titulo,sub:(OCOR_TIPOS[o.tipo]||'Outro')+' · Impacto: '+o.impacto})});
+  // Add results grouped by day
+  const resByDay={};mRes.forEach(r=>{if(!resByDay[r.data])resByDay[r.data]={n:0,u:0};if(r.tipo==='nova_assinatura')resByDay[r.data].n++;else resByDay[r.data].u++});
+  Object.entries(resByDay).forEach(([d,v])=>{tlEvents.push({d,icon:'monetization_on',color:'var(--em)',title:v.n+' nova(s), '+v.u+' upgrade(s)',sub:'Resultado'})});
+  tlEvents.sort((a,b)=>a.d.localeCompare(b.d));
+
+  if(!tlEvents.length)h+=`<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhum evento no período</p>`;
+  else{
+    h+=`<div style="position:relative;padding-left:28px">`;
+    h+=`<div style="position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--g200)"></div>`;
+    let lastD='';
+    tlEvents.forEach(e=>{
+      const showD=e.d!==lastD;lastD=e.d;
+      h+=`<div style="position:relative;margin-bottom:12px">
+        <div style="position:absolute;left:-23px;top:3px;width:12px;height:12px;border-radius:50%;background:${e.color};border:2px solid var(--w);box-shadow:0 0 0 2px ${e.color}"></div>
+        ${showD?`<div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:3px">${e.d}</div>`:''}
+        <div style="background:var(--w);border:1px solid var(--g200);border-radius:6px;padding:8px 12px;border-left:3px solid ${e.color}">
+          <div style="font-size:12px;font-weight:600;color:var(--navy)">${e.title}</div>
+          <div style="font-size:10px;color:var(--g500)">${e.sub}</div>
+        </div></div>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+
+  return h;
+}
+
+function renderDashCharts(){
+  const selMonth=document.getElementById('dash-month')?.value||(new Date().toISOString().substring(0,7));
+  const mStart=selMonth+'-01',mEnd=selMonth+'-31';
+  const mRes=allRes.filter(r=>r.data>=mStart&&r.data<=mEnd);
+  const po={};mRes.forEach(r=>{po[r.origem]=(po[r.origem]||0)+1});
+  const ctx=document.getElementById('dash-chart-origem');
+  if(ctx&&Object.keys(po).length){
+    new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(po).map(k=>ORI[k]||k),datasets:[{data:Object.values(po),backgroundColor:Object.keys(po).map(k=>ORIC[k]||'#666'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  }
+}
+
+// ==================== OCORRÊNCIAS ====================
+function rOcorrencias(){
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="st" style="margin:0">📋 Diário de Ocorrências</div><button class="btn bp" onclick="omNewOcor()"><span class="i is">add</span> Nova Ocorrência</button></div>`;
+  if(!ocors.length)return h+`<div class="card emp"><span class="i">event_note</span><p style="font-size:14px;font-weight:500">Nenhuma ocorrência</p><p style="font-size:12px">Registre promoções, ausências, problemas e outros eventos</p></div>`;
+  const byMonth={};
+  ocors.forEach(o=>{const m=o.data_inicio.substring(0,7);if(!byMonth[m])byMonth[m]=[];byMonth[m].push(o)});
+  Object.entries(byMonth).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([month,items])=>{
+    const [y,m]=month.split('-');const meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    h+=`<div class="sd">${meses[parseInt(m)]} ${y} (${items.length})</div>`;
+    items.forEach(o=>{
+      const tipo=OCOR_TIPOS[o.tipo]||o.tipo;const icon=OCOR_ICONS[o.tipo]||'more_horiz';const color=OCOR_COLORS[o.tipo]||'var(--g500)';
+      const impBadge=IMPACTO_BADGE[o.impacto]||'b-info';const impLabel={positivo:'Positivo',negativo:'Negativo',neutro:'Neutro'}[o.impacto]||'Neutro';
+      h+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid ${color}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="i is" style="color:${color}">${icon}</span>
+            <span style="font-size:14px;font-weight:600;color:var(--navy)">${o.titulo}</span>
+            <span class="badge b-purp">${tipo}</span>
+            <span class="badge ${impBadge}">Impacto: ${impLabel}</span></div>
+            ${o.descricao?`<p style="font-size:12px;color:var(--g500);margin-top:6px">${o.descricao}</p>`:''}
+            <div style="font-size:11px;color:var(--g500);margin-top:6px">📅 ${o.data_inicio}${o.data_fim?' → '+o.data_fim:''}</div></div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="btn bi bo bs" onclick="omEditOcor('${o.id}')"><span class="i is">edit</span></button>
+            <button class="btn bi bd bs" onclick="dOcor('${o.id}')"><span class="i is">delete</span></button></div></div></div>`;
+    });
+  });
+  return h;
+}
+
+function ocorForm(o){
+  const tipos=Object.entries(OCOR_TIPOS).map(([k,v])=>`<option value="${k}" ${o?.tipo===k?'selected':''}>${v}</option>`).join('');
+  return`<div style="display:flex;flex-direction:column;gap:12px">
+    <div><label>Título</label><input id="mo-t" value="${o?o.titulo:''}" placeholder="Ex: Vendedora Ana de férias"></div>
+    <div class="g2"><div><label>Tipo</label><select id="mo-tp">${tipos}</select></div><div><label>Impacto</label><select id="mo-imp"><option value="positivo" ${o?.impacto==='positivo'?'selected':''}>Positivo</option><option value="negativo" ${o?.impacto==='negativo'?'selected':''}>Negativo</option><option value="neutro" ${o?.impacto==='neutro'?'selected':''}>Neutro</option></select></div></div>
+    <div class="g2"><div><label>Data início</label><input type="date" id="mo-di" value="${o?.data_inicio||''}"></div><div><label>Data fim (opcional)</label><input type="date" id="mo-df" value="${o?.data_fim||''}"></div></div>
+    <div><label>Descrição</label><textarea id="mo-ds" placeholder="Detalhes...">${o?.descricao||''}</textarea></div></div>`;
+}
+function omNewOcor(){om('Nova Ocorrência',ocorForm(),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="svOcor()">Registrar</button>`)}
+function omEditOcor(id){om('Editar Ocorrência',ocorForm(ocors.find(o=>o.id===id)),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="upOcor('${id}')">Salvar</button>`)}
+async function svOcor(){const d={titulo:$('mo-t').value,tipo:$('mo-tp').value,impacto:$('mo-imp').value,data_inicio:$('mo-di').value,data_fim:$('mo-df').value||null,descricao:$('mo-ds').value};if(!d.titulo||!d.data_inicio){tst('Preencha título e data');return}await db.from('ocorrencias').insert(d);cm();tst('Registrada!');await ldOcors();rHome()}
+async function upOcor(id){const d={titulo:$('mo-t').value,tipo:$('mo-tp').value,impacto:$('mo-imp').value,data_inicio:$('mo-di').value,data_fim:$('mo-df').value||null,descricao:$('mo-ds').value};await db.from('ocorrencias').update(d).eq('id',id);cm();tst('Atualizada!');await ldOcors();rHome()}
+async function dOcor(id){if(!confirm('Excluir?'))return;await db.from('ocorrencias').delete().eq('id',id);tst('Excluída');await ldOcors();rHome()}
+
 
 // ==================== FEATURE DETAIL ====================
 async function oFeat(id){$('app').innerHTML='<div class="ld2"><div class="sp"></div></div>';cFeat=feats.find(f=>f.id===id);await ldFeatD(id);vw='feat';fTab='overview';rFeat()}
@@ -460,7 +659,7 @@ async function toggleFb(id,v){await db.from('feature_feedbacks').update({resolvi
 async function dFb(id){if(!confirm('Excluir?'))return;await db.from('feature_feedbacks').delete().eq('id',id);tst('Excluído');await ldFeatD(cFeat.id);rFeat()}
 
 // INIT
-async function init(){await Promise.all([ldCamps(),ldFeats()]);rHome()}
+async function init(){await Promise.all([ldCamps(),ldFeats(),ldOcors(),ldAllRes()]);rHome()}
 init();
 </script>
 </body>
