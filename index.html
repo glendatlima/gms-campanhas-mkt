@@ -64,7 +64,7 @@ input,select,textarea{width:100%;padding:8px 12px;border-radius:7px;border:1px s
 const SB_URL='https://rziulhxiwgjcizieqcae.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aXVsaHhpd2dqY2l6aWVxY2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDM5OTksImV4cCI6MjA5MDQ3OTk5OX0.UeOfPqM6Gn1zTsnV6WmsNO8uCtdnjux3gEqwUrM2DBM';
 const db=supabase.createClient(SB_URL,SB_KEY);
-let vw='home',mainTab='campanhas',cCamp=null,cTab='timeline',cFeat=null,fTab='overview';
+let vw='home',mainTab='dashboard',cCamp=null,cTab='timeline',cFeat=null,fTab='overview';
 let camps=[],ems=[],wps=[],socs=[],ress=[],feats=[],fLinks=[],fFbs=[],ocors=[],allRes=[];
 const $=id=>document.getElementById(id);
 const P=(n,d)=>d>0?(n/d*100).toFixed(1):'0.0';
@@ -92,15 +92,17 @@ async function ldFeatD(id){const[l,f]=await Promise.all([db.from('feature_campan
 function rHome(){
   vw='home';cCamp=null;cFeat=null;sbc([{l:'Painel de Marketing'}]);
   let h='<div style="margin-bottom:20px"><h1 style="font-size:24px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif;margin:0">📊 Marketing Intelligence</h1><p style="font-size:13px;color:var(--g500);margin-top:4px">Gerencie campanhas, features e resultados</p></div>';
-  h+=`<div class="nav"><button class="nav-btn ${mainTab==='campanhas'?'active':''}" onclick="mainTab='campanhas';rHome()"><span class="icon icon-sm">campaign</span> Campanhas (${camps.length})</button><button class="nav-btn ${mainTab==='features'?'active':''}" onclick="mainTab='features';rHome()"><span class="icon icon-sm">extension</span> Features (${feats.length})</button><button class="nav-btn ${mainTab==='resultados'?'active':''}" onclick="mainTab='resultados';rHome()"><span class="icon icon-sm">monetization_on</span> Resultados (${allRes.length})</button><button class="nav-btn ${mainTab==='ocorrencias'?'active':''}" onclick="mainTab='ocorrencias';rHome()"><span class="icon icon-sm">event_note</span> Ocorrências (${ocors.length})</button><button class="nav-btn ${mainTab==='comparativo'?'active':''}" onclick="mainTab='comparativo';rHome()"><span class="icon icon-sm">compare_arrows</span> Comparativo</button></div><div class="nav-panel">`;
-  if(mainTab==='campanhas')h+=rCampList();
+  h+=`<div class="nav"><button class="nav-btn ${mainTab==='dashboard'?'active':''}" onclick="mainTab='dashboard';rHome()"><span class="icon icon-sm">dashboard</span> Dashboard</button><button class="nav-btn ${mainTab==='campanhas'?'active':''}" onclick="mainTab='campanhas';rHome()"><span class="icon icon-sm">campaign</span> Campanhas (${camps.length})</button><button class="nav-btn ${mainTab==='features'?'active':''}" onclick="mainTab='features';rHome()"><span class="icon icon-sm">extension</span> Features (${feats.length})</button><button class="nav-btn ${mainTab==='comparativo'?'active':''}" onclick="mainTab='comparativo';rHome()"><span class="icon icon-sm">compare_arrows</span> Comparativo</button><button class="nav-btn ${mainTab==='resultados'?'active':''}" onclick="mainTab='resultados';rHome()"><span class="icon icon-sm">monetization_on</span> Resultados (${allRes.length})</button><button class="nav-btn ${mainTab==='ocorrencias'?'active':''}" onclick="mainTab='ocorrencias';rHome()"><span class="icon icon-sm">event_note</span> Ocorrências (${ocors.length})</button></div><div class="nav-panel">`;
+  if(mainTab==='dashboard')h+=pgDash();
+  else if(mainTab==='campanhas')h+=rCampList();
   else if(mainTab==='features')h+=rFeatList();
+  else if(mainTab==='comparativo')h+=pgComp();
   else if(mainTab==='resultados')h+=pgResGlobal();
   else if(mainTab==='ocorrencias')h+=pgOcor();
-  else if(mainTab==='comparativo')h+=pgComp();
   h+='</div><div class="ft"><p>© 2026 Sismais Tecnologia · GMS</p></div>';
   $('app').innerHTML=h;
   if(mainTab==='resultados')setTimeout(chResG,100);
+  if(mainTab==='dashboard')setTimeout(chDash,100);
 }
 
 // CAMPAIGNS LIST
@@ -201,10 +203,38 @@ function rROICharts(){
 // EMAILS
 function rEmails(){
   const t={env:0,ab:0,cl:0,clV:0,clM:0,clD:0,bo:0,un:0,ve:0};ems.forEach(e=>{t.env+=e.enviados;t.ab+=e.aberturas;t.cl+=e.cliques;t.clV+=e.cliques_venda;t.clM+=e.cliques_midia;t.clD+=e.cliques_desins;t.bo+=e.bounces;t.un+=e.unsubs;t.ve+=e.vendas});
-  let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">E-mails</div><button class="btn bp bs no-print" onclick="omNewEm()"><span class="icon icon-sm">add</span> Novo</button></div>';
+  let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">📧 E-mails</div><button class="btn bp bs no-print" onclick="omNewEm()"><span class="icon icon-sm">add</span> Novo</button></div>';
+  // KPIs
   h+='<div class="kg">';
   [{l:'Enviados',v:t.env,i:'📤',c:'var(--info)'},{l:'Aberturas',v:t.ab,s:P(t.ab,t.env)+'%',i:'👁️',c:'var(--cyan)'},{l:'Cliques',v:t.cl,s:P(t.cl,t.ab)+'%',i:'🖱️',c:'var(--purp)'},{l:'Cl. Venda',v:t.clV,i:'🛒',c:'var(--ok)'},{l:'Cl. Mídia',v:t.clM,i:'🎬',c:'var(--pink)'},{l:'Vendas',v:t.ve,i:'💰',c:'var(--em)'},{l:'Bounces',v:t.bo,s:P(t.bo,t.env)+'%',i:'⚠️',c:'var(--yellow)'},{l:'Descad.',v:t.un,i:'🚫',c:'var(--err)'}].forEach(k=>{h+=`<div class="card kpi" style="border-top-color:${k.c}"><div class="kl">${k.i} ${k.l}</div><div class="kv">${F(k.v)}</div>${k.s?`<div class="ks" style="color:${k.c}">${k.s}</div>`:''}</div>`});
-  h+='</div><div style="margin-top:16px">';
+  h+='</div>';
+  // Dashboard cards - Melhores e Pior
+  const sent=ems.filter(x=>x.enviados>0);
+  if(sent.length>1){
+    const byAb=sent.slice().sort((a,b)=>P(b.aberturas,b.enviados)-P(a.aberturas,a.enviados));
+    const byClV=sent.slice().sort((a,b)=>(b.cliques_venda||0)-(a.cliques_venda||0));
+    const byVe=sent.slice().sort((a,b)=>(b.vendas||0)-(a.vendas||0));
+    const worst=byAb[byAb.length-1];
+    h+='<div class="g2" style="margin-top:16px">';
+    // Melhores
+    h+='<div class="card" style="padding:20px;border-left:4px solid var(--ok)"><div class="st" style="margin:0 0 12px">🏆 Melhores</div>';
+    h+=`<div style="margin-bottom:10px"><span style="font-size:11px;color:var(--g500)">Melhor abertura:</span><div style="font-size:14px;font-weight:600;color:var(--navy)">${byAb[0].nome}</div><div style="font-size:12px;color:var(--ok);font-weight:600">${P(byAb[0].aberturas,byAb[0].enviados)}% abertura</div></div>`;
+    if(byClV[0].cliques_venda>0)h+=`<div style="margin-bottom:10px"><span style="font-size:11px;color:var(--g500)">Mais cliques de venda:</span><div style="font-size:14px;font-weight:600;color:var(--navy)">${byClV[0].nome}</div><div style="font-size:12px;color:var(--ok);font-weight:600">${F(byClV[0].cliques_venda)} cliques</div></div>`;
+    if(byVe[0].vendas>0)h+=`<div><span style="font-size:11px;color:var(--g500)">Mais vendas:</span><div style="font-size:14px;font-weight:600;color:var(--navy)">${byVe[0].nome}</div><div style="font-size:12px;color:var(--em);font-weight:600">${F(byVe[0].vendas)} venda(s)</div></div>`;
+    h+='</div>';
+    // Pior
+    h+='<div class="card" style="padding:20px;border-left:4px solid var(--yellow)"><div class="st" style="margin:0 0 12px">⚠️ Precisa Melhorar</div>';
+    h+=`<div><span style="font-size:11px;color:var(--g500)">Pior taxa de abertura:</span><div style="font-size:14px;font-weight:600;color:var(--navy)">${worst.nome}</div><div style="font-size:12px;color:var(--err);font-weight:600">${P(worst.aberturas,worst.enviados)}% abertura</div><p style="font-size:11px;color:var(--g500);margin-top:6px">💡 Revise o assunto e horário de envio</p></div>`;
+    h+='</div></div>';
+    // Ranking
+    h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📊 Ranking por Abertura</div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">E-mail</th><th style="padding:8px 12px;text-align:center">Enviados</th><th style="padding:8px 12px;text-align:center">Abertura</th><th style="padding:8px 12px;text-align:center">Cl. Venda</th><th style="padding:8px 12px;text-align:center">Vendas</th></tr></thead><tbody>';
+    const medals=['🥇','🥈','🥉'];
+    byAb.forEach((em,i)=>{h+=`<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-size:16px">${medals[i]||i+1+'º'}</td><td style="padding:8px 12px;font-weight:${i===0?'700':'400'};color:var(--navy)">${em.nome}</td><td style="padding:8px 12px;text-align:center">${F(em.enviados)}</td><td style="padding:8px 12px;text-align:center;font-weight:700;color:${i===0?'var(--ok)':'var(--g900)'}">${P(em.aberturas,em.enviados)}%</td><td style="padding:8px 12px;text-align:center;color:var(--ok)">${F(em.cliques_venda)}</td><td style="padding:8px 12px;text-align:center;color:var(--em)">${F(em.vendas)}</td></tr>`});
+    h+='</tbody></table></div>';
+  }
+  // Email cards
+  h+='<div style="margin-top:16px">';
   ems.forEach(em=>{const is=em.status==='enviado',oR=P(em.aberturas,em.enviados),cR=P(em.cliques,em.aberturas),sc=is?'b-ok':em.status==='pendente'?'b-warn':'b-purp',sl=is?'Enviado':em.status==='pendente'?'Pendente':'Rascunho';
     h+=`<div class="card ec ${is?'':'pend'}"><div style="padding:12px 16px;border-bottom:1px solid var(--g100);display:flex;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${em.nome}</span><span class="badge ${sc}">${sl}</span></div><div style="font-size:11px;color:var(--g500);margin-top:3px">"${em.assunto}"${em.data_envio?` · 📅 ${em.data_envio}`:''}</div></div><div style="display:flex;gap:4px" class="no-print"><button class="btn bi bo bs" onclick="omEditEm('${em.id}')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dEm('${em.id}')"><span class="icon icon-sm">delete</span></button></div></div>`;
     if(em.enviados>0){h+=`<div style="padding:10px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(75px,1fr));gap:6px">`;
@@ -217,21 +247,76 @@ function rEmails(){
   h+='</div>';return h;
 }
 
-// WHATSAPP
-function rWap(){let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">WhatsApp</div><button class="btn bp bs no-print" onclick="omNewWp()"><span class="icon icon-sm">add</span> Nova</button></div>';
-  if(!wps.length)return h+'<div class="card emp"><span class="icon">chat</span><p>Nenhuma automação</p></div>';
-  wps.forEach(w=>{h+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--ok)"><div style="display:flex;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${w.nome}</span><span class="badge b-${w.status==='ativo'?'ok':w.status==='concluido'?'info':'warn'}">${w.status}</span></div><div style="font-size:11px;color:var(--g500);margin-top:3px">Seg: <strong>${w.segmento}</strong>${w.data_inicio?` · 📅 ${w.data_inicio}`:''}</div></div><div style="display:flex;gap:4px" class="no-print"><button class="btn bi bo bs" onclick="omEditWp('${w.id}')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dWp('${w.id}')"><span class="icon icon-sm">delete</span></button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-top:12px">${[{l:'Enviados',v:w.enviados,c:'var(--navy)'},{l:'Entregues',v:w.entregues,c:'var(--ok)'},{l:'Cliques',v:w.cliques_link,c:'var(--purp)'},{l:'Conversões',v:w.conversoes,c:'var(--cyan)'},{l:'Vendas',v:w.vendas,c:'var(--em)'}].map(m=>`<div class="mc"><div class="ml">${m.l}</div><div class="mv" style="color:${m.c}">${F(m.v)}</div></div>`).join('')}</div></div>`});
-  return h;}
+function rWap(){
+  const tw={env:0,ent:0,cl:0,co:0,ve:0};wps.forEach(w=>{tw.env+=w.enviados;tw.ent+=w.entregues;tw.cl+=w.cliques_link;tw.co+=w.conversoes;tw.ve+=w.vendas});
+  let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">📱 WhatsApp</div><button class="btn bp bs no-print" onclick="omNewWp()"><span class="icon icon-sm">add</span> Nova</button></div>';
+  // KPIs
+  h+='<div class="kg">';
+  [{l:'Enviados',v:tw.env,c:'var(--navy)'},{l:'Entregues',v:tw.ent,s:P(tw.ent,tw.env)+'%',c:'var(--ok)'},{l:'Cliques',v:tw.cl,s:P(tw.cl,tw.ent)+'%',c:'var(--purp)'},{l:'Conversões',v:tw.co,c:'var(--cyan)'},{l:'Vendas',v:tw.ve,c:'var(--em)'}].forEach(k=>{h+=`<div class="card kpi" style="border-top-color:${k.c}"><div class="kl">${k.l}</div><div class="kv">${F(k.v)}</div>${k.s?`<div class="ks" style="color:${k.c}">${k.s}</div>`:''}</div>`});
+  h+='</div>';
+  // Melhor automação
+  if(wps.length>1){
+    const byCl=wps.slice().filter(w=>w.enviados>0).sort((a,b)=>(b.cliques_link||0)-(a.cliques_link||0));
+    const byVe=wps.slice().filter(w=>w.vendas>0).sort((a,b)=>b.vendas-a.vendas);
+    if(byCl.length){
+      h+='<div class="card" style="padding:20px;margin-top:16px;border-left:4px solid var(--ok)"><div class="st" style="margin:0 0 12px">🏆 Melhor Automação</div>';
+      h+=`<div style="margin-bottom:10px"><span style="font-size:11px;color:var(--g500)">Mais cliques:</span><div style="font-size:14px;font-weight:600;color:var(--navy)">${byCl[0].nome}</div><div style="font-size:12px;color:var(--ok);font-weight:600">${F(byCl[0].cliques_link)} cliques · Seg: ${byCl[0].segmento}</div></div>`;
+      if(byVe.length)h+=`<div><span style="font-size:11px;color:var(--g500)">Mais vendas:</span><div style="font-size:14px;font-weight:600;color:var(--navy)">${byVe[0].nome}</div><div style="font-size:12px;color:var(--em);font-weight:600">${F(byVe[0].vendas)} venda(s)</div></div>`;
+      h+='</div>';
+      // Ranking
+      h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📊 Ranking por Cliques</div>';
+      h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">Automação</th><th style="padding:8px 12px">Segmento</th><th style="padding:8px 12px;text-align:center">Enviados</th><th style="padding:8px 12px;text-align:center">Cliques</th><th style="padding:8px 12px;text-align:center">Vendas</th></tr></thead><tbody>';
+      const medals=['🥇','🥈','🥉'];
+      byCl.forEach((w,i)=>{h+=`<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-size:16px">${medals[i]||i+1+'º'}</td><td style="padding:8px 12px;font-weight:${i===0?'700':'400'}">${w.nome}</td><td style="padding:8px 12px;font-size:11px;color:var(--g500)">${w.segmento}</td><td style="padding:8px 12px;text-align:center">${F(w.enviados)}</td><td style="padding:8px 12px;text-align:center;font-weight:700;color:${i===0?'var(--ok)':'var(--g900)'}">${F(w.cliques_link)}</td><td style="padding:8px 12px;text-align:center;color:var(--em)">${F(w.vendas)}</td></tr>`});
+      h+='</tbody></table></div>';
+    }
+  }
+  // Cards
+  if(!wps.length)h+='<div class="card emp" style="margin-top:16px"><span class="icon">chat</span><p>Nenhuma automação</p></div>';
+  wps.forEach(w=>{h+=`<div class="card" style="padding:16px;margin-top:10px;border-left:4px solid var(--ok)"><div style="display:flex;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${w.nome}</span><span class="badge b-${w.status==='ativo'?'ok':w.status==='concluido'?'info':'warn'}">${w.status}</span></div><div style="font-size:11px;color:var(--g500);margin-top:3px">Seg: <strong>${w.segmento}</strong>${w.data_inicio?` · 📅 ${w.data_inicio}`:''}</div></div><div style="display:flex;gap:4px" class="no-print"><button class="btn bi bo bs" onclick="omEditWp('${w.id}')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dWp('${w.id}')"><span class="icon icon-sm">delete</span></button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-top:12px">${[{l:'Enviados',v:w.enviados,c:'var(--navy)'},{l:'Entregues',v:w.entregues,c:'var(--ok)'},{l:'Cliques',v:w.cliques_link,c:'var(--purp)'},{l:'Conversões',v:w.conversoes,c:'var(--cyan)'},{l:'Vendas',v:w.vendas,c:'var(--em)'}].map(m=>`<div class="mc"><div class="ml">${m.l}</div><div class="mv" style="color:${m.c}">${F(m.v)}</div></div>`).join('')}</div></div>`});
+  return h;
+}
 
-// SOCIAL
-function rSoc(){let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">Redes Sociais</div><button class="btn bp bs no-print" onclick="omNewSc()"><span class="icon icon-sm">add</span> Nova</button></div>';
+function rSoc(){
+  const ts={al:0,im:0,cu:0,co:0,cp:0,sv:0,cl:0,vi:0,sg:0};socs.forEach(s=>{ts.al+=s.alcance;ts.im+=s.impressoes;ts.cu+=s.curtidas;ts.co+=s.comentarios;ts.cp+=s.compartilhamentos;ts.sv+=s.salvamentos;ts.cl+=s.cliques_link;ts.vi+=s.visualizacoes_completas;ts.sg+=s.seguidores_ganhos});
+  let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">📸 Redes Sociais</div><button class="btn bp bs no-print" onclick="omNewSc()"><span class="icon icon-sm">add</span> Nova</button></div>';
+  // KPIs
+  h+='<div class="kg">';
+  [{l:'Alcance',v:ts.al,c:'var(--info)'},{l:'Curtidas',v:ts.cu,c:'var(--err)'},{l:'Comentários',v:ts.co,c:'var(--purp)'},{l:'Compartilh.',v:ts.cp,c:'var(--ok)'},{l:'Salvamentos',v:ts.sv,c:'var(--orange)'},{l:'Vis. Completas',v:ts.vi,c:'var(--pink)'},{l:'Seguidores',v:ts.sg,c:'var(--em)'},{l:'Cliques Link',v:ts.cl,c:'var(--navy)'}].forEach(k=>{h+=`<div class="card kpi" style="border-top-color:${k.c}"><div class="kl">${k.l}</div><div class="kv">${F(k.v)}</div></div>`});
+  h+='</div>';
+  // Engajamento = curtidas + comentários + compartilhamentos + salvamentos
+  const withEng=socs.filter(s=>s.alcance>0).map(s=>{const eng=s.curtidas+s.comentarios+s.compartilhamentos+s.salvamentos;return{...s,eng,engRate:s.alcance>0?(eng/s.alcance*100):0}}).sort((a,b)=>b.engRate-a.engRate);
+  const reels=withEng.filter(s=>s.tipo==='reel');
+  const stories=withEng.filter(s=>s.tipo==='story');
+  if(reels.length||stories.length){
+    h+='<div class="g2" style="margin-top:16px">';
+    // Melhor Reel
+    h+='<div class="card" style="padding:20px;border-left:4px solid var(--pink)"><div class="st" style="margin:0 0 12px">🎬 Melhor Reel</div>';
+    if(reels.length){const r=reels[0];h+=`<div style="font-size:14px;font-weight:600;color:var(--navy)">${r.nome}</div><div style="font-size:12px;color:var(--pink);font-weight:600;margin-top:4px">${r.engRate.toFixed(1)}% engajamento</div><div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--g500)">${r.data_publicacao?`<span>📅 ${r.data_publicacao}</span>`:''}<span>👁️ ${F(r.alcance)}</span><span>❤️ ${F(r.curtidas)}</span><span>💬 ${F(r.comentarios)}</span></div>`}
+    else h+='<p style="font-size:12px;color:var(--g500)">Nenhum reel</p>';
+    h+='</div>';
+    // Melhor Story
+    h+='<div class="card" style="padding:20px;border-left:4px solid var(--purp)"><div class="st" style="margin:0 0 12px">📱 Melhor Story</div>';
+    if(stories.length){const s=stories[0];h+=`<div style="font-size:14px;font-weight:600;color:var(--navy)">${s.nome}</div><div style="font-size:12px;color:var(--purp);font-weight:600;margin-top:4px">${s.engRate.toFixed(1)}% engajamento</div><div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--g500)">${s.data_publicacao?`<span>📅 ${s.data_publicacao}</span>`:''}<span>👁️ ${F(s.alcance)}</span><span>❤️ ${F(s.curtidas)}</span></div>`}
+    else h+='<p style="font-size:12px;color:var(--g500)">Nenhum story</p>';
+    h+='</div></div>';
+    // Ranking
+    if(withEng.length>1){
+      h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📊 Ranking por Engajamento</div>';
+      h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">Publicação</th><th style="padding:8px 12px">Tipo</th><th style="padding:8px 12px;text-align:center">Alcance</th><th style="padding:8px 12px;text-align:center">Engajamento</th><th style="padding:8px 12px;text-align:center">Taxa</th></tr></thead><tbody>';
+      const medals=['🥇','🥈','🥉'];
+      withEng.forEach((s,i)=>{h+=`<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-size:16px">${medals[i]||i+1+'º'}</td><td style="padding:8px 12px;font-weight:${i===0?'700':'400'}">${s.nome}</td><td style="padding:8px 12px"><span class="badge ${s.tipo==='reel'?'b-purp':'b-info'}">${s.tipo}</span></td><td style="padding:8px 12px;text-align:center">${F(s.alcance)}</td><td style="padding:8px 12px;text-align:center;font-weight:600">${F(s.eng)}</td><td style="padding:8px 12px;text-align:center;font-weight:700;color:${i===0?'var(--ok)':'var(--g900)'}">${s.engRate.toFixed(1)}%</td></tr>`});
+      h+='</tbody></table></div>';
+    }
+  }
+  // Cards por tipo
   [['🎬 Reels',socs.filter(s=>s.tipo==='reel')],['📱 Stories',socs.filter(s=>s.tipo==='story')]].forEach(([t,items])=>{
     h+=`<div class="sd">${t} (${items.length})</div>`;
     if(!items.length)h+='<div class="card emp" style="padding:20px"><p style="font-size:12px">Nenhum</p></div>';
     items.forEach(s=>{h+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid ${s.tipo==='reel'?'var(--pink)':'var(--purp)'}"><div style="display:flex;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${s.nome}</span><span class="badge b-${s.status==='publicado'?'ok':'warn'}">${s.status}</span></div>${s.data_publicacao?`<div style="font-size:11px;color:var(--g500);margin-top:3px">📅 ${s.data_publicacao}</div>`:''}</div><div style="display:flex;gap:4px" class="no-print"><button class="btn bi bo bs" onclick="omEditSc('${s.id}')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dSc('${s.id}')"><span class="icon icon-sm">delete</span></button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:5px;margin-top:12px">${[{l:'Alcance',v:s.alcance,c:'var(--info)'},{l:'Curtidas',v:s.curtidas,c:'var(--err)'},{l:'Coment.',v:s.comentarios,c:'var(--purp)'},{l:'Comp.',v:s.compartilhamentos,c:'var(--ok)'},{l:'Salvam.',v:s.salvamentos,c:'var(--orange)'},{l:'Cliques',v:s.cliques_link,c:'var(--navy)'},{l:'Vis.Compl.',v:s.visualizacoes_completas,c:'var(--pink)'},{l:'Seguid.',v:s.seguidores_ganhos,c:'var(--em)'}].map(m=>`<div class="mc"><div class="ml">${m.l}</div><div class="mv" style="color:${m.c};font-size:14px">${F(m.v)}</div></div>`).join('')}</div></div>`})});
-  return h;}
+  return h;
+}
 
-// RESULTADOS
 function rRes(){
   const n=ress.filter(r=>r.tipo==='nova_assinatura').length,u=ress.filter(r=>r.tipo==='upgrade').length,rc=ress.reduce((a,r)=>a+Number(r.valor_mensal||0),0);
   let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">💰 Resultados</div><div style="display:flex;gap:8px" class="no-print"><button class="btn bo bs" onclick="omNewRes()"><span class="icon icon-sm">add</span> Manual</button><button class="btn bp bs" onclick="omCSV()"><span class="icon icon-sm">upload_file</span> CSV</button></div></div>';
@@ -398,7 +483,7 @@ async function delOc(id){if(!confirm('Excluir?'))return;await db.from('ocorrenci
 
 // ==================== COMPARATIVO MENSAL ====================
 function pgComp(){
-  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">Visão mês a mês de resultados e ocorrências</p>';
+  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">Visão completa mês a mês — resultados, ocorrências</p>';
   var months={};
   allRes.forEach(function(r){var m=r.data?r.data.substring(0,7):'?';if(!months[m])months[m]={novas:0,ups:0,receita:0,ocor_pos:0,ocor_neg:0};if(r.tipo==='nova_assinatura')months[m].novas++;else months[m].ups++;months[m].receita+=Number(r.valor_mensal||0)});
   ocors.forEach(function(o){var m=o.data_inicio.substring(0,7);if(!months[m])months[m]={novas:0,ups:0,receita:0,ocor_pos:0,ocor_neg:0};if(o.impacto==='positivo')months[m].ocor_pos++;if(o.impacto==='negativo')months[m].ocor_neg++});
@@ -415,7 +500,83 @@ function pgComp(){
       h+='<td style="padding:10px 12px;text-align:center;font-weight:'+(best?'700':'400')+';color:'+(best?row.c:'var(--g900)')+(best?';background:var(--okbg)':'')+'">'+(row.money?'R$ '+v.toFixed(2):v)+'</td>'});
     h+='</tr>'});
   h+='</tbody></table></div>';
+  // Gráfico evolução
+  h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📈 Evolução Mensal</div><canvas id="ch-comp" height="250"></canvas></div>';
+  setTimeout(function(){
+    var sms=sm.slice().reverse();
+    var cx=document.getElementById('ch-comp');
+    if(cx&&sms.length)new Chart(cx,{type:'bar',data:{labels:sms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+' '+p[0]}),datasets:[{label:'Novas',data:sms.map(function(m){return months[m].novas}),backgroundColor:'rgba(5,150,105,0.7)',borderRadius:4},{label:'Upgrades',data:sms.map(function(m){return months[m].ups}),backgroundColor:'rgba(124,58,237,0.7)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  },100);
   return h;
+}
+
+// ==================== DASHBOARD ====================
+function pgDash(){
+  var now=new Date();var curM=now.toISOString().substring(0,7);
+  var selM=document.getElementById('dash-m')?.value||curM;
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div class="st" style="margin:0">🏠 Dashboard — Resumo Geral</div><div style="display:flex;gap:8px;align-items:center"><label style="margin:0;font-size:12px">Mês:</label><input type="month" id="dash-m" value="'+selM+'" onchange="rHome()" style="width:auto;padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid var(--g300)"></div></div>';
+  var mS=selM+'-01',mE=selM+'-31';
+  var mR=allRes.filter(function(r){return r.data>=mS&&r.data<=mE});
+  var mO=ocors.filter(function(o){return o.data_inicio>=mS&&o.data_inicio<=mE});
+  var mC=camps.filter(function(c){return c.data_inicio&&c.data_inicio<=mE&&(!c.data_fim||c.data_fim>=mS)});
+  var mN=mR.filter(function(r){return r.tipo==='nova_assinatura'}).length;
+  var mU=mR.filter(function(r){return r.tipo==='upgrade'}).length;
+  var mRc=mR.reduce(function(a,r){return a+Number(r.valor_mensal||0)},0);
+  var teM=0,taM=0;
+  mC.forEach(function(c){
+    ems.forEach&&0; // ems is per-campaign, we need global email stats
+  });
+  h+='<div class="kg">';
+  h+='<div class="card kpi" style="border-top-color:var(--em)"><div class="kl">🆕 Novas Assinaturas</div><div class="kv">'+mN+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--purp)"><div class="kl">⬆️ Upgrades</div><div class="kv">'+mU+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">💵 Receita Mensal</div><div class="kv">R$ '+mRc.toFixed(2)+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--cyan)"><div class="kl">📢 Campanhas Ativas</div><div class="kv">'+mC.length+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">🟢 Ocor. Positivas</div><div class="kv">'+mO.filter(function(o){return o.impacto==='positivo'}).length+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--err)"><div class="kl">🔴 Ocor. Negativas</div><div class="kv">'+mO.filter(function(o){return o.impacto==='negativo'}).length+'</div></div>';
+  h+='</div>';
+
+  // Grid: Campanhas + Resultados por Origem
+  h+='<div class="g2" style="margin-top:20px">';
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📢 Campanhas do Período</div>';
+  if(!mC.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma campanha no período</p>';
+  mC.forEach(function(c){
+    var st={ativa:'b-ok',concluida:'b-info',pausada:'b-warn',rascunho:'b-purp'}[c.status]||'b-info';
+    h+='<div style="padding:10px;border:1px solid var(--g200);border-radius:8px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--cyan)" onclick="oCamp(\''+c.id+'\')"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:var(--navy)">'+c.nome+'</span><span class="badge '+st+'">'+c.status+'</span></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📊 Resultados por Origem</div><canvas id="dash-ch" height="200"></canvas>';
+  if(!mR.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhum resultado no período</p>';
+  h+='</div></div>';
+
+  // Grid: Ocorrências + Últimos resultados
+  h+='<div class="g2" style="margin-top:16px">';
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📋 Ocorrências do Período</div>';
+  if(!mO.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma</p>';
+  mO.forEach(function(o){
+    var ie={positivo:'🟢',negativo:'🔴',neutro:'🔵'}[o.impacto]||'🔵';
+    var ic=OCOR_ICONS[o.tipo]||'more_horiz';
+    var cl=OCOR_COLORS[o.tipo]||'#666';
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g100)"><span class="icon icon-sm" style="color:'+cl+'">'+ic+'</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--navy)">'+ie+' '+o.titulo+'</div><div style="font-size:10px;color:var(--g500)">'+o.data_inicio+(o.data_fim?' → '+o.data_fim:'')+'</div></div></div>';
+  });
+  h+='</div>';
+
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">💰 Últimos Resultados</div>';
+  var recent=mR.slice(0,8);
+  if(!recent.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhum</p>';
+  recent.forEach(function(r){
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--g100)"><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(ORIC[r.origem]||'#666')+'"></span><span style="font-size:12px;font-weight:500;color:var(--navy)">'+(r.tipo==='nova_assinatura'?'Nova':'Upgrade')+'</span><span style="font-size:11px;color:var(--g500)">'+(ORI[r.origem]||r.origem)+'</span></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:600;color:var(--em)">R$ '+Number(r.valor_mensal||0).toFixed(2)+'</span><span style="font-size:10px;color:var(--g500)">'+r.data+'</span></div></div>';
+  });
+  h+='</div></div>';
+
+  return h;
+}
+
+function chDash(){
+  var selM=document.getElementById('dash-m')?.value||(new Date().toISOString().substring(0,7));
+  var mR=allRes.filter(function(r){return r.data>=selM+'-01'&&r.data<=selM+'-31'});
+  var po={};mR.forEach(function(r){po[r.origem]=(po[r.origem]||0)+1});
+  var cx=document.getElementById('dash-ch');
+  if(cx&&Object.keys(po).length)new Chart(cx,{type:'doughnut',data:{labels:Object.keys(po).map(function(k){return ORI[k]||k}),datasets:[{data:Object.values(po),backgroundColor:Object.keys(po).map(function(k){return ORIC[k]||'#666'}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
 }
 
 </script>
