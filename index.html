@@ -7,30 +7,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--navy:#10293F;--navy-hover:#1a3d5c;--cyan:#45E5E5;--cyan-hover:#2ecece;--cyan-light:#E8F9F9;--yellow:#FFB800;--white:#FFF;--bg:#F8FAFC;--g100:#F5F5F5;--g200:#E5E5E5;--g300:#CCC;--g500:#666;--g700:#444;--g900:#333;--error:#DC2626;--error-bg:#FEF2F2;--success:#16A34A;--success-bg:#F0FDF4;--info:#2563EB;--info-bg:#EFF6FF;--purple:#7C3AED;--orange:#EA580C;--pink:#DB2777;--emerald:#059669;--sh:0 1px 3px rgba(16,41,63,.08);--sh-lg:0 4px 12px rgba(16,41,63,.12)}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--g900);min-height:100vh}
 .icon{font-family:'Material Symbols Rounded';font-size:20px;font-style:normal;line-height:1;user-select:none;vertical-align:middle}
 .icon-sm{font-size:16px}.icon-lg{font-size:24px}
-
-/* Topbar */
 .topbar{height:52px;background:var(--navy);display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(16,41,63,.15)}
 .tb-logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .tb-mark{background:var(--cyan);color:var(--navy);font-weight:700;font-size:13px;padding:3px 7px;border-radius:4px}
 .tb-text{color:#fff;font-size:13px;opacity:.9}
 .tb-bc{flex:1;font-size:13px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px}
 .tb-bc .a{color:#fff;font-weight:500}
-.tb-status{font-size:11px;color:rgba(255,255,255,.5)}
-
-/* Container */
+.tb-bc span[onclick]{cursor:pointer}.tb-bc span[onclick]:hover{color:var(--cyan)}
 .container{max-width:1200px;margin:0 auto;padding:24px 20px}
-
-/* Cards */
 .card{background:var(--white);border-radius:8px;box-shadow:var(--sh);border:1px solid var(--g200);transition:box-shadow .2s,transform .2s}
 .card:hover{box-shadow:var(--sh-lg)}
-
-/* Buttons */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;font-family:inherit}
 .btn-primary{background:var(--cyan);color:var(--navy)}.btn-primary:hover{background:var(--cyan-hover)}
 .btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:var(--navy-hover)}
@@ -38,66 +31,42 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--g
 .btn-danger{background:transparent;border:1px solid var(--error);color:var(--error)}.btn-danger:hover{background:var(--error-bg)}
 .btn-sm{padding:5px 12px;font-size:11px}
 .btn-icon{padding:6px;min-width:32px;min-height:32px;justify-content:center}
-
-/* Inputs */
 input,select,textarea{width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--g300);font-size:13px;font-family:inherit;outline:none;transition:border .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(69,229,229,.15)}
-select{cursor:pointer}
-textarea{resize:vertical;min-height:60px}
+select{cursor:pointer}textarea{resize:vertical;min-height:60px}
 label{font-size:11px;color:var(--g500);font-weight:500;margin-bottom:3px;display:block}
-
-/* Badge */
 .badge{display:inline-flex;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:600}
 .badge-success{background:var(--success-bg);color:var(--success);border:1px solid rgba(22,163,74,.3)}
 .badge-warning{background:#FFFBEB;color:#92400E;border:1px solid rgba(255,184,0,.5)}
 .badge-error{background:var(--error-bg);color:var(--error);border:1px solid rgba(220,38,38,.3)}
 .badge-info{background:var(--info-bg);color:var(--info);border:1px solid rgba(37,99,235,.3)}
 .badge-purple{background:#F5F3FF;color:var(--purple);border:1px solid rgba(124,58,237,.3)}
-
-/* Tabs */
-.tabs{display:flex;gap:0;border-bottom:2px solid var(--g200);margin:20px 0}
-.tab{padding:10px 18px;font-size:13px;font-weight:400;color:var(--g500);background:0;border:0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:all .15s}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--g200);margin:20px 0;flex-wrap:wrap}
+.tab{padding:10px 16px;font-size:13px;font-weight:400;color:var(--g500);background:0;border:0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:all .15s;white-space:nowrap}
 .tab.active{color:var(--navy);font-weight:600;border-bottom-color:var(--cyan)}
 .tab:hover{color:var(--navy)}
-
-/* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .kpi{padding:14px 16px;border-top:3px solid var(--navy)}
 .kpi-label{font-size:10px;color:var(--g500);margin-bottom:4px;font-weight:500}
 .kpi-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1}
 .kpi-sub{font-size:10px;font-weight:600;margin-top:3px}
-
-/* Grid */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 @media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
-
-/* Section title */
 .section-title{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:14px;font-family:'Poppins',sans-serif}
 .section-divider{font-size:11px;color:var(--g500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;padding:8px 0;border-bottom:1px dashed var(--g200)}
-
-/* Metrics */
 .mcell{text-align:center;padding:6px 4px;border-radius:6px;background:var(--bg)}
 .mcell-l{font-size:9px;color:var(--g500);margin-bottom:2px}
 .mcell-v{font-size:16px;font-weight:700}
 .mcell-s{font-size:9px;font-weight:600}
-
-/* Links */
 .link-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:var(--bg);border:1px solid var(--g200)}
 .link-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
-/* Progress */
-.prog-track{height:4px;border-radius:2px;background:var(--g200)}
-.prog-fill{height:100%;border-radius:2px;transition:width .4s}
-
-/* Insight */
-.insight{padding:8px 12px;border-radius:6px;margin-bottom:6px}
-.insight p{font-size:11px;margin:0;font-weight:500}
-
-/* Best card */
-.best-card{background:linear-gradient(135deg,#10293F,#1a3d5c);border-radius:10px;padding:20px;color:#fff;position:relative;overflow:hidden;margin:16px 0}
-
-/* Modal */
+.email-card{border-left:4px solid var(--success);overflow:hidden;margin-bottom:12px}
+.email-card.pend{border-left-color:var(--yellow)}
+.camp-card{padding:20px;cursor:pointer;border-left:4px solid var(--cyan);transition:all .2s}
+.camp-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+.empty{padding:40px;text-align:center;color:var(--g500)}
+.empty .icon{font-size:48px;color:var(--g300);display:block;margin-bottom:12px}
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(16,41,63,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{background:var(--white);border-radius:12px;width:90%;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(16,41,63,.3);transform:scale(.95);transition:transform .2s}
@@ -106,32 +75,27 @@ label{font-size:11px;color:var(--g500);font-weight:500;margin-bottom:3px;display
 .modal-header h2{font-size:16px;font-weight:600;color:var(--navy);font-family:'Poppins',sans-serif}
 .modal-body{padding:20px}
 .modal-footer{padding:12px 20px;border-top:1px solid var(--g200);display:flex;gap:8px;justify-content:flex-end}
-
-/* Campaign card */
-.camp-card{padding:20px;cursor:pointer;border-left:4px solid var(--cyan);transition:all .2s}
-.camp-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
-.camp-card .camp-name{font-size:16px;font-weight:600;color:var(--navy);font-family:'Poppins',sans-serif}
-.camp-card .camp-desc{font-size:12px;color:var(--g500);margin-top:4px}
-.camp-card .camp-meta{display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--g700)}
-
-/* Email card */
-.email-card{border-left:4px solid var(--success);overflow:hidden;margin-bottom:12px}
-.email-card.pend{border-left-color:var(--yellow)}
-
-/* Empty state */
-.empty{padding:40px;text-align:center;color:var(--g500)}
-.empty .icon{font-size:48px;color:var(--g300);display:block;margin-bottom:12px}
-
-/* Toast */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 12px rgba(16,41,63,.3);opacity:0;transition:opacity .3s;pointer-events:none;z-index:300}
 .toast.show{opacity:1}
-
-/* Loading */
 .loading{display:flex;align-items:center;justify-content:center;padding:60px}
 .spinner{width:36px;height:36px;border:3px solid var(--g200);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* Footer */
+/* Timeline */
+.tl-wrap{position:relative;padding-left:30px}
+.tl-wrap::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--g200)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-dot{position:absolute;left:-25px;top:4px;width:14px;height:14px;border-radius:50%;border:2px solid var(--white);box-shadow:0 0 0 2px var(--g300)}
+.tl-date{font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px}
+.tl-content{background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:12px;box-shadow:var(--sh)}
+.tl-content.action{border-left:3px solid var(--cyan)}
+.tl-content.result{border-left:3px solid var(--emerald)}
+.tl-tag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.tl-title{font-size:13px;font-weight:600;color:var(--navy)}
+.tl-detail{font-size:11px;color:var(--g500);margin-top:2px}
+/* Upload area */
+.upload-area{border:2px dashed var(--g300);border-radius:8px;padding:30px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-area:hover,.upload-area.drag{border-color:var(--cyan);background:var(--cyan-light)}
+.upload-area input{display:none}
 .footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--g200);text-align:center}
 .footer p{font-size:10px;color:var(--g500)}
 </style>
@@ -141,571 +105,440 @@ label{font-size:11px;color:var(--g500);font-weight:500;margin-bottom:3px;display
 <header class="topbar">
   <div class="tb-logo"><span class="tb-mark">GMS</span><span class="tb-text">Gestão Mais Simples</span></div>
   <nav class="tb-bc" id="breadcrumb"><span class="a">Campanhas de Marketing</span></nav>
-  <span class="tb-status" id="save-status"></span>
 </header>
 
-<div class="container" id="app">
-  <div class="loading"><div class="spinner"></div></div>
-</div>
+<div class="container" id="app"><div class="loading"><div class="spinner"></div></div></div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-header"><h2 id="modal-title">Modal</h2><button class="btn btn-icon btn-outline" onclick="closeModal()"><span class="icon icon-sm">close</span></button></div>
-    <div class="modal-body" id="modal-body"></div>
-    <div class="modal-footer" id="modal-footer"></div>
-  </div>
+  <div class="modal"><div class="modal-header"><h2 id="modal-title"></h2><button class="btn btn-icon btn-outline" onclick="closeModal()"><span class="icon icon-sm">close</span></button></div>
+  <div class="modal-body" id="modal-body"></div><div class="modal-footer" id="modal-footer"></div></div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ===================== SUPABASE =====================
-const SUPABASE_URL = 'https://rziulhxiwgjcizieqcae.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aXVsaHhpd2dqY2l6aWVxY2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDM5OTksImV4cCI6MjA5MDQ3OTk5OX0.UeOfPqM6Gn1zTsnV6WmsNO8uCtdnjux3gEqwUrM2DBM';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SB_URL='https://rziulhxiwgjcizieqcae.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aXVsaHhpd2dqY2l6aWVxY2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDM5OTksImV4cCI6MjA5MDQ3OTk5OX0.UeOfPqM6Gn1zTsnV6WmsNO8uCtdnjux3gEqwUrM2DBM';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
-// ===================== STATE =====================
-let currentView = 'campaigns'; // campaigns | campaign-detail
-let currentCampaign = null;
-let currentTab = 'emails';
-let campaigns = [];
-let emails = [];
-let whatsapps = [];
-let socials = [];
+let view='list',curCamp=null,curTab='timeline',camps=[],emails=[],waps=[],socials=[],results=[];
+const $=id=>document.getElementById(id);
+const pc=(n,d)=>d>0?(n/d*100).toFixed(1):'0.0';
+const fmt=n=>(n||0).toLocaleString('pt-BR');
+const ORIGENS={email_campanha:'E-mail',whatsapp:'WhatsApp',rede_social:'Rede Social',indicacao:'Indicação',comercial:'Comercial',google:'Google',outro:'Outro'};
+const ORIGEM_COLORS={email_campanha:'#2563EB',whatsapp:'#16A34A',rede_social:'#DB2777',indicacao:'#7C3AED',comercial:'#EA580C',google:'#45E5E5',outro:'#666'};
 
-// ===================== HELPERS =====================
-const pc = (n,d) => d>0?(n/d*100).toFixed(1):'0.0';
-const fmt = n => (n||0).toLocaleString('pt-BR');
-const $ = id => document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2000)}
+function openModal(t,b,f){$('modal-title').textContent=t;$('modal-body').innerHTML=b;$('modal-footer').innerHTML=f;$('modal-overlay').classList.add('open')}
+function closeModal(){$('modal-overlay').classList.remove('open')}
+function setBc(parts){$('breadcrumb').innerHTML=parts.map((p,i)=>i<parts.length-1?`<span onclick="${p.action||''}">${p.label}</span><span style="opacity:.4">›</span>`:`<span class="a">${p.label}</span>`).join('')}
 
-function toast(msg) {
-  const t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-function openModal(title, bodyHtml, footerHtml) {
-  $('modal-title').textContent = title;
-  $('modal-body').innerHTML = bodyHtml;
-  $('modal-footer').innerHTML = footerHtml;
-  $('modal-overlay').classList.add('open');
-}
-function closeModal() { $('modal-overlay').classList.remove('open'); }
-
-function setBreadcrumb(parts) {
-  $('breadcrumb').innerHTML = parts.map((p, i) => 
-    i < parts.length - 1 
-      ? `<span style="cursor:pointer" onclick="${p.action}">${p.label}</span><span style="opacity:.4">›</span>` 
-      : `<span class="a">${p.label}</span>`
-  ).join('');
-}
-
-// ===================== DATA =====================
-async function loadCampaigns() {
-  const { data, error } = await sb.from('campanhas').select('*').order('created_at', { ascending: false });
-  if (error) { toast('Erro ao carregar campanhas'); console.error(error); return; }
-  campaigns = data || [];
-}
-
-async function loadCampaignData(campId) {
-  const [e, w, s] = await Promise.all([
-    sb.from('emails_campanha').select('*').eq('campanha_id', campId).order('ordem'),
-    sb.from('whatsapp_campanha').select('*').eq('campanha_id', campId).order('created_at'),
-    sb.from('social_campanha').select('*').eq('campanha_id', campId).order('data_publicacao', { ascending: false }),
+// ==================== DATA ====================
+async function loadCamps(){const{data}=await sb.from('campanhas').select('*').order('created_at',{ascending:false});camps=data||[]}
+async function loadCampData(id){
+  const[e,w,s,r]=await Promise.all([
+    sb.from('emails_campanha').select('*').eq('campanha_id',id).order('ordem'),
+    sb.from('whatsapp_campanha').select('*').eq('campanha_id',id).order('created_at'),
+    sb.from('social_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),
+    sb.from('resultados_campanha').select('*').eq('campanha_id',id).order('data'),
   ]);
-  emails = e.data || [];
-  whatsapps = w.data || [];
-  socials = s.data || [];
+  emails=e.data||[];waps=w.data||[];socials=s.data||[];results=r.data||[];
 }
 
-// ===================== RENDER: CAMPAIGNS LIST =====================
-function renderCampaignsList() {
-  currentView = 'campaigns';
-  currentCampaign = null;
-  setBreadcrumb([{ label: 'Campanhas de Marketing' }]);
-
-  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+// ==================== CAMPAIGNS LIST ====================
+function renderList(){
+  view='list';curCamp=null;setBc([{label:'Campanhas de Marketing'}]);
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
     <div><h1 style="font-size:22px;font-weight:700;color:var(--navy);font-family:'Poppins',sans-serif;margin:0">📊 Campanhas de Marketing</h1>
-    <p style="font-size:13px;color:var(--g500);margin-top:4px">${campaigns.length} campanha(s) cadastrada(s)</p></div>
-    <button class="btn btn-primary" onclick="openNewCampaignModal()"><span class="icon icon-sm">add</span> Nova Campanha</button>
-  </div>`;
-
-  if (campaigns.length === 0) {
-    h += `<div class="card empty"><span class="icon">campaign</span><p style="font-size:14px;font-weight:500;margin-bottom:8px">Nenhuma campanha ainda</p><p style="font-size:12px">Clique em "Nova Campanha" para começar</p></div>`;
-  } else {
-    campaigns.forEach(c => {
-      const stBadge = c.status === 'ativa' ? 'badge-success' : c.status === 'concluida' ? 'badge-info' : c.status === 'pausada' ? 'badge-warning' : 'badge-purple';
-      const stLabel = { ativa:'Ativa', concluida:'Concluída', pausada:'Pausada', rascunho:'Rascunho' }[c.status] || c.status;
-      h += `<div class="card camp-card" onclick="openCampaign('${c.id}')" style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div>
-            <div class="camp-name">${c.nome}</div>
-            ${c.descricao ? `<div class="camp-desc">${c.descricao}</div>` : ''}
-            <div class="camp-meta">
-              ${c.data_inicio ? `<span>📅 ${c.data_inicio} → ${c.data_fim || '...'}</span>` : ''}
-              <span class="badge ${stBadge}">${stLabel}</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
-            <button class="btn btn-icon btn-outline btn-sm" onclick="openEditCampaignModal('${c.id}')" title="Editar"><span class="icon icon-sm">edit</span></button>
-            <button class="btn btn-icon btn-danger btn-sm" onclick="deleteCampaign('${c.id}')" title="Excluir"><span class="icon icon-sm">delete</span></button>
-          </div>
-        </div>
-      </div>`;
-    });
-  }
-
-  h += `<div class="footer"><p>© 2026 Sismais Tecnologia · GMS — Gestão Mais Simples</p></div>`;
-  $('app').innerHTML = h;
-}
-
-// ===================== RENDER: CAMPAIGN DETAIL =====================
-async function openCampaign(id) {
-  $('app').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  currentCampaign = campaigns.find(c => c.id === id);
-  await loadCampaignData(id);
-  currentView = 'campaign-detail';
-  currentTab = 'emails';
-  renderCampaignDetail();
-}
-
-function renderCampaignDetail() {
-  const c = currentCampaign;
-  setBreadcrumb([
-    { label: 'Campanhas', action: "goBack()" },
-    { label: c.nome }
-  ]);
-
-  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-    <div>
-      <button class="btn btn-outline btn-sm" onclick="goBack()" style="margin-bottom:8px"><span class="icon icon-sm">arrow_back</span> Voltar</button>
-      <h1 style="font-size:20px;font-weight:700;color:var(--navy);font-family:'Poppins',sans-serif;margin:0">${c.nome}</h1>
-      ${c.descricao ? `<p style="font-size:12px;color:var(--g500);margin-top:4px">${c.descricao}</p>` : ''}
-    </div>
-  </div>`;
-
-  // Tabs
-  h += `<div class="tabs">
-    <button class="tab ${currentTab==='emails'?'active':''}" onclick="switchCampTab('emails')">📧 E-mails (${emails.length})</button>
-    <button class="tab ${currentTab==='whatsapp'?'active':''}" onclick="switchCampTab('whatsapp')">📱 WhatsApp (${whatsapps.length})</button>
-    <button class="tab ${currentTab==='social'?'active':''}" onclick="switchCampTab('social')">📸 Redes Sociais (${socials.length})</button>
-  </div>`;
-
-  if (currentTab === 'emails') h += renderEmailsTab();
-  else if (currentTab === 'whatsapp') h += renderWhatsappTab();
-  else if (currentTab === 'social') h += renderSocialTab();
-
-  h += `<div class="footer"><p>© 2026 Sismais Tecnologia · GMS — Gestão Mais Simples</p></div>`;
-  $('app').innerHTML = h;
-}
-
-function switchCampTab(tab) { currentTab = tab; renderCampaignDetail(); }
-function goBack() { renderCampaignsList(); }
-
-// ===================== EMAILS TAB =====================
-function renderEmailsTab() {
-  const tot = { env:0,ab:0,cl:0,clV:0,clD:0,clM:0,bo:0,un:0,ve:0 };
-  emails.forEach(e => { tot.env+=e.enviados; tot.ab+=e.aberturas; tot.cl+=e.cliques; tot.clV+=e.cliques_venda; tot.clD+=e.cliques_desins; tot.clM+=e.cliques_midia; tot.bo+=e.bounces; tot.un+=e.unsubs; tot.ve+=e.vendas; });
-
-  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div class="section-title" style="margin:0">Visão Geral dos E-mails</div>
-    <button class="btn btn-primary btn-sm" onclick="openNewEmailModal()"><span class="icon icon-sm">add</span> Novo E-mail</button>
-  </div>`;
-
-  // KPIs
-  h += '<div class="kpi-grid">';
-  [
-    {l:'Enviados',v:tot.env,i:'📤',c:'var(--info)'},
-    {l:'Aberturas',v:tot.ab,s:pc(tot.ab,tot.env)+'%',i:'👁️',c:'var(--cyan)'},
-    {l:'Cliques',v:tot.cl,s:pc(tot.cl,tot.ab)+'%',i:'🖱️',c:'var(--purple)'},
-    {l:'Cl. Venda',v:tot.clV,s:tot.cl>0?pc(tot.clV,tot.cl)+'%':'',i:'🛒',c:'var(--success)'},
-    {l:'Cl. Mídia',v:tot.clM,s:tot.cl>0?pc(tot.clM,tot.cl)+'%':'',i:'🎬',c:'var(--pink)'},
-    {l:'Vendas',v:tot.ve,s:tot.clV>0?pc(tot.ve,tot.clV)+'% conv':'',i:'💰',c:'var(--emerald)'},
-    {l:'Bounces',v:tot.bo,s:pc(tot.bo,tot.env)+'%',i:'⚠️',c:'var(--yellow)'},
-    {l:'Descadastros',v:tot.un,i:'🚫',c:'var(--error)'},
-  ].forEach(k => {
-    h += `<div class="card kpi" style="border-top-color:${k.c}"><div class="kpi-label">${k.i} ${k.l}</div><div class="kpi-value">${fmt(k.v)}</div>${k.s?`<div class="kpi-sub" style="color:${k.c}">${k.s}</div>`:''}</div>`;
+    <p style="font-size:13px;color:var(--g500);margin-top:4px">${camps.length} campanha(s)</p></div>
+    <button class="btn btn-primary" onclick="openNewCampModal()"><span class="icon icon-sm">add</span> Nova Campanha</button></div>`;
+  if(!camps.length)h+=`<div class="card empty"><span class="icon">campaign</span><p style="font-size:14px;font-weight:500">Nenhuma campanha</p></div>`;
+  camps.forEach(c=>{
+    const st={ativa:'badge-success',concluida:'badge-info',pausada:'badge-warning',rascunho:'badge-purple'}[c.status]||'badge-info';
+    h+=`<div class="card camp-card" onclick="openCamp('${c.id}')" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:16px;font-weight:600;color:var(--navy);font-family:'Poppins',sans-serif">${c.nome}</div>
+        ${c.descricao?`<div style="font-size:12px;color:var(--g500);margin-top:4px">${c.descricao}</div>`:''}
+        <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--g700)">${c.data_inicio?`<span>📅 ${c.data_inicio} → ${c.data_fim||'...'}</span>`:''}<span class="badge ${st}">${c.status}</span></div></div>
+        <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+          <button class="btn btn-icon btn-outline btn-sm" onclick="openEditCampModal('${c.id}')"><span class="icon icon-sm">edit</span></button>
+          <button class="btn btn-icon btn-danger btn-sm" onclick="delCamp('${c.id}')"><span class="icon icon-sm">delete</span></button></div></div></div>`;
   });
-  h += '</div>';
+  h+=`<div class="footer"><p>© 2026 Sismais Tecnologia · GMS — Gestão Mais Simples</p></div>`;
+  $('app').innerHTML=h;
+}
 
-  // Per email
-  h += '<div style="margin-top:20px">';
-  if (emails.length === 0) {
-    h += '<div class="card empty"><span class="icon">email</span><p>Nenhum e-mail cadastrado</p></div>';
-  }
-  emails.forEach(em => {
-    const isSent = em.status === 'enviado';
-    const oR = pc(em.aberturas,em.enviados), cR = pc(em.cliques,em.aberturas);
-    const stCls = isSent ? 'badge-success' : em.status==='pendente' ? 'badge-warning' : 'badge-purple';
-    const stLbl = isSent ? 'Enviado' : em.status==='pendente' ? 'Pendente' : 'Rascunho';
+// ==================== CAMPAIGN DETAIL ====================
+async function openCamp(id){
+  $('app').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  curCamp=camps.find(c=>c.id===id);
+  await loadCampData(id);view='detail';curTab='timeline';renderDetail();
+}
+function renderDetail(){
+  const c=curCamp;
+  setBc([{label:'Campanhas',action:"goBack()"},{label:c.nome}]);
+  let h=`<div style="margin-bottom:8px">
+    <button class="btn btn-outline btn-sm" onclick="goBack()" style="margin-bottom:8px"><span class="icon icon-sm">arrow_back</span> Voltar</button>
+    <h1 style="font-size:20px;font-weight:700;color:var(--navy);font-family:'Poppins',sans-serif;margin:0">${c.nome}</h1>
+    ${c.descricao?`<p style="font-size:12px;color:var(--g500);margin-top:4px">${c.descricao}</p>`:''}</div>`;
+  h+=`<div class="tabs">
+    <button class="tab ${curTab==='timeline'?'active':''}" onclick="sTab('timeline')">📅 Timeline</button>
+    <button class="tab ${curTab==='roi'?'active':''}" onclick="sTab('roi')">📊 ROI</button>
+    <button class="tab ${curTab==='emails'?'active':''}" onclick="sTab('emails')">📧 E-mails (${emails.length})</button>
+    <button class="tab ${curTab==='whatsapp'?'active':''}" onclick="sTab('whatsapp')">📱 WhatsApp (${waps.length})</button>
+    <button class="tab ${curTab==='social'?'active':''}" onclick="sTab('social')">📸 Social (${socials.length})</button>
+    <button class="tab ${curTab==='resultados'?'active':''}" onclick="sTab('resultados')">💰 Resultados (${results.length})</button>
+  </div>`;
+  if(curTab==='timeline')h+=renderTimeline();
+  else if(curTab==='roi')h+=renderROI();
+  else if(curTab==='emails')h+=renderEmails();
+  else if(curTab==='whatsapp')h+=renderWhatsapp();
+  else if(curTab==='social')h+=renderSocial();
+  else if(curTab==='resultados')h+=renderResultados();
+  h+=`<div class="footer"><p>© 2026 Sismais Tecnologia · GMS</p></div>`;
+  $('app').innerHTML=h;
+  if(curTab==='roi')renderROICharts();
+}
+function sTab(t){curTab=t;renderDetail()}
+function goBack(){renderList()}
 
-    h += `<div class="card email-card ${isSent?'':'pend'}">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--g100);display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${em.nome}</span><span class="badge ${stCls}">${stLbl}</span></div>
-          <div style="font-size:11px;color:var(--g500);margin-top:3px">Assunto: <em>"${em.assunto}"</em>${em.data_envio?` <span style="margin-left:8px">📅 ${em.data_envio}</span>`:''}</div>
-        </div>
-        <div style="display:flex;gap:4px">
-          <button class="btn btn-icon btn-outline btn-sm" onclick="openEditEmailModal('${em.id}')" title="Editar"><span class="icon icon-sm">edit</span></button>
-          <button class="btn btn-icon btn-danger btn-sm" onclick="deleteEmail('${em.id}')" title="Excluir"><span class="icon icon-sm">delete</span></button>
-        </div>
-      </div>`;
-
-    if (em.enviados > 0) {
-      h += `<div style="padding:10px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(75px,1fr));gap:6px">`;
-      [{l:'Enviados',v:em.enviados,c:'var(--navy)'},{l:'Aberturas',v:em.aberturas,s:oR+'%',c:'var(--cyan)'},{l:'Cliques',v:em.cliques,s:cR+'%',c:'var(--purple)'},{l:'Vendas',v:em.vendas,c:'var(--emerald)'},{l:'Bounces',v:em.bounces,c:'var(--yellow)'},{l:'Unsubs',v:em.unsubs,c:'var(--error)'}].forEach(m => {
-        h += `<div class="mcell"><div class="mcell-l">${m.l}</div><div class="mcell-v" style="color:${m.c}">${fmt(m.v)}</div>${m.s?`<div class="mcell-s" style="color:${m.c}">${m.s}</div>`:''}</div>`;
-      });
-      h += '</div>';
-
-      // Links
-      if (em.cliques>0||em.cliques_venda>0||em.cliques_midia>0||em.cliques_desins>0) {
-        h += `<div style="padding:0 16px 10px"><div style="font-size:10px;color:var(--g500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🔗 Cliques por Link</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:5px">`;
-        [{n:'Venda',v:em.cliques_venda,c:'var(--success)'},{n:'Mídia',v:em.cliques_midia,c:'var(--pink)'},{n:'Desinscrição',v:em.cliques_desins,c:'var(--orange)'}].forEach(lk => {
-          h += `<div class="link-item"><div class="link-dot" style="background:${lk.c}"></div><div><div style="font-size:10px;color:var(--g700);font-weight:500">${lk.n}</div><div style="font-size:14px;font-weight:700;color:${lk.c}">${fmt(lk.v)}</div>${em.cliques>0?`<div style="font-size:9px;font-weight:600;color:${lk.c}">${pc(lk.v,em.cliques)}%</div>`:''}</div></div>`;
-        });
-        h += '</div></div>';
-      }
-    }
-    h += '</div>';
+// ==================== TIMELINE ====================
+function renderTimeline(){
+  // Merge all events into timeline
+  const events=[];
+  emails.forEach(e=>{if(e.data_envio)events.push({date:e.data_envio,type:'action',cat:'email',title:e.nome,detail:`Assunto: "${e.assunto}" · ${fmt(e.enviados)} enviados · ${fmt(e.aberturas)} aberturas`,color:'var(--info)'})});
+  waps.forEach(w=>{if(w.data_inicio)events.push({date:w.data_inicio,type:'action',cat:'whatsapp',title:w.nome,detail:`Segmento: ${w.segmento} · ${fmt(w.enviados)} enviados`,color:'var(--success)'})});
+  socials.forEach(s=>{if(s.data_publicacao)events.push({date:s.data_publicacao,type:'action',cat:s.tipo,title:s.nome,detail:`${s.tipo==='reel'?'🎬 Reel':'📱 Story'} · ${fmt(s.alcance)} alcance`,color:'var(--pink)'})});
+  // Group results by date
+  const resByDate={};
+  results.forEach(r=>{
+    if(!resByDate[r.data])resByDate[r.data]={novas:0,upgrades:0,receita:0,origens:{}};
+    const d=resByDate[r.data];
+    if(r.tipo==='nova_assinatura')d.novas++;else d.upgrades++;
+    d.receita+=Number(r.valor_mensal)||0;
+    d.origens[r.origem]=(d.origens[r.origem]||0)+1;
   });
-  h += '</div>';
+  Object.entries(resByDate).forEach(([date,d])=>{
+    const origTxt=Object.entries(d.origens).map(([k,v])=>`${ORIGENS[k]||k}: ${v}`).join(', ');
+    events.push({date,type:'result',title:`${d.novas} nova(s) assinatura(s), ${d.upgrades} upgrade(s)`,detail:`Receita: R$ ${d.receita.toFixed(2)} · Origens: ${origTxt}`,color:'var(--emerald)'});
+  });
+  events.sort((a,b)=>a.date.localeCompare(b.date));
+
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div class="section-title" style="margin:0">📅 Timeline — Ações x Resultados</div></div>`;
+  if(!events.length){
+    h+=`<div class="card empty"><span class="icon">timeline</span><p style="font-size:14px;font-weight:500">Nenhum evento na timeline</p><p style="font-size:12px">Cadastre e-mails com data de envio e importe resultados para ver a timeline</p></div>`;
+    return h;
+  }
+  h+='<div class="tl-wrap">';
+  let lastDate='';
+  events.forEach(ev=>{
+    const showDate=ev.date!==lastDate;lastDate=ev.date;
+    const isResult=ev.type==='result';
+    h+=`<div class="tl-item">
+      <div class="tl-dot" style="background:${ev.color};box-shadow:0 0 0 2px ${ev.color}"></div>
+      ${showDate?`<div class="tl-date">${ev.date}</div>`:''}
+      <div class="tl-content ${isResult?'result':'action'}">
+        <div class="tl-tag" style="color:${ev.color}">${isResult?'💰 RESULTADO':ev.cat==='email'?'📧 E-MAIL':ev.cat==='whatsapp'?'📱 WHATSAPP':ev.cat==='reel'?'🎬 REEL':'📱 STORY'}</div>
+        <div class="tl-title">${ev.title}</div>
+        <div class="tl-detail">${ev.detail}</div>
+      </div></div>`;
+  });
+  h+='</div>';
   return h;
 }
 
-// ===================== WHATSAPP TAB =====================
-function renderWhatsappTab() {
-  const tot = { env:0,ent:0,cl:0,conv:0,ve:0 };
-  whatsapps.forEach(w => { tot.env+=w.enviados; tot.ent+=w.entregues; tot.cl+=w.cliques_link; tot.conv+=w.conversoes; tot.ve+=w.vendas; });
+// ==================== ROI DASHBOARD ====================
+function renderROI(){
+  const totRes={novas:0,upgrades:0,receita:0};
+  const porOrigem={};
+  results.forEach(r=>{
+    if(r.tipo==='nova_assinatura')totRes.novas++;else totRes.upgrades++;
+    totRes.receita+=Number(r.valor_mensal)||0;
+    if(!porOrigem[r.origem])porOrigem[r.origem]={novas:0,upgrades:0,receita:0};
+    const o=porOrigem[r.origem];
+    if(r.tipo==='nova_assinatura')o.novas++;else o.upgrades++;
+    o.receita+=Number(r.valor_mensal)||0;
+  });
+  const totEmails=emails.reduce((a,e)=>a+e.enviados,0);
+  const totAb=emails.reduce((a,e)=>a+e.aberturas,0);
 
-  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div class="section-title" style="margin:0">Automações de WhatsApp</div>
-    <button class="btn btn-primary btn-sm" onclick="openNewWhatsappModal()"><span class="icon icon-sm">add</span> Nova Automação</button>
+  let h=`<div class="section-title">📊 Dashboard de ROI da Campanha</div>`;
+  // KPIs
+  h+=`<div class="kpi-grid">
+    <div class="card kpi" style="border-top-color:var(--emerald)"><div class="kpi-label">💰 Novas Assinaturas</div><div class="kpi-value">${totRes.novas}</div></div>
+    <div class="card kpi" style="border-top-color:var(--purple)"><div class="kpi-label">⬆️ Upgrades</div><div class="kpi-value">${totRes.upgrades}</div></div>
+    <div class="card kpi" style="border-top-color:var(--success)"><div class="kpi-label">💵 Receita Mensal</div><div class="kpi-value">R$ ${totRes.receita.toFixed(2)}</div></div>
+    <div class="card kpi" style="border-top-color:var(--info)"><div class="kpi-label">📧 E-mails Enviados</div><div class="kpi-value">${fmt(totEmails)}</div></div>
+    <div class="card kpi" style="border-top-color:var(--cyan)"><div class="kpi-label">👁️ Aberturas</div><div class="kpi-value">${fmt(totAb)}</div><div class="kpi-sub" style="color:var(--cyan)">${pc(totAb,totEmails)}%</div></div>
+    <div class="card kpi" style="border-top-color:var(--navy)"><div class="kpi-label">📈 Conv. Total</div><div class="kpi-value">${totRes.novas+totRes.upgrades}</div><div class="kpi-sub" style="color:var(--navy)">${pc(totRes.novas+totRes.upgrades,totAb)}% das aberturas</div></div>
   </div>`;
 
-  h += '<div class="kpi-grid">';
-  [{l:'Enviados',v:tot.env,i:'📤',c:'var(--info)'},{l:'Entregues',v:tot.ent,s:pc(tot.ent,tot.env)+'%',i:'✅',c:'var(--success)'},{l:'Cliques Link',v:tot.cl,s:pc(tot.cl,tot.ent)+'%',i:'🔗',c:'var(--purple)'},{l:'Conversões',v:tot.conv,i:'🎯',c:'var(--cyan)'},{l:'Vendas',v:tot.ve,s:tot.cl>0?pc(tot.ve,tot.cl)+'% conv':'',i:'💰',c:'var(--emerald)'}].forEach(k => {
-    h += `<div class="card kpi" style="border-top-color:${k.c}"><div class="kpi-label">${k.i} ${k.l}</div><div class="kpi-value">${fmt(k.v)}</div>${k.s?`<div class="kpi-sub" style="color:${k.c}">${k.s}</div>`:''}</div>`;
-  });
-  h += '</div><div style="margin-top:16px">';
+  // Charts
+  h+=`<div class="grid-2" style="margin-top:20px">
+    <div class="card" style="padding:20px"><div class="section-title" style="margin:0 0 12px">Resultados por Origem</div><canvas id="chart-origem" height="220"></canvas></div>
+    <div class="card" style="padding:20px"><div class="section-title" style="margin:0 0 12px">Resultados ao Longo do Tempo</div><canvas id="chart-tempo" height="220"></canvas></div>
+  </div>`;
 
-  if (whatsapps.length === 0) {
-    h += '<div class="card empty"><span class="icon">chat</span><p>Nenhuma automação cadastrada</p></div>';
-  }
-  whatsapps.forEach(w => {
-    const stCls = w.status==='ativo'?'badge-success':w.status==='concluido'?'badge-info':w.status==='pausado'?'badge-warning':'badge-purple';
-    h += `<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--success)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${w.nome}</span><span class="badge ${stCls}">${w.status}</span></div>
-          <div style="font-size:11px;color:var(--g500);margin-top:3px">Segmento: <strong>${w.segmento}</strong>${w.data_inicio?` · 📅 ${w.data_inicio}`:''}</div>
-        </div>
-        <div style="display:flex;gap:4px">
-          <button class="btn btn-icon btn-outline btn-sm" onclick="openEditWhatsappModal('${w.id}')"><span class="icon icon-sm">edit</span></button>
-          <button class="btn btn-icon btn-danger btn-sm" onclick="deleteWhatsapp('${w.id}')"><span class="icon icon-sm">delete</span></button>
-        </div>
-      </div>
+  // Table by origin
+  h+=`<div class="card" style="padding:20px;margin-top:16px"><div class="section-title" style="margin:0 0 12px">Detalhamento por Origem</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left;border-radius:6px 0 0 0">Origem</th><th style="padding:8px 12px;text-align:center">Novas</th><th style="padding:8px 12px;text-align:center">Upgrades</th><th style="padding:8px 12px;text-align:center">Total</th><th style="padding:8px 12px;text-align:right;border-radius:0 6px 0 0">Receita</th></tr></thead><tbody>`;
+  Object.entries(porOrigem).sort((a,b)=>(b[1].novas+b[1].upgrades)-(a[1].novas+a[1].upgrades)).forEach(([k,v])=>{
+    h+=`<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ORIGEM_COLORS[k]||'#666'};margin-right:6px"></span>${ORIGENS[k]||k}</td><td style="padding:8px 12px;text-align:center;font-weight:600;color:var(--emerald)">${v.novas}</td><td style="padding:8px 12px;text-align:center;font-weight:600;color:var(--purple)">${v.upgrades}</td><td style="padding:8px 12px;text-align:center;font-weight:700">${v.novas+v.upgrades}</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--emerald)">R$ ${v.receita.toFixed(2)}</td></tr>`;
+  });
+  if(!Object.keys(porOrigem).length)h+=`<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--g500)">Importe resultados na aba "Resultados"</td></tr>`;
+  h+=`</tbody></table></div>`;
+  return h;
+}
+
+function renderROICharts(){
+  // Origem chart
+  const porOrigem={};
+  results.forEach(r=>{porOrigem[r.origem]=(porOrigem[r.origem]||0)+1});
+  const origLabels=Object.keys(porOrigem).map(k=>ORIGENS[k]||k);
+  const origData=Object.values(porOrigem);
+  const origColors=Object.keys(porOrigem).map(k=>ORIGEM_COLORS[k]||'#666');
+  const ctx1=document.getElementById('chart-origem');
+  if(ctx1&&origLabels.length){new Chart(ctx1,{type:'doughnut',data:{labels:origLabels,datasets:[{data:origData,backgroundColor:origColors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}})}
+
+  // Tempo chart
+  const porDia={};
+  results.forEach(r=>{porDia[r.data]=(porDia[r.data]||0)+1});
+  const dias=Object.keys(porDia).sort();
+  const ctx2=document.getElementById('chart-tempo');
+  if(ctx2&&dias.length){new Chart(ctx2,{type:'bar',data:{labels:dias,datasets:[{label:'Conversões',data:dias.map(d=>porDia[d]),backgroundColor:'#059669',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{font:{size:10}}}}}})}
+}
+
+// ==================== EMAILS TAB ====================
+function renderEmails(){
+  const tot={env:0,ab:0,cl:0,clV:0,clM:0,clD:0,bo:0,un:0,ve:0};
+  emails.forEach(e=>{tot.env+=e.enviados;tot.ab+=e.aberturas;tot.cl+=e.cliques;tot.clV+=e.cliques_venda;tot.clM+=e.cliques_midia;tot.clD+=e.cliques_desins;tot.bo+=e.bounces;tot.un+=e.unsubs;tot.ve+=e.vendas});
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="section-title" style="margin:0">E-mails da Campanha</div>
+    <button class="btn btn-primary btn-sm" onclick="openNewEmailModal()"><span class="icon icon-sm">add</span> Novo E-mail</button></div>`;
+  h+='<div class="kpi-grid">';
+  [{l:'Enviados',v:tot.env,i:'📤',c:'var(--info)'},{l:'Aberturas',v:tot.ab,s:pc(tot.ab,tot.env)+'%',i:'👁️',c:'var(--cyan)'},{l:'Cliques',v:tot.cl,s:pc(tot.cl,tot.ab)+'%',i:'🖱️',c:'var(--purple)'},{l:'Cl. Venda',v:tot.clV,i:'🛒',c:'var(--success)'},{l:'Cl. Mídia',v:tot.clM,i:'🎬',c:'var(--pink)'},{l:'Vendas',v:tot.ve,i:'💰',c:'var(--emerald)'},{l:'Bounces',v:tot.bo,s:pc(tot.bo,tot.env)+'%',i:'⚠️',c:'var(--yellow)'},{l:'Descad.',v:tot.un,i:'🚫',c:'var(--error)'}].forEach(k=>{
+    h+=`<div class="card kpi" style="border-top-color:${k.c}"><div class="kpi-label">${k.i} ${k.l}</div><div class="kpi-value">${fmt(k.v)}</div>${k.s?`<div class="kpi-sub" style="color:${k.c}">${k.s}</div>`:''}</div>`;
+  });
+  h+='</div><div style="margin-top:16px">';
+  emails.forEach(em=>{
+    const isSent=em.status==='enviado';const oR=pc(em.aberturas,em.enviados),cR=pc(em.cliques,em.aberturas);
+    const stCls=isSent?'badge-success':em.status==='pendente'?'badge-warning':'badge-purple';
+    const stLbl=isSent?'Enviado':em.status==='pendente'?'Pendente':'Rascunho';
+    h+=`<div class="card email-card ${isSent?'':'pend'}">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--g100);display:flex;justify-content:space-between">
+        <div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${em.nome}</span><span class="badge ${stCls}">${stLbl}</span></div>
+        <div style="font-size:11px;color:var(--g500);margin-top:3px">"${em.assunto}"${em.data_envio?` · 📅 ${em.data_envio}`:''}</div></div>
+        <div style="display:flex;gap:4px"><button class="btn btn-icon btn-outline btn-sm" onclick="openEditEmailModal('${em.id}')"><span class="icon icon-sm">edit</span></button><button class="btn btn-icon btn-danger btn-sm" onclick="delEmail('${em.id}')"><span class="icon icon-sm">delete</span></button></div></div>`;
+    if(em.enviados>0){
+      h+=`<div style="padding:10px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(75px,1fr));gap:6px">`;
+      [{l:'Enviados',v:em.enviados,c:'var(--navy)'},{l:'Aberturas',v:em.aberturas,s:oR+'%',c:'var(--cyan)'},{l:'Cliques',v:em.cliques,s:cR+'%',c:'var(--purple)'},{l:'Vendas',v:em.vendas,c:'var(--emerald)'},{l:'Bounces',v:em.bounces,c:'var(--yellow)'},{l:'Unsubs',v:em.unsubs,c:'var(--error)'}].forEach(m=>{
+        h+=`<div class="mcell"><div class="mcell-l">${m.l}</div><div class="mcell-v" style="color:${m.c}">${fmt(m.v)}</div>${m.s?`<div class="mcell-s" style="color:${m.c}">${m.s}</div>`:''}</div>`;
+      });
+      h+='</div>';
+      if(em.cliques>0||em.cliques_venda>0||em.cliques_midia>0){
+        h+=`<div style="padding:0 16px 10px"><div style="font-size:10px;color:var(--g500);font-weight:600;text-transform:uppercase;margin-bottom:5px">🔗 Cliques por Link</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:5px">`;
+        [{n:'Venda',v:em.cliques_venda,c:'var(--success)'},{n:'Mídia',v:em.cliques_midia,c:'var(--pink)'},{n:'Desinscrição',v:em.cliques_desins,c:'var(--orange)'}].forEach(lk=>{
+          h+=`<div class="link-item"><div class="link-dot" style="background:${lk.c}"></div><div><div style="font-size:10px;color:var(--g700)">${lk.n}</div><div style="font-size:14px;font-weight:700;color:${lk.c}">${fmt(lk.v)}</div></div></div>`;
+        });
+        h+='</div></div>';
+      }
+    }
+    h+='</div>';
+  });
+  h+='</div>';return h;
+}
+
+// ==================== WHATSAPP TAB ====================
+function renderWhatsapp(){
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="section-title" style="margin:0">Automações WhatsApp</div>
+    <button class="btn btn-primary btn-sm" onclick="openNewWapModal()"><span class="icon icon-sm">add</span> Nova Automação</button></div>`;
+  if(!waps.length)h+=`<div class="card empty"><span class="icon">chat</span><p>Nenhuma automação</p></div>`;
+  waps.forEach(w=>{
+    h+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--success)">
+      <div style="display:flex;justify-content:space-between"><div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${w.nome}</span><span class="badge badge-${w.status==='ativo'?'success':w.status==='concluido'?'info':'warning'}">${w.status}</span></div>
+        <div style="font-size:11px;color:var(--g500);margin-top:3px">Segmento: <strong>${w.segmento}</strong>${w.data_inicio?` · 📅 ${w.data_inicio}`:''}</div></div>
+        <div style="display:flex;gap:4px"><button class="btn btn-icon btn-outline btn-sm" onclick="openEditWapModal('${w.id}')"><span class="icon icon-sm">edit</span></button><button class="btn btn-icon btn-danger btn-sm" onclick="delWap('${w.id}')"><span class="icon icon-sm">delete</span></button></div></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-top:12px">
         <div class="mcell"><div class="mcell-l">Enviados</div><div class="mcell-v" style="color:var(--navy)">${fmt(w.enviados)}</div></div>
         <div class="mcell"><div class="mcell-l">Entregues</div><div class="mcell-v" style="color:var(--success)">${fmt(w.entregues)}</div></div>
         <div class="mcell"><div class="mcell-l">Cliques</div><div class="mcell-v" style="color:var(--purple)">${fmt(w.cliques_link)}</div></div>
         <div class="mcell"><div class="mcell-l">Conversões</div><div class="mcell-v" style="color:var(--cyan)">${fmt(w.conversoes)}</div></div>
         <div class="mcell"><div class="mcell-l">Vendas</div><div class="mcell-v" style="color:var(--emerald)">${fmt(w.vendas)}</div></div>
-      </div>
-    </div>`;
+      </div></div>`;
   });
-  h += '</div>';
   return h;
 }
 
-// ===================== SOCIAL TAB =====================
-function renderSocialTab() {
-  const reels = socials.filter(s => s.tipo === 'reel');
-  const stories = socials.filter(s => s.tipo === 'story');
-  const tot = { alc:0,imp:0,cur:0,com:0,comp:0,salv:0,cl:0,vis:0,seg:0 };
-  socials.forEach(s => { tot.alc+=s.alcance;tot.imp+=s.impressoes;tot.cur+=s.curtidas;tot.com+=s.comentarios;tot.comp+=s.compartilhamentos;tot.salv+=s.salvamentos;tot.cl+=s.cliques_link;tot.vis+=s.visualizacoes_completas;tot.seg+=s.seguidores_ganhos; });
-
-  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+// ==================== SOCIAL TAB ====================
+function renderSocial(){
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div class="section-title" style="margin:0">Redes Sociais</div>
-    <button class="btn btn-primary btn-sm" onclick="openNewSocialModal()"><span class="icon icon-sm">add</span> Nova Publicação</button>
-  </div>`;
-
-  h += '<div class="kpi-grid">';
-  [{l:'Alcance',v:tot.alc,i:'👁️',c:'var(--info)'},{l:'Impressões',v:tot.imp,i:'📊',c:'var(--cyan)'},{l:'Curtidas',v:tot.cur,i:'❤️',c:'var(--error)'},{l:'Comentários',v:tot.com,i:'💬',c:'var(--purple)'},{l:'Compartilh.',v:tot.comp,i:'🔄',c:'var(--success)'},{l:'Salvamentos',v:tot.salv,i:'🔖',c:'var(--orange)'},{l:'Cliques Link',v:tot.cl,i:'🔗',c:'var(--navy)'},{l:'Vis. Completas',v:tot.vis,i:'▶️',c:'var(--pink)'},{l:'Seguidores',v:tot.seg,i:'👥',c:'var(--emerald)'}].forEach(k => {
-    h += `<div class="card kpi" style="border-top-color:${k.c}"><div class="kpi-label">${k.i} ${k.l}</div><div class="kpi-value">${fmt(k.v)}</div></div>`;
+    <button class="btn btn-primary btn-sm" onclick="openNewSocialModal()"><span class="icon icon-sm">add</span> Nova Publicação</button></div>`;
+  const reels=socials.filter(s=>s.tipo==='reel'),stories=socials.filter(s=>s.tipo==='story');
+  [['🎬 Reels',reels],['📱 Stories',stories]].forEach(([title,items])=>{
+    h+=`<div class="section-divider">${title} (${items.length})</div>`;
+    if(!items.length)h+=`<div class="card empty" style="padding:20px"><p style="font-size:12px">Nenhum</p></div>`;
+    items.forEach(s=>{
+      h+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid ${s.tipo==='reel'?'var(--pink)':'var(--purple)'}">
+        <div style="display:flex;justify-content:space-between"><div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${s.nome}</span><span class="badge badge-${s.status==='publicado'?'success':'warning'}">${s.status}</span></div>
+          ${s.data_publicacao?`<div style="font-size:11px;color:var(--g500);margin-top:3px">📅 ${s.data_publicacao}</div>`:''}</div>
+          <div style="display:flex;gap:4px"><button class="btn btn-icon btn-outline btn-sm" onclick="openEditSocialModal('${s.id}')"><span class="icon icon-sm">edit</span></button><button class="btn btn-icon btn-danger btn-sm" onclick="delSocial('${s.id}')"><span class="icon icon-sm">delete</span></button></div></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:5px;margin-top:12px">
+          ${[{l:'Alcance',v:s.alcance,c:'var(--info)'},{l:'Curtidas',v:s.curtidas,c:'var(--error)'},{l:'Coment.',v:s.comentarios,c:'var(--purple)'},{l:'Compartilh.',v:s.compartilhamentos,c:'var(--success)'},{l:'Salvam.',v:s.salvamentos,c:'var(--orange)'},{l:'Cliques',v:s.cliques_link,c:'var(--navy)'},{l:'Vis.Compl.',v:s.visualizacoes_completas,c:'var(--pink)'},{l:'Seguidores',v:s.seguidores_ganhos,c:'var(--emerald)'}].map(m=>`<div class="mcell"><div class="mcell-l">${m.l}</div><div class="mcell-v" style="color:${m.c};font-size:14px">${fmt(m.v)}</div></div>`).join('')}
+        </div></div>`;
+    });
   });
-  h += '</div>';
-
-  // Reels
-  h += `<div class="section-divider" style="margin-top:20px">🎬 Reels (${reels.length})</div>`;
-  if (reels.length === 0) h += '<div class="card empty" style="padding:20px"><p style="font-size:12px">Nenhum reel cadastrado</p></div>';
-  reels.forEach(s => { h += renderSocialCard(s); });
-
-  // Stories
-  h += `<div class="section-divider">📱 Stories (${stories.length})</div>`;
-  if (stories.length === 0) h += '<div class="card empty" style="padding:20px"><p style="font-size:12px">Nenhum story cadastrado</p></div>';
-  stories.forEach(s => { h += renderSocialCard(s); });
-
   return h;
 }
 
-function renderSocialCard(s) {
-  return `<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid ${s.tipo==='reel'?'var(--pink)':'var(--purple)'}">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start">
-      <div>
-        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">${s.nome}</span><span class="badge ${s.status==='publicado'?'badge-success':'badge-warning'}">${s.status}</span></div>
-        ${s.descricao?`<div style="font-size:11px;color:var(--g500);margin-top:3px">${s.descricao}</div>`:''}
-        ${s.data_publicacao?`<div style="font-size:11px;color:var(--g500);margin-top:2px">📅 ${s.data_publicacao}</div>`:''}
-      </div>
-      <div style="display:flex;gap:4px">
-        <button class="btn btn-icon btn-outline btn-sm" onclick="openEditSocialModal('${s.id}')"><span class="icon icon-sm">edit</span></button>
-        <button class="btn btn-icon btn-danger btn-sm" onclick="deleteSocial('${s.id}')"><span class="icon icon-sm">delete</span></button>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:5px;margin-top:12px">
-      <div class="mcell"><div class="mcell-l">Alcance</div><div class="mcell-v" style="color:var(--info);font-size:14px">${fmt(s.alcance)}</div></div>
-      <div class="mcell"><div class="mcell-l">Curtidas</div><div class="mcell-v" style="color:var(--error);font-size:14px">${fmt(s.curtidas)}</div></div>
-      <div class="mcell"><div class="mcell-l">Comentários</div><div class="mcell-v" style="color:var(--purple);font-size:14px">${fmt(s.comentarios)}</div></div>
-      <div class="mcell"><div class="mcell-l">Compartilh.</div><div class="mcell-v" style="color:var(--success);font-size:14px">${fmt(s.compartilhamentos)}</div></div>
-      <div class="mcell"><div class="mcell-l">Salvamentos</div><div class="mcell-v" style="color:var(--orange);font-size:14px">${fmt(s.salvamentos)}</div></div>
-      <div class="mcell"><div class="mcell-l">Cliques</div><div class="mcell-v" style="color:var(--navy);font-size:14px">${fmt(s.cliques_link)}</div></div>
-      <div class="mcell"><div class="mcell-l">Vis. Completas</div><div class="mcell-v" style="color:var(--pink);font-size:14px">${fmt(s.visualizacoes_completas)}</div></div>
-      <div class="mcell"><div class="mcell-l">Seguidores</div><div class="mcell-v" style="color:var(--emerald);font-size:14px">${fmt(s.seguidores_ganhos)}</div></div>
-    </div>
+// ==================== RESULTADOS TAB (Upload CSV + Manual) ====================
+function renderResultados(){
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="section-title" style="margin:0">💰 Resultados — Assinaturas e Upgrades</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" onclick="openNewResultModal()"><span class="icon icon-sm">add</span> Manual</button>
+      <button class="btn btn-primary btn-sm" onclick="openCSVModal()"><span class="icon icon-sm">upload_file</span> Importar CSV</button>
+    </div></div>`;
+
+  // Summary
+  const novas=results.filter(r=>r.tipo==='nova_assinatura').length;
+  const ups=results.filter(r=>r.tipo==='upgrade').length;
+  const receita=results.reduce((a,r)=>a+Number(r.valor_mensal||0),0);
+  h+=`<div class="kpi-grid" style="margin-bottom:16px">
+    <div class="card kpi" style="border-top-color:var(--emerald)"><div class="kpi-label">🆕 Novas Assinaturas</div><div class="kpi-value">${novas}</div></div>
+    <div class="card kpi" style="border-top-color:var(--purple)"><div class="kpi-label">⬆️ Upgrades</div><div class="kpi-value">${ups}</div></div>
+    <div class="card kpi" style="border-top-color:var(--success)"><div class="kpi-label">💵 Receita Mensal</div><div class="kpi-value">R$ ${receita.toFixed(2)}</div></div>
+    <div class="card kpi" style="border-top-color:var(--navy)"><div class="kpi-label">📊 Total</div><div class="kpi-value">${results.length}</div></div>
   </div>`;
+
+  // List
+  if(!results.length)h+=`<div class="card empty"><span class="icon">monetization_on</span><p style="font-size:14px;font-weight:500">Nenhum resultado</p><p style="font-size:12px">Adicione manualmente ou importe um CSV</p></div>`;
+  else{
+    h+=`<div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">Data</th><th style="padding:8px 12px">Tipo</th><th style="padding:8px 12px">Plano</th><th style="padding:8px 12px;text-align:right">Valor</th><th style="padding:8px 12px">Origem</th><th style="padding:8px 12px;width:40px"></th></tr></thead><tbody>`;
+    results.forEach(r=>{
+      h+=`<tr style="border-bottom:1px solid var(--g100)">
+        <td style="padding:8px 12px">${r.data}</td>
+        <td style="padding:8px 12px"><span class="badge ${r.tipo==='nova_assinatura'?'badge-success':'badge-purple'}">${r.tipo==='nova_assinatura'?'Nova':'Upgrade'}</span></td>
+        <td style="padding:8px 12px">${r.plano||'—'}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--emerald)">R$ ${Number(r.valor_mensal||0).toFixed(2)}</td>
+        <td style="padding:8px 12px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ORIGEM_COLORS[r.origem]||'#666'};margin-right:4px"></span>${ORIGENS[r.origem]||r.origem}</td>
+        <td style="padding:8px 12px"><button class="btn btn-icon btn-danger btn-sm" onclick="delResult('${r.id}')"><span class="icon icon-sm">delete</span></button></td>
+      </tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  }
+  return h;
 }
 
-// ===================== MODALS: CAMPAIGN =====================
-function openNewCampaignModal() {
-  openModal('Nova Campanha',
-    `<div style="display:flex;flex-direction:column;gap:12px">
-      <div><label>Nome da campanha</label><input id="m-camp-nome" placeholder="Ex: Maio 2026 - Monitor de XML"></div>
-      <div><label>Descrição</label><textarea id="m-camp-desc" placeholder="Breve descrição da campanha"></textarea></div>
-      <div class="grid-2"><div><label>Data início</label><input type="date" id="m-camp-ini"></div><div><label>Data fim</label><input type="date" id="m-camp-fim"></div></div>
-      <div><label>Status</label><select id="m-camp-status"><option value="ativa">Ativa</option><option value="rascunho">Rascunho</option><option value="pausada">Pausada</option><option value="concluida">Concluída</option></select></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveCampaign()">Criar Campanha</button>`
-  );
+// ==================== ALL MODALS ====================
+// Campaign
+function openNewCampModal(){openModal('Nova Campanha',`<div style="display:flex;flex-direction:column;gap:12px"><div><label>Nome</label><input id="m-c-nome" placeholder="Ex: Maio 2026 - Monitor de XML"></div><div><label>Descrição</label><textarea id="m-c-desc"></textarea></div><div class="grid-2"><div><label>Início</label><input type="date" id="m-c-ini"></div><div><label>Fim</label><input type="date" id="m-c-fim"></div></div><div><label>Status</label><select id="m-c-st"><option value="ativa">Ativa</option><option value="rascunho">Rascunho</option><option value="pausada">Pausada</option><option value="concluida">Concluída</option></select></div></div>`,`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveCamp()">Criar</button>`)}
+function openEditCampModal(id){const c=camps.find(x=>x.id===id);openModal('Editar Campanha',`<div style="display:flex;flex-direction:column;gap:12px"><div><label>Nome</label><input id="m-c-nome" value="${c.nome}"></div><div><label>Descrição</label><textarea id="m-c-desc">${c.descricao||''}</textarea></div><div class="grid-2"><div><label>Início</label><input type="date" id="m-c-ini" value="${c.data_inicio||''}"></div><div><label>Fim</label><input type="date" id="m-c-fim" value="${c.data_fim||''}"></div></div><div><label>Status</label><select id="m-c-st"><option value="ativa" ${c.status==='ativa'?'selected':''}>Ativa</option><option value="rascunho" ${c.status==='rascunho'?'selected':''}>Rascunho</option><option value="pausada" ${c.status==='pausada'?'selected':''}>Pausada</option><option value="concluida" ${c.status==='concluida'?'selected':''}>Concluída</option></select></div></div>`,`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updCamp('${id}')">Salvar</button>`)}
+async function saveCamp(){const d={nome:$('m-c-nome').value,descricao:$('m-c-desc').value,data_inicio:$('m-c-ini').value||null,data_fim:$('m-c-fim').value||null,status:$('m-c-st').value};if(!d.nome){toast('Preencha o nome');return}await sb.from('campanhas').insert(d);closeModal();toast('Criada!');await loadCamps();renderList()}
+async function updCamp(id){const d={nome:$('m-c-nome').value,descricao:$('m-c-desc').value,data_inicio:$('m-c-ini').value||null,data_fim:$('m-c-fim').value||null,status:$('m-c-st').value};await sb.from('campanhas').update(d).eq('id',id);closeModal();toast('Atualizada!');await loadCamps();renderList()}
+async function delCamp(id){if(!confirm('Excluir campanha e todos os dados?'))return;await sb.from('campanhas').delete().eq('id',id);toast('Excluída');await loadCamps();renderList()}
+
+// Email
+function emailForm(em){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="grid-2"><div><label>Nome</label><input id="m-e-nome" value="${em?em.nome:''}"></div><div><label>Assunto</label><input id="m-e-assunto" value="${em?em.assunto:''}"></div></div><div class="grid-2"><div><label>Status</label><select id="m-e-st"><option value="pendente" ${em?.status==='pendente'?'selected':''}>Pendente</option><option value="enviado" ${em?.status==='enviado'?'selected':''}>Enviado</option><option value="rascunho" ${em?.status==='rascunho'?'selected':''}>Rascunho</option></select></div><div><label>Data envio</label><input type="date" id="m-e-dt" value="${em?.data_envio||''}"></div></div><div class="section-divider">📊 Métricas</div><div class="grid-3"><div><label>Enviados</label><input type="number" id="m-e-env" value="${em?.enviados||0}"></div><div><label>Aberturas</label><input type="number" id="m-e-ab" value="${em?.aberturas||0}"></div><div><label>Cliques</label><input type="number" id="m-e-cl" value="${em?.cliques||0}"></div></div><div class="grid-3"><div><label>Bounces</label><input type="number" id="m-e-bo" value="${em?.bounces||0}"></div><div><label>Descadastros</label><input type="number" id="m-e-un" value="${em?.unsubs||0}"></div><div><label>Vendas</label><input type="number" id="m-e-ve" value="${em?.vendas||0}"></div></div><div class="section-divider">🔗 Cliques por Link</div><div class="grid-3"><div><label>🛒 Venda</label><input type="number" id="m-e-clV" value="${em?.cliques_venda||0}"></div><div><label>🎬 Mídia</label><input type="number" id="m-e-clM" value="${em?.cliques_midia||0}"></div><div><label>🚪 Desinscrição</label><input type="number" id="m-e-clD" value="${em?.cliques_desins||0}"></div></div></div>`}
+function getEmailData(){return{campanha_id:curCamp.id,ordem:emails.length+1,nome:$('m-e-nome').value,assunto:$('m-e-assunto').value,status:$('m-e-st').value,data_envio:$('m-e-dt').value||null,enviados:+$('m-e-env').value||0,aberturas:+$('m-e-ab').value||0,cliques:+$('m-e-cl').value||0,bounces:+$('m-e-bo').value||0,unsubs:+$('m-e-un').value||0,vendas:+$('m-e-ve').value||0,cliques_venda:+$('m-e-clV').value||0,cliques_midia:+$('m-e-clM').value||0,cliques_desins:+$('m-e-clD').value||0}}
+function openNewEmailModal(){openModal('Novo E-mail',emailForm(),`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveEmail()">Criar</button>`)}
+function openEditEmailModal(id){openModal('Editar E-mail',emailForm(emails.find(x=>x.id===id)),`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updEmail('${id}')">Salvar</button>`)}
+async function saveEmail(){const d=getEmailData();if(!d.nome){toast('Preencha');return}await sb.from('emails_campanha').insert(d);closeModal();toast('Criado!');await loadCampData(curCamp.id);renderDetail()}
+async function updEmail(id){const d=getEmailData();delete d.campanha_id;delete d.ordem;await sb.from('emails_campanha').update(d).eq('id',id);closeModal();toast('Atualizado!');await loadCampData(curCamp.id);renderDetail()}
+async function delEmail(id){if(!confirm('Excluir?'))return;await sb.from('emails_campanha').delete().eq('id',id);toast('Excluído');await loadCampData(curCamp.id);renderDetail()}
+
+// WhatsApp
+function openNewWapModal(){openModal('Nova Automação WhatsApp',`<div style="display:flex;flex-direction:column;gap:10px"><div class="grid-2"><div><label>Nome</label><input id="m-w-nome"></div><div><label>Segmento</label><input id="m-w-seg"></div></div><div class="grid-2"><div><label>Status</label><select id="m-w-st"><option value="pendente">Pendente</option><option value="ativo">Ativo</option><option value="pausado">Pausado</option><option value="concluido">Concluído</option></select></div><div><label>Data início</label><input type="date" id="m-w-dt"></div></div><div class="section-divider">📊 Métricas</div><div class="grid-3"><div><label>Enviados</label><input type="number" id="m-w-env" value="0"></div><div><label>Entregues</label><input type="number" id="m-w-ent" value="0"></div><div><label>Cliques</label><input type="number" id="m-w-cl" value="0"></div></div><div class="grid-2"><div><label>Conversões</label><input type="number" id="m-w-conv" value="0"></div><div><label>Vendas</label><input type="number" id="m-w-ve" value="0"></div></div></div>`,`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveWap()">Criar</button>`)}
+function openEditWapModal(id){const w=waps.find(x=>x.id===id);openModal('Editar WhatsApp',`<div style="display:flex;flex-direction:column;gap:10px"><div class="grid-2"><div><label>Nome</label><input id="m-w-nome" value="${w.nome}"></div><div><label>Segmento</label><input id="m-w-seg" value="${w.segmento}"></div></div><div class="grid-2"><div><label>Status</label><select id="m-w-st"><option value="pendente" ${w.status==='pendente'?'selected':''}>Pendente</option><option value="ativo" ${w.status==='ativo'?'selected':''}>Ativo</option><option value="pausado" ${w.status==='pausado'?'selected':''}>Pausado</option><option value="concluido" ${w.status==='concluido'?'selected':''}>Concluído</option></select></div><div><label>Data</label><input type="date" id="m-w-dt" value="${w.data_inicio||''}"></div></div><div class="section-divider">📊 Métricas</div><div class="grid-3"><div><label>Enviados</label><input type="number" id="m-w-env" value="${w.enviados}"></div><div><label>Entregues</label><input type="number" id="m-w-ent" value="${w.entregues}"></div><div><label>Cliques</label><input type="number" id="m-w-cl" value="${w.cliques_link}"></div></div><div class="grid-2"><div><label>Conversões</label><input type="number" id="m-w-conv" value="${w.conversoes}"></div><div><label>Vendas</label><input type="number" id="m-w-ve" value="${w.vendas}"></div></div></div>`,`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updWap('${id}')">Salvar</button>`)}
+async function saveWap(){const d={campanha_id:curCamp.id,nome:$('m-w-nome').value,segmento:$('m-w-seg').value,status:$('m-w-st').value,data_inicio:$('m-w-dt').value||null,enviados:+$('m-w-env').value||0,entregues:+$('m-w-ent').value||0,cliques_link:+$('m-w-cl').value||0,conversoes:+$('m-w-conv').value||0,vendas:+$('m-w-ve').value||0};if(!d.nome){toast('Preencha');return}await sb.from('whatsapp_campanha').insert(d);closeModal();toast('Criada!');await loadCampData(curCamp.id);renderDetail()}
+async function updWap(id){const d={nome:$('m-w-nome').value,segmento:$('m-w-seg').value,status:$('m-w-st').value,data_inicio:$('m-w-dt').value||null,enviados:+$('m-w-env').value||0,entregues:+$('m-w-ent').value||0,cliques_link:+$('m-w-cl').value||0,conversoes:+$('m-w-conv').value||0,vendas:+$('m-w-ve').value||0};await sb.from('whatsapp_campanha').update(d).eq('id',id);closeModal();toast('Atualizado!');await loadCampData(curCamp.id);renderDetail()}
+async function delWap(id){if(!confirm('Excluir?'))return;await sb.from('whatsapp_campanha').delete().eq('id',id);toast('Excluído');await loadCampData(curCamp.id);renderDetail()}
+
+// Social
+function socialForm(s){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="grid-2"><div><label>Nome</label><input id="m-s-nome" value="${s?s.nome:''}"></div><div><label>Tipo</label><select id="m-s-tipo"><option value="reel" ${s?.tipo==='reel'?'selected':''}>Reel</option><option value="story" ${s?.tipo==='story'?'selected':''}>Story</option></select></div></div><div><label>Descrição</label><textarea id="m-s-desc">${s?.descricao||''}</textarea></div><div class="grid-2"><div><label>Data</label><input type="date" id="m-s-dt" value="${s?.data_publicacao||''}"></div><div><label>Status</label><select id="m-s-st"><option value="pendente" ${s?.status==='pendente'?'selected':''}>Pendente</option><option value="publicado" ${s?.status==='publicado'?'selected':''}>Publicado</option></select></div></div><div class="section-divider">📊 Métricas</div><div class="grid-3"><div><label>Alcance</label><input type="number" id="m-s-alc" value="${s?.alcance||0}"></div><div><label>Impressões</label><input type="number" id="m-s-imp" value="${s?.impressoes||0}"></div><div><label>Curtidas</label><input type="number" id="m-s-cur" value="${s?.curtidas||0}"></div></div><div class="grid-3"><div><label>Comentários</label><input type="number" id="m-s-com" value="${s?.comentarios||0}"></div><div><label>Compartilh.</label><input type="number" id="m-s-comp" value="${s?.compartilhamentos||0}"></div><div><label>Salvamentos</label><input type="number" id="m-s-salv" value="${s?.salvamentos||0}"></div></div><div class="grid-3"><div><label>Cliques link</label><input type="number" id="m-s-cl" value="${s?.cliques_link||0}"></div><div><label>Vis. completas</label><input type="number" id="m-s-vis" value="${s?.visualizacoes_completas||0}"></div><div><label>Seguidores</label><input type="number" id="m-s-seg" value="${s?.seguidores_ganhos||0}"></div></div></div>`}
+function getSocialData(){return{campanha_id:curCamp.id,tipo:$('m-s-tipo').value,nome:$('m-s-nome').value,descricao:$('m-s-desc').value,data_publicacao:$('m-s-dt').value||null,status:$('m-s-st').value,alcance:+$('m-s-alc').value||0,impressoes:+$('m-s-imp').value||0,curtidas:+$('m-s-cur').value||0,comentarios:+$('m-s-com').value||0,compartilhamentos:+$('m-s-comp').value||0,salvamentos:+$('m-s-salv').value||0,cliques_link:+$('m-s-cl').value||0,visualizacoes_completas:+$('m-s-vis').value||0,seguidores_ganhos:+$('m-s-seg').value||0}}
+function openNewSocialModal(){openModal('Nova Publicação',socialForm(),`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveSocial()">Criar</button>`)}
+function openEditSocialModal(id){openModal('Editar',socialForm(socials.find(x=>x.id===id)),`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updSocial('${id}')">Salvar</button>`)}
+async function saveSocial(){const d=getSocialData();if(!d.nome){toast('Preencha');return}await sb.from('social_campanha').insert(d);closeModal();toast('Criado!');await loadCampData(curCamp.id);renderDetail()}
+async function updSocial(id){const d=getSocialData();delete d.campanha_id;await sb.from('social_campanha').update(d).eq('id',id);closeModal();toast('Atualizado!');await loadCampData(curCamp.id);renderDetail()}
+async function delSocial(id){if(!confirm('Excluir?'))return;await sb.from('social_campanha').delete().eq('id',id);toast('Excluído');await loadCampData(curCamp.id);renderDetail()}
+
+// Result manual
+function openNewResultModal(){
+  const origens=Object.entries(ORIGENS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  openModal('Novo Resultado',`<div style="display:flex;flex-direction:column;gap:10px">
+    <div class="grid-2"><div><label>Data</label><input type="date" id="m-r-dt"></div><div><label>Tipo</label><select id="m-r-tipo"><option value="nova_assinatura">Nova Assinatura</option><option value="upgrade">Upgrade</option></select></div></div>
+    <div class="grid-3"><div><label>Plano</label><input id="m-r-plano" placeholder="PRO"></div><div><label>Valor mensal (R$)</label><input type="number" step="0.01" id="m-r-val" value="0"></div><div><label>Origem</label><select id="m-r-orig">${origens}</select></div></div>
+    <div><label>Observação</label><input id="m-r-obs" placeholder="Opcional"></div></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveResult()">Salvar</button>`);
+}
+async function saveResult(){
+  const d={campanha_id:curCamp.id,data:$('m-r-dt').value,tipo:$('m-r-tipo').value,plano:$('m-r-plano').value,valor_mensal:+$('m-r-val').value||0,origem:$('m-r-orig').value,observacao:$('m-r-obs').value};
+  if(!d.data){toast('Preencha a data');return}
+  await sb.from('resultados_campanha').insert(d);closeModal();toast('Resultado salvo!');await loadCampData(curCamp.id);renderDetail();
+}
+async function delResult(id){if(!confirm('Excluir?'))return;await sb.from('resultados_campanha').delete().eq('id',id);toast('Excluído');await loadCampData(curCamp.id);renderDetail()}
+
+// CSV Upload
+function openCSVModal(){
+  openModal('Importar CSV de Resultados',`
+    <div style="margin-bottom:16px">
+      <p style="font-size:13px;color:var(--g700);margin-bottom:8px">O CSV deve ter as colunas:</p>
+      <div class="card" style="padding:12px;font-family:monospace;font-size:11px;background:var(--bg)">data,tipo,plano,valor_mensal,origem<br>2026-03-19,nova_assinatura,PRO,99.90,email_campanha<br>2026-03-21,upgrade,PRO,99.90,indicacao</div>
+      <p style="font-size:11px;color:var(--g500);margin-top:8px"><strong>Origens válidas:</strong> email_campanha, whatsapp, rede_social, indicacao, comercial, google, outro</p>
+      <p style="font-size:11px;color:var(--g500)"><strong>Tipos válidos:</strong> nova_assinatura, upgrade</p>
+    </div>
+    <div class="upload-area" id="csv-drop" onclick="document.getElementById('csv-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');handleCSV(event.dataTransfer.files[0])">
+      <span class="icon icon-lg" style="color:var(--g300);display:block;margin-bottom:8px">upload_file</span>
+      <p style="font-size:14px;font-weight:500;color:var(--g700)">Arraste o CSV aqui ou clique para selecionar</p>
+      <p style="font-size:11px;color:var(--g500)">Aceita .csv e .txt</p>
+      <input type="file" id="csv-file" accept=".csv,.txt" onchange="handleCSV(this.files[0])">
+    </div>
+    <div id="csv-preview" style="margin-top:16px"></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="csv-confirm-btn" onclick="confirmCSV()" disabled>Importar</button>`);
 }
 
-function openEditCampaignModal(id) {
-  const c = campaigns.find(x => x.id === id);
-  openModal('Editar Campanha',
-    `<div style="display:flex;flex-direction:column;gap:12px">
-      <div><label>Nome</label><input id="m-camp-nome" value="${c.nome}"></div>
-      <div><label>Descrição</label><textarea id="m-camp-desc">${c.descricao||''}</textarea></div>
-      <div class="grid-2"><div><label>Data início</label><input type="date" id="m-camp-ini" value="${c.data_inicio||''}"></div><div><label>Data fim</label><input type="date" id="m-camp-fim" value="${c.data_fim||''}"></div></div>
-      <div><label>Status</label><select id="m-camp-status"><option value="ativa" ${c.status==='ativa'?'selected':''}>Ativa</option><option value="rascunho" ${c.status==='rascunho'?'selected':''}>Rascunho</option><option value="pausada" ${c.status==='pausada'?'selected':''}>Pausada</option><option value="concluida" ${c.status==='concluida'?'selected':''}>Concluída</option></select></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updateCampaign('${id}')">Salvar</button>`
-  );
-}
-
-async function saveCampaign() {
-  const d = { nome:$('m-camp-nome').value, descricao:$('m-camp-desc').value, data_inicio:$('m-camp-ini').value||null, data_fim:$('m-camp-fim').value||null, status:$('m-camp-status').value };
-  if (!d.nome) { toast('Preencha o nome'); return; }
-  const { error } = await sb.from('campanhas').insert(d);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('Campanha criada!'); await loadCampaigns(); renderCampaignsList();
-}
-
-async function updateCampaign(id) {
-  const d = { nome:$('m-camp-nome').value, descricao:$('m-camp-desc').value, data_inicio:$('m-camp-ini').value||null, data_fim:$('m-camp-fim').value||null, status:$('m-camp-status').value };
-  const { error } = await sb.from('campanhas').update(d).eq('id', id);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('Campanha atualizada!'); await loadCampaigns(); renderCampaignsList();
-}
-
-async function deleteCampaign(id) {
-  if (!confirm('Excluir esta campanha e todos os dados associados?')) return;
-  await sb.from('campanhas').delete().eq('id', id);
-  toast('Campanha excluída'); await loadCampaigns(); renderCampaignsList();
-}
-
-// ===================== MODALS: EMAIL =====================
-function openNewEmailModal() {
-  const ordem = emails.length + 1;
-  openModal('Novo E-mail',
-    `<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid-2"><div><label>Nome</label><input id="m-em-nome" placeholder="Ex: E-mail ${ordem} — Tema"></div><div><label>Assunto</label><input id="m-em-assunto" placeholder="Linha de assunto"></div></div>
-      <div class="grid-2"><div><label>Status</label><select id="m-em-status"><option value="pendente">Pendente</option><option value="enviado">Enviado</option><option value="rascunho">Rascunho</option></select></div><div><label>Data envio</label><input type="date" id="m-em-data"></div></div>
-      <div class="section-divider">📊 Métricas</div>
-      <div class="grid-3"><div><label>Enviados</label><input type="number" id="m-em-env" value="0"></div><div><label>Aberturas</label><input type="number" id="m-em-ab" value="0"></div><div><label>Cliques (total)</label><input type="number" id="m-em-cl" value="0"></div></div>
-      <div class="grid-3"><div><label>Bounces</label><input type="number" id="m-em-bo" value="0"></div><div><label>Descadastros</label><input type="number" id="m-em-un" value="0"></div><div><label>Vendas</label><input type="number" id="m-em-ve" value="0"></div></div>
-      <div class="section-divider">🔗 Cliques por Link</div>
-      <div class="grid-3"><div><label>🛒 Venda</label><input type="number" id="m-em-clV" value="0"></div><div><label>🎬 Mídia</label><input type="number" id="m-em-clM" value="0"></div><div><label>🚪 Desinscrição</label><input type="number" id="m-em-clD" value="0"></div></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveEmail()">Criar</button>`
-  );
-}
-
-function openEditEmailModal(id) {
-  const em = emails.find(x => x.id === id);
-  openModal('Editar E-mail',
-    `<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid-2"><div><label>Nome</label><input id="m-em-nome" value="${em.nome}"></div><div><label>Assunto</label><input id="m-em-assunto" value="${em.assunto}"></div></div>
-      <div class="grid-2"><div><label>Status</label><select id="m-em-status"><option value="pendente" ${em.status==='pendente'?'selected':''}>Pendente</option><option value="enviado" ${em.status==='enviado'?'selected':''}>Enviado</option><option value="rascunho" ${em.status==='rascunho'?'selected':''}>Rascunho</option></select></div><div><label>Data envio</label><input type="date" id="m-em-data" value="${em.data_envio||''}"></div></div>
-      <div class="section-divider">📊 Métricas</div>
-      <div class="grid-3"><div><label>Enviados</label><input type="number" id="m-em-env" value="${em.enviados}"></div><div><label>Aberturas</label><input type="number" id="m-em-ab" value="${em.aberturas}"></div><div><label>Cliques</label><input type="number" id="m-em-cl" value="${em.cliques}"></div></div>
-      <div class="grid-3"><div><label>Bounces</label><input type="number" id="m-em-bo" value="${em.bounces}"></div><div><label>Descadastros</label><input type="number" id="m-em-un" value="${em.unsubs}"></div><div><label>Vendas</label><input type="number" id="m-em-ve" value="${em.vendas}"></div></div>
-      <div class="section-divider">🔗 Cliques por Link</div>
-      <div class="grid-3"><div><label>🛒 Venda</label><input type="number" id="m-em-clV" value="${em.cliques_venda}"></div><div><label>🎬 Mídia</label><input type="number" id="m-em-clM" value="${em.cliques_midia}"></div><div><label>🚪 Desinscrição</label><input type="number" id="m-em-clD" value="${em.cliques_desins}"></div></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updateEmail('${id}')">Salvar</button>`
-  );
-}
-
-function getEmailFormData() {
-  return {
-    campanha_id: currentCampaign.id, ordem: emails.length+1,
-    nome:$('m-em-nome').value, assunto:$('m-em-assunto').value, status:$('m-em-status').value,
-    data_envio:$('m-em-data').value||null,
-    enviados:+$('m-em-env').value||0, aberturas:+$('m-em-ab').value||0, cliques:+$('m-em-cl').value||0,
-    bounces:+$('m-em-bo').value||0, unsubs:+$('m-em-un').value||0, vendas:+$('m-em-ve').value||0,
-    cliques_venda:+$('m-em-clV').value||0, cliques_midia:+$('m-em-clM').value||0, cliques_desins:+$('m-em-clD').value||0,
+let csvRows=[];
+function handleCSV(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const lines=e.target.result.split('\n').map(l=>l.trim()).filter(l=>l);
+    if(lines.length<2){toast('CSV vazio');return}
+    const header=lines[0].toLowerCase().split(/[,;\t]/);
+    const iData=header.findIndex(h=>h.includes('data'));
+    const iTipo=header.findIndex(h=>h.includes('tipo'));
+    const iPlano=header.findIndex(h=>h.includes('plano'));
+    const iValor=header.findIndex(h=>h.includes('valor'));
+    const iOrigem=header.findIndex(h=>h.includes('origem'));
+    if(iData<0||iTipo<0){toast('CSV precisa ter colunas "data" e "tipo"');return}
+    csvRows=[];
+    for(let i=1;i<lines.length;i++){
+      const cols=lines[i].split(/[,;\t]/);
+      if(cols.length<2)continue;
+      csvRows.push({data:cols[iData]?.trim(),tipo:cols[iTipo]?.trim(),plano:iPlano>=0?cols[iPlano]?.trim():'',valor_mensal:iValor>=0?parseFloat(cols[iValor])||0:0,origem:iOrigem>=0?cols[iOrigem]?.trim():'outro'});
+    }
+    $('csv-preview').innerHTML=`<div class="card" style="padding:12px"><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px">✅ ${csvRows.length} registro(s) encontrado(s)</p><div style="max-height:200px;overflow-y:auto"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:var(--g100)"><th style="padding:4px 8px;text-align:left">Data</th><th style="padding:4px 8px">Tipo</th><th style="padding:4px 8px">Plano</th><th style="padding:4px 8px">Valor</th><th style="padding:4px 8px">Origem</th></tr></thead><tbody>${csvRows.map(r=>`<tr style="border-bottom:1px solid var(--g100)"><td style="padding:4px 8px">${r.data}</td><td style="padding:4px 8px">${r.tipo}</td><td style="padding:4px 8px">${r.plano}</td><td style="padding:4px 8px">R$ ${r.valor_mensal.toFixed(2)}</td><td style="padding:4px 8px">${r.origem}</td></tr>`).join('')}</tbody></table></div></div>`;
+    $('csv-confirm-btn').disabled=false;
   };
+  reader.readAsText(file);
+}
+async function confirmCSV(){
+  if(!csvRows.length)return;
+  const rows=csvRows.map(r=>({...r,campanha_id:curCamp.id}));
+  const{error}=await sb.from('resultados_campanha').insert(rows);
+  if(error){toast('Erro: '+error.message);return}
+  closeModal();toast(`${rows.length} resultado(s) importado(s)!`);csvRows=[];
+  await loadCampData(curCamp.id);renderDetail();
 }
 
-async function saveEmail() {
-  const d = getEmailFormData();
-  if (!d.nome) { toast('Preencha o nome'); return; }
-  const { error } = await sb.from('emails_campanha').insert(d);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('E-mail criado!'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-async function updateEmail(id) {
-  const d = getEmailFormData(); delete d.campanha_id; delete d.ordem;
-  const { error } = await sb.from('emails_campanha').update(d).eq('id', id);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('E-mail atualizado!'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-async function deleteEmail(id) {
-  if (!confirm('Excluir este e-mail?')) return;
-  await sb.from('emails_campanha').delete().eq('id', id);
-  toast('E-mail excluído'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-// ===================== MODALS: WHATSAPP =====================
-function openNewWhatsappModal() {
-  openModal('Nova Automação WhatsApp',
-    `<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid-2"><div><label>Nome</label><input id="m-wa-nome" placeholder="Ex: Automação Clientes Ativos"></div><div><label>Segmento</label><input id="m-wa-seg" placeholder="Ex: Clientes Ativos"></div></div>
-      <div class="grid-2"><div><label>Status</label><select id="m-wa-status"><option value="pendente">Pendente</option><option value="ativo">Ativo</option><option value="pausado">Pausado</option><option value="concluido">Concluído</option></select></div><div><label>Data início</label><input type="date" id="m-wa-data"></div></div>
-      <div class="section-divider">📊 Métricas</div>
-      <div class="grid-3"><div><label>Enviados</label><input type="number" id="m-wa-env" value="0"></div><div><label>Entregues</label><input type="number" id="m-wa-ent" value="0"></div><div><label>Cliques Link</label><input type="number" id="m-wa-cl" value="0"></div></div>
-      <div class="grid-2"><div><label>Conversões</label><input type="number" id="m-wa-conv" value="0"></div><div><label>Vendas</label><input type="number" id="m-wa-ve" value="0"></div></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveWhatsapp()">Criar</button>`
-  );
-}
-
-function openEditWhatsappModal(id) {
-  const w = whatsapps.find(x => x.id === id);
-  openModal('Editar Automação WhatsApp',
-    `<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid-2"><div><label>Nome</label><input id="m-wa-nome" value="${w.nome}"></div><div><label>Segmento</label><input id="m-wa-seg" value="${w.segmento}"></div></div>
-      <div class="grid-2"><div><label>Status</label><select id="m-wa-status"><option value="pendente" ${w.status==='pendente'?'selected':''}>Pendente</option><option value="ativo" ${w.status==='ativo'?'selected':''}>Ativo</option><option value="pausado" ${w.status==='pausado'?'selected':''}>Pausado</option><option value="concluido" ${w.status==='concluido'?'selected':''}>Concluído</option></select></div><div><label>Data início</label><input type="date" id="m-wa-data" value="${w.data_inicio||''}"></div></div>
-      <div class="section-divider">📊 Métricas</div>
-      <div class="grid-3"><div><label>Enviados</label><input type="number" id="m-wa-env" value="${w.enviados}"></div><div><label>Entregues</label><input type="number" id="m-wa-ent" value="${w.entregues}"></div><div><label>Cliques</label><input type="number" id="m-wa-cl" value="${w.cliques_link}"></div></div>
-      <div class="grid-2"><div><label>Conversões</label><input type="number" id="m-wa-conv" value="${w.conversoes}"></div><div><label>Vendas</label><input type="number" id="m-wa-ve" value="${w.vendas}"></div></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updateWhatsapp('${id}')">Salvar</button>`
-  );
-}
-
-async function saveWhatsapp() {
-  const d = { campanha_id:currentCampaign.id, nome:$('m-wa-nome').value, segmento:$('m-wa-seg').value, status:$('m-wa-status').value, data_inicio:$('m-wa-data').value||null, enviados:+$('m-wa-env').value||0, entregues:+$('m-wa-ent').value||0, cliques_link:+$('m-wa-cl').value||0, conversoes:+$('m-wa-conv').value||0, vendas:+$('m-wa-ve').value||0 };
-  if (!d.nome||!d.segmento) { toast('Preencha nome e segmento'); return; }
-  const { error } = await sb.from('whatsapp_campanha').insert(d);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('Automação criada!'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-async function updateWhatsapp(id) {
-  const d = { nome:$('m-wa-nome').value, segmento:$('m-wa-seg').value, status:$('m-wa-status').value, data_inicio:$('m-wa-data').value||null, enviados:+$('m-wa-env').value||0, entregues:+$('m-wa-ent').value||0, cliques_link:+$('m-wa-cl').value||0, conversoes:+$('m-wa-conv').value||0, vendas:+$('m-wa-ve').value||0 };
-  const { error } = await sb.from('whatsapp_campanha').update(d).eq('id', id);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('Atualizado!'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-async function deleteWhatsapp(id) {
-  if (!confirm('Excluir esta automação?')) return;
-  await sb.from('whatsapp_campanha').delete().eq('id', id);
-  toast('Excluído'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-// ===================== MODALS: SOCIAL =====================
-function openNewSocialModal() {
-  openModal('Nova Publicação',
-    `<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid-2"><div><label>Nome</label><input id="m-so-nome" placeholder="Ex: Reel - Como funciona"></div><div><label>Tipo</label><select id="m-so-tipo"><option value="reel">Reel</option><option value="story">Story</option></select></div></div>
-      <div><label>Descrição</label><textarea id="m-so-desc" placeholder="Breve descrição do conteúdo"></textarea></div>
-      <div class="grid-2"><div><label>Data publicação</label><input type="date" id="m-so-data"></div><div><label>Status</label><select id="m-so-status"><option value="pendente">Pendente</option><option value="publicado">Publicado</option><option value="rascunho">Rascunho</option></select></div></div>
-      <div class="section-divider">📊 Métricas</div>
-      <div class="grid-3"><div><label>Alcance</label><input type="number" id="m-so-alc" value="0"></div><div><label>Impressões</label><input type="number" id="m-so-imp" value="0"></div><div><label>Curtidas</label><input type="number" id="m-so-cur" value="0"></div></div>
-      <div class="grid-3"><div><label>Comentários</label><input type="number" id="m-so-com" value="0"></div><div><label>Compartilhamentos</label><input type="number" id="m-so-comp" value="0"></div><div><label>Salvamentos</label><input type="number" id="m-so-salv" value="0"></div></div>
-      <div class="grid-3"><div><label>Cliques no link</label><input type="number" id="m-so-cl" value="0"></div><div><label>Vis. completas</label><input type="number" id="m-so-vis" value="0"></div><div><label>Seguidores ganhos</label><input type="number" id="m-so-seg" value="0"></div></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveSocial()">Criar</button>`
-  );
-}
-
-function openEditSocialModal(id) {
-  const s = socials.find(x => x.id === id);
-  openModal('Editar Publicação',
-    `<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid-2"><div><label>Nome</label><input id="m-so-nome" value="${s.nome}"></div><div><label>Tipo</label><select id="m-so-tipo"><option value="reel" ${s.tipo==='reel'?'selected':''}>Reel</option><option value="story" ${s.tipo==='story'?'selected':''}>Story</option></select></div></div>
-      <div><label>Descrição</label><textarea id="m-so-desc">${s.descricao||''}</textarea></div>
-      <div class="grid-2"><div><label>Data publicação</label><input type="date" id="m-so-data" value="${s.data_publicacao||''}"></div><div><label>Status</label><select id="m-so-status"><option value="pendente" ${s.status==='pendente'?'selected':''}>Pendente</option><option value="publicado" ${s.status==='publicado'?'selected':''}>Publicado</option><option value="rascunho" ${s.status==='rascunho'?'selected':''}>Rascunho</option></select></div></div>
-      <div class="section-divider">📊 Métricas</div>
-      <div class="grid-3"><div><label>Alcance</label><input type="number" id="m-so-alc" value="${s.alcance}"></div><div><label>Impressões</label><input type="number" id="m-so-imp" value="${s.impressoes}"></div><div><label>Curtidas</label><input type="number" id="m-so-cur" value="${s.curtidas}"></div></div>
-      <div class="grid-3"><div><label>Comentários</label><input type="number" id="m-so-com" value="${s.comentarios}"></div><div><label>Compartilhamentos</label><input type="number" id="m-so-comp" value="${s.compartilhamentos}"></div><div><label>Salvamentos</label><input type="number" id="m-so-salv" value="${s.salvamentos}"></div></div>
-      <div class="grid-3"><div><label>Cliques no link</label><input type="number" id="m-so-cl" value="${s.cliques_link}"></div><div><label>Vis. completas</label><input type="number" id="m-so-vis" value="${s.visualizacoes_completas}"></div><div><label>Seguidores ganhos</label><input type="number" id="m-so-seg" value="${s.seguidores_ganhos}"></div></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updateSocial('${id}')">Salvar</button>`
-  );
-}
-
-function getSocialFormData() {
-  return {
-    campanha_id:currentCampaign.id, tipo:$('m-so-tipo').value, nome:$('m-so-nome').value,
-    descricao:$('m-so-desc').value, data_publicacao:$('m-so-data').value||null, status:$('m-so-status').value,
-    alcance:+$('m-so-alc').value||0, impressoes:+$('m-so-imp').value||0, curtidas:+$('m-so-cur').value||0,
-    comentarios:+$('m-so-com').value||0, compartilhamentos:+$('m-so-comp').value||0, salvamentos:+$('m-so-salv').value||0,
-    cliques_link:+$('m-so-cl').value||0, visualizacoes_completas:+$('m-so-vis').value||0, seguidores_ganhos:+$('m-so-seg').value||0,
-  };
-}
-
-async function saveSocial() {
-  const d = getSocialFormData();
-  if (!d.nome) { toast('Preencha o nome'); return; }
-  const { error } = await sb.from('social_campanha').insert(d);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('Publicação criada!'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-async function updateSocial(id) {
-  const d = getSocialFormData(); delete d.campanha_id;
-  const { error } = await sb.from('social_campanha').update(d).eq('id', id);
-  if (error) { toast('Erro: '+error.message); return; }
-  closeModal(); toast('Atualizado!'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-async function deleteSocial(id) {
-  if (!confirm('Excluir esta publicação?')) return;
-  await sb.from('social_campanha').delete().eq('id', id);
-  toast('Excluído'); await loadCampaignData(currentCampaign.id); renderCampaignDetail();
-}
-
-// ===================== INIT =====================
-async function init() {
-  await loadCampaigns();
-  renderCampaignsList();
-}
+// ==================== INIT ====================
+async function init(){await loadCamps();renderList()}
 init();
 </script>
 </body>
