@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</body>
+</html>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--navy:#10293F;--navy2:#1a3d5c;--cyan:#45E5E5;--cyan2:#2ecece;--cl:#E8F9F9;--yellow:#FFB800;--w:#FFF;--bg:#F8FAFC;--g100:#F5F5F5;--g200:#E5E5E5;--g300:#CCC;--g500:#666;--g700:#444;--g900:#333;--err:#DC2626;--errbg:#FEF2F2;--ok:#16A34A;--okbg:#F0FDF4;--info:#2563EB;--infobg:#EFF6FF;--purp:#7C3AED;--orange:#EA580C;--pink:#DB2777;--em:#059669;--sh:0 1px 3px rgba(16,41,63,.08);--shl:0 4px 12px rgba(16,41,63,.12)}
@@ -65,7 +67,7 @@ const SB_URL='https://rziulhxiwgjcizieqcae.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aXVsaHhpd2dqY2l6aWVxY2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDM5OTksImV4cCI6MjA5MDQ3OTk5OX0.UeOfPqM6Gn1zTsnV6WmsNO8uCtdnjux3gEqwUrM2DBM';
 const db=supabase.createClient(SB_URL,SB_KEY);
 let vw='home',mainTab='dashboard',cCamp=null,cTab='timeline',cFeat=null,fTab='overview';
-let camps=[],ems=[],wps=[],socs=[],ress=[],feats=[],fLinks=[],fFbs=[],ocors=[],allRes=[];
+let camps=[],ems=[],wps=[],socs=[],ress=[],feats=[],fLinks=[],fFbs=[],ocors=[],allRes=[],allEms=[],allSocs=[];
 const $=id=>document.getElementById(id);
 const P=(n,d)=>d>0?(n/d*100).toFixed(1):'0.0';
 const F=n=>(n||0).toLocaleString('pt-BR');
@@ -82,6 +84,8 @@ function sbc(p){$('bc').innerHTML=p.map((x,i)=>i<p.length-1?`<span onclick="${x.
 
 // DATA
 async function ldCamps(){const{data}=await db.from('campanhas').select('*').order('created_at',{ascending:false});camps=data||[]}
+async function ldAllEms(){const{data}=await db.from('emails_campanha').select('*').order('data_envio');allEms=data||[]}
+async function ldAllSocs(){const{data}=await db.from('social_campanha').select('*').order('data_publicacao',{ascending:false});allSocs=data||[]}
 async function ldOcors(){const{data}=await db.from('ocorrencias').select('*').order('data_inicio',{ascending:false});ocors=data||[]}
 async function ldAllRes(){const{data}=await db.from('resultados_campanha').select('*').order('data',{ascending:false});allRes=data||[]}
 async function ldFeats(){const{data}=await db.from('features').select('*').order('created_at',{ascending:false});feats=data||[]}
@@ -424,7 +428,7 @@ async function toggleFb(id,v){await db.from('feature_feedbacks').update({resolvi
 async function dFb(id){if(!confirm('Excluir?'))return;await db.from('feature_feedbacks').delete().eq('id',id);tst('Excluído');await ldFeatD(cFeat.id);rFeat()}
 
 // INIT
-async function init(){await Promise.all([ldCamps(),ldFeats(),ldOcors(),ldAllRes()]);rHome()}
+async function init(){await Promise.all([ldCamps(),ldFeats(),ldOcors(),ldAllRes(),ldAllEms(),ldAllSocs()]);rHome()}
 init();
 
 
@@ -483,29 +487,60 @@ async function delOc(id){if(!confirm('Excluir?'))return;await db.from('ocorrenci
 
 // ==================== COMPARATIVO MENSAL ====================
 function pgComp(){
-  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">Visão completa mês a mês — resultados, ocorrências</p>';
+  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">Raio-X completo: o que foi feito × o que gerou resultado</p>';
   var months={};
-  allRes.forEach(function(r){var m=r.data?r.data.substring(0,7):'?';if(!months[m])months[m]={novas:0,ups:0,receita:0,ocor_pos:0,ocor_neg:0};if(r.tipo==='nova_assinatura')months[m].novas++;else months[m].ups++;months[m].receita+=Number(r.valor_mensal||0)});
-  ocors.forEach(function(o){var m=o.data_inicio.substring(0,7);if(!months[m])months[m]={novas:0,ups:0,receita:0,ocor_pos:0,ocor_neg:0};if(o.impacto==='positivo')months[m].ocor_pos++;if(o.impacto==='negativo')months[m].ocor_neg++});
+  // Resultados
+  allRes.forEach(function(r){if(!r.data)return;var m=r.data.substring(0,7);if(!months[m])months[m]={novas:0,receita:0,emails:0,emails_env:0,reels:0,stories:0,features:0,campanhas:0,wps:0,ocor_pos:0,ocor_neg:0};months[m].novas++;months[m].receita+=Number(r.valor_mensal||0)});
+  // E-mails (por data_envio)
+  allEms.forEach(function(e){if(!e.data_envio)return;var m=e.data_envio.substring(0,7);if(!months[m])months[m]={novas:0,receita:0,emails:0,emails_env:0,reels:0,stories:0,features:0,campanhas:0,wps:0,ocor_pos:0,ocor_neg:0};months[m].emails++;months[m].emails_env+=e.enviados||0});
+  // Social (por data_publicacao)
+  allSocs.forEach(function(s){if(!s.data_publicacao)return;var m=s.data_publicacao.substring(0,7);if(!months[m])months[m]={novas:0,receita:0,emails:0,emails_env:0,reels:0,stories:0,features:0,campanhas:0,wps:0,ocor_pos:0,ocor_neg:0};if(s.tipo==='reel')months[m].reels++;else months[m].stories++});
+  // Features (por data_lancamento)
+  feats.forEach(function(f){if(!f.data_lancamento)return;var m=f.data_lancamento.substring(0,7);if(!months[m])months[m]={novas:0,receita:0,emails:0,emails_env:0,reels:0,stories:0,features:0,campanhas:0,wps:0,ocor_pos:0,ocor_neg:0};months[m].features++});
+  // Campanhas (por data_inicio)
+  camps.forEach(function(c){if(!c.data_inicio)return;var m=c.data_inicio.substring(0,7);if(!months[m])months[m]={novas:0,receita:0,emails:0,emails_env:0,reels:0,stories:0,features:0,campanhas:0,wps:0,ocor_pos:0,ocor_neg:0};months[m].campanhas++});
+  // Ocorrências
+  ocors.forEach(function(o){var m=o.data_inicio.substring(0,7);if(!months[m])months[m]={novas:0,receita:0,emails:0,emails_env:0,reels:0,stories:0,features:0,campanhas:0,wps:0,ocor_pos:0,ocor_neg:0};if(o.impacto==='positivo')months[m].ocor_pos++;if(o.impacto==='negativo')months[m].ocor_neg++});
   var sm=Object.keys(months).sort(function(a,b){return b.localeCompare(a)});
-  if(!sm.length)return h+'<div class="card emp"><span class="icon">compare_arrows</span><p>Nenhum dado para comparar</p></div>';
+  if(!sm.length)return h+'<div class="card emp"><span class="icon">compare_arrows</span><p>Nenhum dado</p></div>';
   var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  h+='<div class="card" style="overflow-x:auto;padding:0"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:10px 12px;text-align:left">Métrica</th>';
-  sm.forEach(function(m){var p=m.split('-');h+='<th style="padding:10px 12px;text-align:center">'+mn[parseInt(p[1])]+' '+p[0]+'</th>'});
+  h+='<div class="card" style="overflow-x:auto;padding:0"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:10px 12px;text-align:left;min-width:180px">Métrica</th>';
+  sm.forEach(function(m){var p=m.split('-');h+='<th style="padding:10px 12px;text-align:center;min-width:90px">'+mn[parseInt(p[1])]+' '+p[0]+'</th>'});
   h+='</tr></thead><tbody>';
-  [{l:'🆕 Novas Assinaturas',k:'novas',c:'#059669'},{l:'⬆️ Upgrades',k:'ups',c:'#7C3AED'},{l:'💵 Receita (R$)',k:'receita',c:'#16A34A',money:true},{l:'🟢 Ocor. Positivas',k:'ocor_pos',c:'#16A34A'},{l:'🔴 Ocor. Negativas',k:'ocor_neg',c:'#DC2626'}].forEach(function(row){
-    h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:10px 12px;font-weight:500">'+row.l+'</td>';
+  // Seção: AÇÕES
+  h+='<tr style="background:var(--g100)"><td colspan="'+(sm.length+1)+'" style="padding:8px 12px;font-weight:700;color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:1px">📢 Ações Realizadas</td></tr>';
+  [{l:'📢 Campanhas',k:'campanhas',c:'#45E5E5'},{l:'📧 E-mails enviados',k:'emails',c:'#2563EB'},{l:'📤 Total disparos e-mail',k:'emails_env',c:'#2563EB',big:true},{l:'🎬 Reels publicados',k:'reels',c:'#DB2777'},{l:'📱 Stories publicados',k:'stories',c:'#7C3AED'},{l:'🚀 Features lançadas',k:'features',c:'#059669'}].forEach(function(row){
+    h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-weight:500">'+row.l+'</td>';
+    var mx=0;sm.forEach(function(m){var v=months[m][row.k]||0;if(v>mx)mx=v});
+    sm.forEach(function(m){var v=months[m][row.k]||0;var best=v>0&&v===mx&&sm.length>1;var none=v===0;
+      if(row.big){h+='<td style="padding:8px 12px;text-align:center;color:'+(none?'var(--g300)':'var(--g900)')+'">'+(!none?F(v):'—')+'</td>'}
+      else{h+='<td style="padding:8px 12px;text-align:center;font-weight:'+(best?'700':'400')+';color:'+(none?'var(--g300)':best?row.c:'var(--g900)')+(best?';background:var(--okbg)':'')+'">'+(none?'—':v)+'</td>'}});
+    h+='</tr>'});
+  // Seção: RESULTADOS
+  h+='<tr style="background:var(--g100)"><td colspan="'+(sm.length+1)+'" style="padding:8px 12px;font-weight:700;color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:1px">💰 Resultados</td></tr>';
+  [{l:'🆕 Novas Assinaturas',k:'novas',c:'#059669'},{l:'💵 Receita (R$)',k:'receita',c:'#16A34A',money:true}].forEach(function(row){
+    h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-weight:500">'+row.l+'</td>';
     var mx=0;sm.forEach(function(m){var v=months[m][row.k]||0;if(v>mx)mx=v});
     sm.forEach(function(m){var v=months[m][row.k]||0;var best=v>0&&v===mx&&sm.length>1;
-      h+='<td style="padding:10px 12px;text-align:center;font-weight:'+(best?'700':'400')+';color:'+(best?row.c:'var(--g900)')+(best?';background:var(--okbg)':'')+'">'+(row.money?'R$ '+v.toFixed(2):v)+'</td>'});
+      h+='<td style="padding:8px 12px;text-align:center;font-weight:'+(best?'700':'400')+';color:'+(v===0?'var(--g300)':best?row.c:'var(--g900)')+(best?';background:var(--okbg)':'')+'">'+(row.money?(v>0?'R$ '+v.toFixed(2):'—'):(v>0?v:'—'))+'</td>'});
+    h+='</tr>'});
+  // Seção: CONTEXTO
+  h+='<tr style="background:var(--g100)"><td colspan="'+(sm.length+1)+'" style="padding:8px 12px;font-weight:700;color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:1px">📋 Contexto</td></tr>';
+  [{l:'🟢 Ocor. Positivas',k:'ocor_pos',c:'#16A34A'},{l:'🔴 Ocor. Negativas',k:'ocor_neg',c:'#DC2626'}].forEach(function(row){
+    h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-weight:500">'+row.l+'</td>';
+    sm.forEach(function(m){var v=months[m][row.k]||0;h+='<td style="padding:8px 12px;text-align:center;color:'+(v===0?'var(--g300)':row.c)+';font-weight:'+(v>0?'600':'400')+'">'+(v>0?v:'—')+'</td>'});
     h+='</tr>'});
   h+='</tbody></table></div>';
   // Gráfico evolução
-  h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📈 Evolução Mensal</div><canvas id="ch-comp" height="250"></canvas></div>';
+  h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">📈 Evolução: Ações × Resultados</div><canvas id="ch-comp" height="280"></canvas></div>';
   setTimeout(function(){
     var sms=sm.slice().reverse();
     var cx=document.getElementById('ch-comp');
-    if(cx&&sms.length)new Chart(cx,{type:'bar',data:{labels:sms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+' '+p[0]}),datasets:[{label:'Novas',data:sms.map(function(m){return months[m].novas}),backgroundColor:'rgba(5,150,105,0.7)',borderRadius:4},{label:'Upgrades',data:sms.map(function(m){return months[m].ups}),backgroundColor:'rgba(124,58,237,0.7)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    if(cx&&sms.length)new Chart(cx,{type:'bar',data:{labels:sms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+' '+p[0]}),datasets:[
+      {label:'Novas Assinaturas',data:sms.map(function(m){return months[m].novas}),backgroundColor:'rgba(5,150,105,0.8)',borderRadius:4,order:1},
+      {label:'E-mails',data:sms.map(function(m){return months[m].emails}),backgroundColor:'rgba(37,99,235,0.6)',borderRadius:4,order:2},
+      {label:'Reels',data:sms.map(function(m){return months[m].reels}),backgroundColor:'rgba(219,39,119,0.6)',borderRadius:4,order:3}
+    ]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
   },100);
   return h;
 }
@@ -514,52 +549,39 @@ function pgComp(){
 function pgDash(){
   var now=new Date();var curM=now.toISOString().substring(0,7);
   var selM=document.getElementById('dash-m')?.value||curM;
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div class="st" style="margin:0">🏠 Dashboard — Resumo Geral</div><div style="display:flex;gap:8px;align-items:center"><label style="margin:0;font-size:12px">Mês:</label><input type="month" id="dash-m" value="'+selM+'" onchange="rHome()" style="width:auto;padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid var(--g300)"></div></div>';
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div class="st" style="margin:0">🏠 Dashboard</div><div style="display:flex;gap:8px;align-items:center"><label style="margin:0;font-size:12px">Mês:</label><input type="month" id="dash-m" value="'+selM+'" onchange="rHome()" style="width:auto;padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid var(--g300)"></div></div>';
   var mS=selM+'-01',mE=selM+'-31';
   var mR=allRes.filter(function(r){return r.data>=mS&&r.data<=mE});
-  var mO=ocors.filter(function(o){return o.data_inicio>=mS&&o.data_inicio<=mE});
-  var mC=camps.filter(function(c){return c.data_inicio&&c.data_inicio<=mE&&(!c.data_fim||c.data_fim>=mS)});
   var mN=mR.filter(function(r){return r.tipo==='nova_assinatura'}).length;
-  var mU=mR.filter(function(r){return r.tipo==='upgrade'}).length;
+  var total=mR.length;
   var mRc=mR.reduce(function(a,r){return a+Number(r.valor_mensal||0)},0);
-  var teM=0,taM=0;
-  mC.forEach(function(c){
-    ems.forEach&&0; // ems is per-campaign, we need global email stats
-  });
+  var ticket=total>0?(mRc/total):0;
+  // KPIs: Novas, Receita, Ticket Médio, Total Conversões
   h+='<div class="kg">';
   h+='<div class="card kpi" style="border-top-color:var(--em)"><div class="kl">🆕 Novas Assinaturas</div><div class="kv">'+mN+'</div></div>';
-  h+='<div class="card kpi" style="border-top-color:var(--purp)"><div class="kl">⬆️ Upgrades</div><div class="kv">'+mU+'</div></div>';
   h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">💵 Receita Mensal</div><div class="kv">R$ '+mRc.toFixed(2)+'</div></div>';
-  h+='<div class="card kpi" style="border-top-color:var(--cyan)"><div class="kl">📢 Campanhas Ativas</div><div class="kv">'+mC.length+'</div></div>';
-  h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">🟢 Ocor. Positivas</div><div class="kv">'+mO.filter(function(o){return o.impacto==='positivo'}).length+'</div></div>';
-  h+='<div class="card kpi" style="border-top-color:var(--err)"><div class="kl">🔴 Ocor. Negativas</div><div class="kv">'+mO.filter(function(o){return o.impacto==='negativo'}).length+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--purp)"><div class="kl">💰 Ticket Médio</div><div class="kv">R$ '+ticket.toFixed(2)+'</div></div>';
+  h+='<div class="card kpi" style="border-top-color:var(--navy)"><div class="kl">📊 Total Conversões</div><div class="kv">'+total+'</div></div>';
   h+='</div>';
-
-  // Grid: Campanhas + Resultados por Origem
+  // Grid: Gráficos
   h+='<div class="g2" style="margin-top:20px">';
-  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📢 Campanhas do Período</div>';
-  if(!mC.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma campanha no período</p>';
-  mC.forEach(function(c){
-    var st={ativa:'b-ok',concluida:'b-info',pausada:'b-warn',rascunho:'b-purp'}[c.status]||'b-info';
-    h+='<div style="padding:10px;border:1px solid var(--g200);border-radius:8px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--cyan)" onclick="oCamp(\''+c.id+'\')"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:var(--navy)">'+c.nome+'</span><span class="badge '+st+'">'+c.status+'</span></div></div>';
-  });
-  h+='</div>';
   h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📊 Resultados por Origem</div><canvas id="dash-ch" height="200"></canvas>';
   if(!mR.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhum resultado no período</p>';
-  h+='</div></div>';
-
-  // Grid: Ocorrências + Últimos resultados
-  h+='<div class="g2" style="margin-top:16px">';
-  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📋 Ocorrências do Período</div>';
-  if(!mO.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma</p>';
-  mO.forEach(function(o){
-    var ie={positivo:'🟢',negativo:'🔴',neutro:'🔵'}[o.impacto]||'🔵';
-    var ic=OCOR_ICONS[o.tipo]||'more_horiz';
-    var cl=OCOR_COLORS[o.tipo]||'#666';
-    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g100)"><span class="icon icon-sm" style="color:'+cl+'">'+ic+'</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--navy)">'+ie+' '+o.titulo+'</div><div style="font-size:10px;color:var(--g500)">'+o.data_inicio+(o.data_fim?' → '+o.data_fim:'')+'</div></div></div>';
-  });
   h+='</div>';
-
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📈 Evolução Mensal</div><canvas id="dash-evo" height="200"></canvas></div>';
+  h+='</div>';
+  // Melhor campanha + Últimos resultados
+  h+='<div class="g2" style="margin-top:16px">';
+  // Melhor campanha do mês
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">🏆 Melhor Campanha do Mês</div>';
+  var campRes={};
+  mR.forEach(function(r){if(r.campanha_id){if(!campRes[r.campanha_id])campRes[r.campanha_id]={n:0,r:0};campRes[r.campanha_id].n++;campRes[r.campanha_id].r+=Number(r.valor_mensal||0)}});
+  var bestCamp=null;var bestN=0;
+  Object.entries(campRes).forEach(function(e){if(e[1].n>bestN){bestN=e[1].n;bestCamp=e[0]}});
+  if(bestCamp){var bc=camps.find(function(c){return c.id===bestCamp});if(bc)h+='<div style="padding:12px;background:var(--okbg);border-radius:8px;border:1px solid rgba(22,163,74,.3)"><div style="font-size:14px;font-weight:600;color:var(--navy)">'+bc.nome+'</div><div style="font-size:12px;color:var(--ok);font-weight:600;margin-top:4px">'+bestN+' conversão(ões) · R$ '+campRes[bestCamp].r.toFixed(2)+'</div></div>'}
+  else h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma campanha com resultados</p>';
+  h+='</div>';
+  // Últimos resultados
   h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">💰 Últimos Resultados</div>';
   var recent=mR.slice(0,8);
   if(!recent.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhum</p>';
@@ -567,18 +589,22 @@ function pgDash(){
     h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--g100)"><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(ORIC[r.origem]||'#666')+'"></span><span style="font-size:12px;font-weight:500;color:var(--navy)">'+(r.tipo==='nova_assinatura'?'Nova':'Upgrade')+'</span><span style="font-size:11px;color:var(--g500)">'+(ORI[r.origem]||r.origem)+'</span></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:600;color:var(--em)">R$ '+Number(r.valor_mensal||0).toFixed(2)+'</span><span style="font-size:10px;color:var(--g500)">'+r.data+'</span></div></div>';
   });
   h+='</div></div>';
-
   return h;
 }
-
 function chDash(){
   var selM=document.getElementById('dash-m')?.value||(new Date().toISOString().substring(0,7));
   var mR=allRes.filter(function(r){return r.data>=selM+'-01'&&r.data<=selM+'-31'});
+  // Donut por origem
   var po={};mR.forEach(function(r){po[r.origem]=(po[r.origem]||0)+1});
   var cx=document.getElementById('dash-ch');
   if(cx&&Object.keys(po).length)new Chart(cx,{type:'doughnut',data:{labels:Object.keys(po).map(function(k){return ORI[k]||k}),datasets:[{data:Object.values(po),backgroundColor:Object.keys(po).map(function(k){return ORIC[k]||'#666'}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  // Evolução mensal (últimos 6 meses)
+  var pm={};allRes.forEach(function(r){if(!r.data)return;var m=r.data.substring(0,7);if(!pm[m])pm[m]=0;pm[m]++});
+  var ms=Object.keys(pm).sort().slice(-6);
+  var cx2=document.getElementById('dash-evo');
+  var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  if(cx2&&ms.length)new Chart(cx2,{type:'bar',data:{labels:ms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+' '+p[0]}),datasets:[{label:'Conversões',data:ms.map(function(m){return pm[m]}),backgroundColor:'rgba(5,150,105,0.7)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
 }
-
 </script>
 </body>
 </html>
