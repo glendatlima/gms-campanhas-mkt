@@ -380,32 +380,37 @@ function pgVendas(){
   var total=allVendas.length;
   var rc=allVendas.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
   var ticket=total>0?(rc/total):0;
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">💰 Vendas</div><div style="display:flex;gap:8px" class="no-print"><button class="btn bp bs" onclick="omUploadVendas()"><span class="icon icon-sm">upload_file</span> Importar Planilha</button>'+( total>0?'<button class="btn bd bs" onclick="limparVendas()"><span class="icon icon-sm">delete_sweep</span> Excluir Tudo</button>':'')+'</div></div>';
-  // KPIs
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">💰 Vendas</div><div style="display:flex;gap:8px" class="no-print"><button class="btn bp bs" onclick="omUploadVendas()"><span class="icon icon-sm">upload_file</span> Importar Planilha</button>'+(total>0?'<button class="btn bd bs" onclick="limparVendas()"><span class="icon icon-sm">delete_sweep</span> Excluir Tudo</button>':'')+'</div></div>';
   h+='<div class="kg" style="margin-bottom:16px">';
   h+='<div class="card kpi" style="border-top-color:var(--em)"><div class="kl">🆕 Total Vendas</div><div class="kv">'+F(total)+'</div></div>';
   h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">💵 Receita Total</div><div class="kv">R$ '+fmtBR(rc)+'</div></div>';
   h+='<div class="card kpi" style="border-top-color:var(--purp)"><div class="kl">💰 Ticket Médio</div><div class="kv">R$ '+fmtBR(ticket)+'</div></div>';
   h+='</div>';
-  // Gráficos
   h+='<div class="g2" style="margin-bottom:16px"><div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">Por Origem</div><canvas id="v-orig" height="220"></canvas></div><div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">Evolução Mensal</div><canvas id="v-evo" height="220"></canvas></div></div>';
-  // Por vendedor
-  var byVend={};allVendas.forEach(function(v){var ve=v.vendedor||'Não identificado';if(!byVend[ve])byVend[ve]={n:0,r:0};byVend[ve].n++;byVend[ve].r+=Number(v.valor_assinatura||0)});
-  h+='<div class="card" style="padding:20px;margin-bottom:16px"><div class="st" style="margin:0 0 12px">Por Vendedor</div><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">Vendedor</th><th style="padding:8px 12px;text-align:center">Vendas</th><th style="padding:8px 12px;text-align:right">Receita</th></tr></thead><tbody>';
-  Object.entries(byVend).sort(function(a,b){return b[1].n-a[1].n}).forEach(function(e){h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-weight:500">'+e[0]+'</td><td style="padding:8px 12px;text-align:center;font-weight:600">'+e[1].n+'</td><td style="padding:8px 12px;text-align:right;color:var(--em);font-weight:600">R$ '+fmtBR(e[1].r)+'</td></tr>'});
-  h+='</tbody></table></div>';
-  // Lista com todas as vendas
-  if(allVendas.length){
-    h+='<div class="card" style="overflow-x:auto;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="st" style="margin:0">Todas as Vendas ('+allVendas.length+')</div></div><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--g100)"><th style="padding:6px 10px;text-align:left">Data</th><th style="padding:6px 10px;text-align:left">Cliente</th><th style="padding:6px 10px">Plano</th><th style="padding:6px 10px;text-align:right">Valor</th><th style="padding:6px 10px">Tipo Venda</th><th style="padding:6px 10px">Origem</th><th style="padding:6px 10px">Vendedor</th><th style="padding:6px 10px">Status</th></tr></thead><tbody>';
-    allVendas.forEach(function(v){
-      var stColor=(v.status_contrato==='active'||v.status_contrato==='Em dia'||v.status_contrato==='Em Dia')?'var(--ok)':v.status_contrato==='Cancelado'?'var(--err)':'var(--g500)';
-      h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:6px 10px">'+v.data_contrato+'</td><td style="padding:6px 10px;font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.cliente||'—')+'</td><td style="padding:6px 10px;font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.plano||'—')+'</td><td style="padding:6px 10px;text-align:right;font-weight:600;color:var(--em)">R$ '+fmtBR(Number(v.valor_assinatura||0))+'</td><td style="padding:6px 10px;font-size:10px">'+(v.tipo_venda||'—')+'</td><td style="padding:6px 10px;font-size:10px">'+(v.origem||'—')+'</td><td style="padding:6px 10px;font-size:10px">'+(v.vendedor||'—')+'</td><td style="padding:6px 10px"><span style="color:'+stColor+';font-size:10px;font-weight:600">'+(v.status_contrato||'—')+'</span></td></tr>'});
-    h+='</tbody></table></div>';
-  } else {
+  if(!allVendas.length){
     h+='<div class="card emp"><span class="icon">monetization_on</span><p style="font-weight:500">Nenhuma venda importada</p><p style="font-size:12px">Clique em "Importar Planilha" para subir seu CSV</p></div>';
+    return h;
   }
+  // Agrupar por mês
+  var byM={};allVendas.forEach(function(v){var m=v.data_contrato?v.data_contrato.substring(0,7):'?';if(!byM[m])byM[m]=[];byM[m].push(v)});
+  var meses=Object.keys(byM).sort(function(a,b){return b.localeCompare(a)});
+  var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  meses.forEach(function(m){
+    var items=byM[m];var p=m.split('-');var mLabel=mn[parseInt(p[1])]+' '+p[0];
+    var mRc=items.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
+    // Por origem neste mês
+    var origens={};items.forEach(function(v){var o=v.origem||'Não identificado';origens[o]=(origens[o]||0)+1});
+    var oriList=Object.entries(origens).sort(function(a,b){return b[1]-a[1]}).map(function(e){return e[0]+': '+e[1]}).join(' · ');
+    h+='<div class="card" style="overflow-x:auto;margin-bottom:16px"><div style="padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g200);background:var(--g100);border-radius:10px 10px 0 0"><div><span style="font-size:15px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+mLabel+'</span><span style="font-size:12px;color:var(--g500);margin-left:12px">'+items.length+' vendas · R$ '+fmtBR(mRc)+'</span></div><div style="font-size:10px;color:var(--g500)">'+oriList+'</div></div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--bg)"><th style="padding:6px 10px;text-align:left">Data</th><th style="padding:6px 10px;text-align:left">Cliente</th><th style="padding:6px 10px">Plano</th><th style="padding:6px 10px;text-align:right">Valor</th><th style="padding:6px 10px">Tipo Venda</th><th style="padding:6px 10px">Origem</th><th style="padding:6px 10px">Vendedor</th><th style="padding:6px 10px">Status</th></tr></thead><tbody>';
+    items.forEach(function(v){
+      var stC=(v.status_contrato==='active'||v.status_contrato==='Em dia'||v.status_contrato==='Em Dia')?'var(--ok)':v.status_contrato==='Cancelado'?'var(--err)':'var(--g500)';
+      h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:6px 10px">'+v.data_contrato+'</td><td style="padding:6px 10px;font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.cliente||'—')+'</td><td style="padding:6px 10px;font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.plano||'—')+'</td><td style="padding:6px 10px;text-align:right;font-weight:600;color:var(--em)">R$ '+fmtBR(Number(v.valor_assinatura||0))+'</td><td style="padding:6px 10px;font-size:10px">'+(v.tipo_venda||'—')+'</td><td style="padding:6px 10px;font-size:10px">'+(v.origem||'—')+'</td><td style="padding:6px 10px;font-size:10px">'+(v.vendedor||'—')+'</td><td style="padding:6px 10px"><span style="color:'+stC+';font-size:10px;font-weight:600">'+(v.status_contrato||'—')+'</span></td></tr>'});
+    h+='</tbody></table></div>';
+  });
   return h;
 }
+
 async function limparVendas(){if(!confirm('Tem certeza que deseja EXCLUIR TODAS as '+allVendas.length+' vendas?\n\nEssa ação não pode ser desfeita.'))return;tst('Excluindo...');await db.from('vendas').delete().neq('id','00000000-0000-0000-0000-000000000000');tst('Vendas excluídas');await ldVendas();rHome()}
 
 function chVendas(){
@@ -528,7 +533,7 @@ async function delOc(id){if(!confirm('Excluir?'))return;await db.from('ocorrenci
 
 // ==================== COMPARATIVO MENSAL ====================
 function pgComp(){
-  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">O que fizemos em cada mês e qual foi o resultado — para entender e replicar o que funciona</p>';
+  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">O que fizemos em cada mês e qual foi o resultado</p>';
   var months={};
   allVendas.forEach(function(v){if(!v.data_contrato)return;var m=v.data_contrato.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[]};months[m].vendas++;months[m].receita+=Number(v.valor_assinatura||0)});
   allEms.forEach(function(e){if(!e.data_envio)return;var m=e.data_envio.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[]};months[m].emails++});
@@ -541,13 +546,38 @@ function pgComp(){
   var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   // Encontrar melhor mês
   var bestM='',bestV=0;sm.forEach(function(m){if((months[m]?.vendas||0)>bestV){bestV=months[m].vendas;bestM=m}});
-  // Cards por mês (vertical, não tabela)
+  // Card destaque do melhor mês
+  if(bestM&&bestV>0&&sm.length>1){
+    var bd=months[bestM];var bp=bestM.split('-');var bLabel=mn[parseInt(bp[1])]+' '+bp[0];
+    h+='<div class="card" style="padding:24px;margin-bottom:20px;border-left:4px solid var(--ok);background:linear-gradient(135deg,#F0FDF4,#ECFDF5)">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><div>';
+    h+='<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ok);font-weight:700;margin-bottom:6px">🏆 Melhor Mês</div>';
+    h+='<div style="font-size:22px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+bLabel+'</div>';
+    h+='<div style="font-size:14px;color:var(--em);font-weight:600;margin-top:4px">'+bd.vendas+' vendas · R$ '+fmtBR(bd.receita)+'</div>';
+    h+='</div><div style="display:flex;gap:20px;align-items:center">';
+    h+='<div style="text-align:center"><div style="font-size:32px;font-weight:700;color:var(--em)">'+bd.vendas+'</div><div style="font-size:10px;color:var(--g500)">vendas</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--ok)">R$ '+fmtBR(bd.receita)+'</div><div style="font-size:10px;color:var(--g500)">receita</div></div>';
+    h+='</div></div>';
+    // O que foi feito no melhor mês
+    h+='<div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(22,163,74,.2)">';
+    h+='<div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:8px">O que foi feito nesse mês:</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    if(bd.campanhas.length)bd.campanhas.forEach(function(c){h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:var(--cl);color:var(--navy);font-weight:600">📢 '+c+'</span>'});
+    if(bd.emails)h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:var(--infobg);color:var(--info);font-weight:600">📧 '+bd.emails+' e-mail(s)</span>';
+    if(bd.reels)h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:#FDF2F8;color:var(--pink);font-weight:600">🎬 '+bd.reels+' reel(s)</span>';
+    if(bd.stories)h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:#F5F3FF;color:var(--purp);font-weight:600">📱 '+bd.stories+' story(ies)</span>';
+    if(bd.features.length)bd.features.forEach(function(f){h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:600">🚀 '+f+'</span>'});
+    if(!bd.campanhas.length&&!bd.emails&&!bd.reels&&!bd.stories&&!bd.features.length)h+='<span style="font-size:10px;color:var(--g500);font-style:italic">Nenhuma ação registrada</span>';
+    h+='</div>';
+    if(bd.ocorrencias.length){h+='<div style="margin-top:8px;font-size:10px;color:var(--g700)">';bd.ocorrencias.forEach(function(o){h+='<span style="display:inline-block;margin-right:10px">'+o+'</span>'});h+='</div>'}
+    h+='</div></div>';
+  }
+  // Cards por mês
   sm.forEach(function(m){
     var d=months[m];var p=m.split('-');var mLabel=mn[parseInt(p[1])]+' '+p[0];
     var isBest=m===bestM&&sm.length>1&&d.vendas>0;
-    h+='<div class="card" style="padding:20px;margin-bottom:12px;border-left:4px solid '+(isBest?'var(--ok)':'var(--g300)')+(isBest?';background:var(--okbg)':'')+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+mLabel+'</span>'+(isBest?'<span class="badge b-ok">🏆 Melhor mês</span>':'')+'</div><div style="display:flex;gap:16px;align-items:baseline"><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--em)">'+d.vendas+'</div><div style="font-size:10px;color:var(--g500)">vendas</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--ok)">R$ '+fmtBR(d.receita)+'</div><div style="font-size:10px;color:var(--g500)">receita</div></div></div></div>';
-    // O que fez
-    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
+    h+='<div class="card" style="padding:20px;margin-bottom:12px;border-left:4px solid '+(isBest?'var(--ok)':'var(--g300)')+(isBest?';background:var(--okbg)':'')+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+mLabel+'</span>'+(isBest?'<span class="badge b-ok">🏆 Melhor</span>':'')+'</div><div style="display:flex;gap:16px;align-items:baseline"><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--em)">'+d.vendas+'</div><div style="font-size:10px;color:var(--g500)">vendas</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--ok)">R$ '+fmtBR(d.receita)+'</div><div style="font-size:10px;color:var(--g500)">receita</div></div></div></div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
     if(d.campanhas.length)d.campanhas.forEach(function(c){h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--cl);color:var(--navy);font-weight:600">📢 '+c+'</span>'});
     if(d.emails)h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--infobg);color:var(--info);font-weight:600">📧 '+d.emails+' e-mail(s)</span>';
     if(d.reels)h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:#FDF2F8;color:var(--pink);font-weight:600">🎬 '+d.reels+' reel(s)</span>';
@@ -555,8 +585,7 @@ function pgComp(){
     if(d.features.length)d.features.forEach(function(f){h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:600">🚀 '+f+'</span>'});
     if(!d.campanhas.length&&!d.emails&&!d.reels&&!d.stories&&!d.features.length)h+='<span style="font-size:10px;color:var(--g500);font-style:italic">Nenhuma ação registrada</span>';
     h+='</div>';
-    // Ocorrências
-    if(d.ocorrencias.length){h+='<div style="margin-top:4px;font-size:10px;color:var(--g700)">';d.ocorrencias.forEach(function(o){h+='<span style="display:inline-block;margin-right:12px">'+o+'</span>'});h+='</div>'}
+    if(d.ocorrencias.length){h+='<div style="font-size:10px;color:var(--g700)">';d.ocorrencias.forEach(function(o){h+='<span style="display:inline-block;margin-right:10px">'+o+'</span>'});h+='</div>'}
     h+='</div>';
   });
   // Gráfico
