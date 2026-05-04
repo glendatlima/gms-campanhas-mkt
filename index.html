@@ -91,7 +91,7 @@ async function ldAllSocs(){const{data}=await db.from('social_campanha').select('
 async function ldOcors(){const{data}=await db.from('ocorrencias').select('*').order('data_inicio',{ascending:false});ocors=data||[]}
 async function ldAllRes(){const{data}=await db.from('resultados_campanha').select('*').order('data',{ascending:false});allRes=data||[]}
 async function ldFeats(){const{data}=await db.from('features').select('*').order('created_at',{ascending:false});feats=data||[]}
-async function ldCampD(id){const[e,w,s,r,b]=await Promise.all([db.from('emails_campanha').select('*').eq('campanha_id',id).order('ordem'),db.from('whatsapp_campanha').select('*').eq('campanha_id',id).order('created_at'),db.from('social_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),db.from('resultados_campanha').select('*').eq('campanha_id',id).order('data'),db.from('banners').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false})]);ems=e.data||[];wps=w.data||[];socs=s.data||[];ress=r.data||[];bans=b.data||[]}
+async function ldCampD(id){const[e,w,s,r,b,ig,yt]=await Promise.all([db.from('emails_campanha').select('*').eq('campanha_id',id).order('ordem'),db.from('whatsapp_campanha').select('*').eq('campanha_id',id).order('created_at'),db.from('social_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),db.from('resultados_campanha').select('*').eq('campanha_id',id).order('data'),db.from('banners').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false}),db.from('instagram_insights').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false}),db.from('youtube_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false})]);ems=e.data||[];wps=w.data||[];socs=s.data||[];ress=r.data||[];bans=b.data||[];igInsights=ig.data||[];yts=yt.data||[]}
 async function ldFeatD(id){const[l,f]=await Promise.all([db.from('feature_campanhas').select('*,campanhas(*)').eq('feature_id',id),db.from('feature_feedbacks').select('*').eq('feature_id',id).order('data',{ascending:false})]);fLinks=l.data||[];fFbs=f.data||[]}
 
 // HOME
@@ -145,11 +145,13 @@ function rCamp(){
   h+=`<div class="tabs no-print">
     <button class="tab ${cTab==='emails'?'active':''}" onclick="sT('emails')">📧 E-mails (${ems.length})</button>
     <button class="tab ${cTab==='whatsapp'?'active':''}" onclick="sT('whatsapp')">📱 WhatsApp (${wps.length})</button>
-    <button class="tab ${cTab==='social'?'active':''}" onclick="sT('social')">📸 Social (${socs.length})</button><button class="tab ${cTab==='banners'?'active':''}" onclick="sT('banners')">🖼️ Banners (${bans.length})</button></div>`;
+    <button class="tab ${cTab==='social'?'active':''}" onclick="sT('social')">📸 Social (${socs.length})</button><button class="tab ${cTab==='banners'?'active':''}" onclick="sT('banners')">🖼️ Banners (${bans.length})</button><button class="tab ${cTab==='instagram'?'active':''}" onclick="sT('instagram')">📸 Instagram (${igInsights.length})</button><button class="tab ${cTab==='youtube'?'active':''}" onclick="sT('youtube')">🎬 YouTube (${yts.length})</button></div>`;
   if(cTab==='emails')h+=rEmails();
   else if(cTab==='whatsapp')h+=rWap();
   else if(cTab==='social')h+=rSoc();
   else if(cTab==='banners')h+=rBanners();
+  else if(cTab==='instagram')h+=rInstagram();
+  else if(cTab==='youtube')h+=rYoutube();
   h+='<div class="ft"><p>© 2026 Sismais · GMS</p></div>';
   $('app').innerHTML=h;
 }
@@ -750,6 +752,75 @@ function omEditBan(id){om('Editar Banner',banForm(bans.find(function(b){return b
 async function svBan(){var d=gBanD();if(!d.nome){tst('Preencha o nome');return}await db.from('banners').insert(d);cm();tst('Banner criado!');await ldCampD(cCamp.id);await ldBanners();rCamp()}
 async function upBan(id){var d=gBanD();delete d.campanha_id;await db.from('banners').update(d).eq('id',id);cm();tst('Atualizado!');await ldCampD(cCamp.id);await ldBanners();rCamp()}
 async function dBan(id){if(!confirm('Excluir banner?'))return;await db.from('banners').delete().eq('id',id);tst('Excluído');await ldCampD(cCamp.id);await ldBanners();rCamp()}
+
+
+// ==================== INSTAGRAM INSIGHTS ====================
+function rInstagram(){
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">📸 Instagram — Insights da Conta</div><button class="btn bp bs no-print" onclick="omNewIg()"><span class="icon icon-sm">add</span> Novo Período</button></div>';
+  if(!igInsights.length) return h+'<div class="card emp"><span class="icon">photo_camera</span><p style="font-weight:500">Nenhum insight cadastrado</p><p style="font-size:12px">Cadastre os insights do Instagram por período</p></div>';
+  // KPIs consolidados
+  var tAlc=0,tImp=0,tVis=0,tCl=0,tSeg=0;
+  igInsights.forEach(function(ig){tAlc+=ig.alcance;tImp+=ig.impressoes;tVis+=ig.visitas_perfil;tCl+=ig.cliques_link_bio;if(ig.seguidores_fim>ig.seguidores_inicio)tSeg+=ig.seguidores_fim-ig.seguidores_inicio});
+  h+='<div class="kg" style="margin-bottom:16px">';
+  [{l:'📈 Seguidores ganhos',v:tSeg,c:'var(--em)'},{l:'👁️ Alcance total',v:tAlc,c:'var(--info)'},{l:'📊 Impressões',v:tImp,c:'var(--cyan)'},{l:'👤 Visitas perfil',v:tVis,c:'var(--purp)'},{l:'🔗 Cliques bio',v:tCl,c:'var(--ok)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+F(k.v)+'</div></div>'});
+  h+='</div>';
+  // Cards por período
+  igInsights.forEach(function(ig){
+    var segDiff=ig.seguidores_fim-ig.seguidores_inicio;
+    var segColor=segDiff>0?'var(--ok)':segDiff<0?'var(--err)':'var(--g500)';
+    var segIcon=segDiff>0?'↑':segDiff<0?'↓':'=';
+    h+='<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--pink)"><div style="display:flex;justify-content:space-between"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:600;color:var(--navy)">📅 '+ig.data_inicio+(ig.data_fim?' → '+ig.data_fim:'')+'</span></div>';
+    if(ig.observacoes)h+='<p style="font-size:12px;color:var(--g500);margin-top:4px">'+ig.observacoes+'</p>';
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:10px">';
+    h+='<div class="mc"><div class="ml">Seguidores</div><div class="mv" style="color:var(--navy)">'+F(ig.seguidores_inicio)+' → '+F(ig.seguidores_fim)+'</div><div class="ms" style="color:'+segColor+'">'+segIcon+' '+Math.abs(segDiff)+'</div></div>';
+    [{l:'Alcance',v:ig.alcance,c:'var(--info)'},{l:'Impressões',v:ig.impressoes,c:'var(--cyan)'},{l:'Visitas',v:ig.visitas_perfil,c:'var(--purp)'},{l:'Cliques bio',v:ig.cliques_link_bio,c:'var(--ok)'}].forEach(function(m){h+='<div class="mc"><div class="ml">'+m.l+'</div><div class="mv" style="color:'+m.c+'">'+F(m.v)+'</div></div>'});
+    h+='</div></div><div style="display:flex;gap:4px;flex-shrink:0" class="no-print"><button class="btn bi bo bs" onclick="omEditIg(\''+ig.id+'\')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dIg(\''+ig.id+'\')"><span class="icon icon-sm">delete</span></button></div></div></div>';
+  });
+  return h;
+}
+function igForm(ig){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="g2"><div><label>Data início</label><input type="date" id="mig-di" value="${ig?.data_inicio||''}"></div><div><label>Data fim</label><input type="date" id="mig-df" value="${ig?.data_fim||''}"></div></div><div class="sd">👥 Seguidores</div><div class="g2"><div><label>Seguidores no início</label><input type="number" id="mig-si" value="${ig?.seguidores_inicio||0}"></div><div><label>Seguidores no fim</label><input type="number" id="mig-sf" value="${ig?.seguidores_fim||0}"></div></div><div class="sd">📊 Métricas do Período</div><div class="g2"><div><label>Alcance</label><input type="number" id="mig-al" value="${ig?.alcance||0}"></div><div><label>Impressões</label><input type="number" id="mig-im" value="${ig?.impressoes||0}"></div></div><div class="g2"><div><label>Visitas ao perfil</label><input type="number" id="mig-vp" value="${ig?.visitas_perfil||0}"></div><div><label>Cliques link da bio</label><input type="number" id="mig-cl" value="${ig?.cliques_link_bio||0}"></div></div><div><label>Observações</label><textarea id="mig-ob" style="width:100%;padding:8px 12px;border-radius:7px;border:1px solid var(--g300);font-size:13px;font-family:inherit;resize:vertical;min-height:60px">${ig?.observacoes||''}</textarea></div></div>`}
+function gIgD(){return{campanha_id:cCamp.id,data_inicio:$('mig-di').value||null,data_fim:$('mig-df').value||null,seguidores_inicio:+$('mig-si').value||0,seguidores_fim:+$('mig-sf').value||0,alcance:+$('mig-al').value||0,impressoes:+$('mig-im').value||0,visitas_perfil:+$('mig-vp').value||0,cliques_link_bio:+$('mig-cl').value||0,observacoes:$('mig-ob').value}}
+function omNewIg(){om('Novo Período — Instagram',igForm(),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="svIg()">Salvar</button>`)}
+function omEditIg(id){om('Editar Insight',igForm(igInsights.find(function(x){return x.id===id})),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="upIg('${id}')">Salvar</button>`)}
+async function svIg(){var d=gIgD();if(!d.data_inicio){tst('Preencha a data');return}await db.from('instagram_insights').insert(d);cm();tst('Salvo!');await ldCampD(cCamp.id);rCamp()}
+async function upIg(id){var d=gIgD();delete d.campanha_id;await db.from('instagram_insights').update(d).eq('id',id);cm();tst('Atualizado!');await ldCampD(cCamp.id);rCamp()}
+async function dIg(id){if(!confirm('Excluir?'))return;await db.from('instagram_insights').delete().eq('id',id);tst('Excluído');await ldCampD(cCamp.id);rCamp()}
+
+// ==================== YOUTUBE ====================
+function rYoutube(){
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">🎬 YouTube</div><button class="btn bp bs no-print" onclick="omNewYt()"><span class="icon icon-sm">add</span> Novo</button></div>';
+  if(!yts.length) return h+'<div class="card emp"><span class="icon">smart_display</span><p style="font-weight:500">Nenhum vídeo/live</p><p style="font-size:12px">Cadastre vídeos e lives do YouTube</p></div>';
+  // KPIs
+  var tIns=0,tVis=0,tWt=0,tCl=0,tLk=0,tCo=0;
+  yts.forEach(function(y){tIns+=y.inscritos_ganhos;tVis+=y.visualizacoes;tWt+=y.watch_time_min;tCl+=y.cliques;tLk+=y.likes;tCo+=y.comentarios});
+  h+='<div class="kg" style="margin-bottom:16px">';
+  [{l:'📈 Inscritos',v:tIns,c:'var(--err)'},{l:'👁️ Visualizações',v:tVis,c:'var(--info)'},{l:'⏱️ Watch Time (min)',v:tWt,c:'var(--cyan)'},{l:'🖱️ Cliques',v:tCl,c:'var(--purp)'},{l:'👍 Likes',v:tLk,c:'var(--ok)'},{l:'💬 Comentários',v:tCo,c:'var(--navy)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+F(k.v)+'</div></div>'});
+  h+='</div>';
+  // Separar por tipo
+  [['🎬 Vídeos',yts.filter(function(y){return y.tipo==='video'})],['🔴 Lives',yts.filter(function(y){return y.tipo==='live'})]].forEach(function(group){
+    var label=group[0],items=group[1];
+    if(!items.length)return;
+    h+='<div class="sd">'+label+' ('+items.length+')</div>';
+    items.forEach(function(y){
+      h+='<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid '+(y.tipo==='live'?'var(--err)':'var(--info)')+'"><div style="display:flex;justify-content:space-between"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:14px;font-weight:600;color:var(--navy)">'+y.nome+'</span><span class="badge '+(y.tipo==='live'?'b-err':'b-info')+'">'+y.tipo+'</span><span class="badge b-'+(y.status==='publicado'?'ok':'warn')+'">'+y.status+'</span></div>';
+      if(y.descricao)h+='<p style="font-size:12px;color:var(--g500);margin-top:4px">'+y.descricao+'</p>';
+      if(y.data_publicacao)h+='<div style="font-size:11px;color:var(--g500);margin-top:4px">📅 '+y.data_publicacao+'</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-top:10px">';
+      var metrics=[{l:'Visualizações',v:y.visualizacoes,c:'var(--info)'},{l:'Watch Time',v:y.watch_time_min+'min',c:'var(--cyan)',raw:true},{l:'Cliques',v:y.cliques,c:'var(--purp)'},{l:'Inscritos',v:y.inscritos_ganhos,c:'var(--err)'},{l:'Likes',v:y.likes,c:'var(--ok)'},{l:'Comentários',v:y.comentarios,c:'var(--navy)'}];
+      if(y.tipo==='live')metrics.push({l:'Pessoas live',v:y.pessoas_live,c:'var(--orange)'});
+      metrics.forEach(function(m){h+='<div class="mc"><div class="ml">'+m.l+'</div><div class="mv" style="color:'+m.c+'">'+(m.raw?m.v:F(m.v))+'</div></div>'});
+      h+='</div></div><div style="display:flex;gap:4px;flex-shrink:0" class="no-print"><button class="btn bi bo bs" onclick="omEditYt(\''+y.id+'\')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dYt(\''+y.id+'\')"><span class="icon icon-sm">delete</span></button></div></div></div>';
+    });
+  });
+  return h;
+}
+function ytForm(y){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="g2"><div><label>Nome</label><input id="myt-n" value="${y?y.nome:''}"></div><div><label>Tipo</label><select id="myt-tp"><option value="video" ${y?.tipo==='video'?'selected':''}>Vídeo</option><option value="live" ${y?.tipo==='live'?'selected':''}>Live</option></select></div></div><div><label>Descrição</label><textarea id="myt-ds" style="width:100%;padding:8px 12px;border-radius:7px;border:1px solid var(--g300);font-size:13px;font-family:inherit;resize:vertical;min-height:60px">${y?.descricao||''}</textarea></div><div class="g2"><div><label>Data</label><input type="date" id="myt-d" value="${y?.data_publicacao||''}"></div><div><label>Status</label><select id="myt-st"><option value="publicado" ${y?.status==='publicado'?'selected':''}>Publicado</option><option value="pendente" ${y?.status==='pendente'?'selected':''}>Pendente</option><option value="privado" ${y?.status==='privado'?'selected':''}>Privado</option></select></div></div><div class="sd">📊 Métricas</div><div class="g3"><div><label>Visualizações</label><input type="number" id="myt-vi" value="${y?.visualizacoes||0}"></div><div><label>Watch Time (min)</label><input type="number" id="myt-wt" value="${y?.watch_time_min||0}"></div><div><label>Cliques</label><input type="number" id="myt-cl" value="${y?.cliques||0}"></div></div><div class="g3"><div><label>Inscritos ganhos</label><input type="number" id="myt-in" value="${y?.inscritos_ganhos||0}"></div><div><label>Likes</label><input type="number" id="myt-lk" value="${y?.likes||0}"></div><div><label>Comentários</label><input type="number" id="myt-co" value="${y?.comentarios||0}"></div></div><div id="myt-live-field" style="${y?.tipo==='live'?'':'display:none'}"><label>👥 Pessoas na live</label><input type="number" id="myt-pl" value="${y?.pessoas_live||0}"></div><script>document.getElementById('myt-tp')?.addEventListener('change',function(){document.getElementById('myt-live-field').style.display=this.value==='live'?'':'none'})<\/script></div>`}
+function gYtD(){return{campanha_id:cCamp.id,tipo:$('myt-tp').value,nome:$('myt-n').value,descricao:$('myt-ds').value,data_publicacao:$('myt-d').value||null,status:$('myt-st').value,visualizacoes:+$('myt-vi').value||0,watch_time_min:+$('myt-wt').value||0,cliques:+$('myt-cl').value||0,inscritos_ganhos:+$('myt-in').value||0,likes:+$('myt-lk').value||0,comentarios:+$('myt-co').value||0,pessoas_live:+$('myt-pl').value||0}}
+function omNewYt(){om('Novo Vídeo/Live',ytForm(),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="svYt()">Criar</button>`)}
+function omEditYt(id){om('Editar',ytForm(yts.find(function(x){return x.id===id})),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="upYt('${id}')">Salvar</button>`)}
+async function svYt(){var d=gYtD();if(!d.nome){tst('Preencha o nome');return}await db.from('youtube_campanha').insert(d);cm();tst('Criado!');await ldCampD(cCamp.id);rCamp()}
+async function upYt(id){var d=gYtD();delete d.campanha_id;await db.from('youtube_campanha').update(d).eq('id',id);cm();tst('Atualizado!');await ldCampD(cCamp.id);rCamp()}
+async function dYt(id){if(!confirm('Excluir?'))return;await db.from('youtube_campanha').delete().eq('id',id);tst('Excluído');await ldCampD(cCamp.id);rCamp()}
 
 </script>
 </body>
