@@ -66,7 +66,7 @@ input,select,textarea{width:100%;padding:8px 12px;border-radius:7px;border:1px s
 const SB_URL='https://rziulhxiwgjcizieqcae.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aXVsaHhpd2dqY2l6aWVxY2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDM5OTksImV4cCI6MjA5MDQ3OTk5OX0.UeOfPqM6Gn1zTsnV6WmsNO8uCtdnjux3gEqwUrM2DBM';
 const db=supabase.createClient(SB_URL,SB_KEY);
-let vw='home',mainTab='dashboard',cCamp=null,cTab='timeline',cFeat=null,fTab='overview';
+let vw='home',mainTab='dashboard',cCamp=null,cTab='timeline',cFeat=null,fTab='overview',dashPeriod='mes';
 let camps=[],ems=[],wps=[],socs=[],ress=[],feats=[],fLinks=[],fFbs=[],ocors=[],allRes=[],allEms=[],allSocs=[],allVendas=[],allBanners=[];
 const $=id=>document.getElementById(id);
 const P=(n,d)=>d>0?(n/d*100).toFixed(1):'0.0';
@@ -91,7 +91,7 @@ async function ldAllSocs(){const{data}=await db.from('social_campanha').select('
 async function ldOcors(){const{data}=await db.from('ocorrencias').select('*').order('data_inicio',{ascending:false});ocors=data||[]}
 async function ldAllRes(){const{data}=await db.from('resultados_campanha').select('*').order('data',{ascending:false});allRes=data||[]}
 async function ldFeats(){const{data}=await db.from('features').select('*').order('created_at',{ascending:false});feats=data||[]}
-async function ldCampD(id){const[e,w,s,r,b,ig,yt]=await Promise.all([db.from('emails_campanha').select('*').eq('campanha_id',id).order('ordem'),db.from('whatsapp_campanha').select('*').eq('campanha_id',id).order('created_at'),db.from('social_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),db.from('resultados_campanha').select('*').eq('campanha_id',id).order('data'),db.from('banners').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false}),db.from('instagram_insights').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false}),db.from('youtube_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false})]);ems=e.data||[];wps=w.data||[];socs=s.data||[];ress=r.data||[];bans=b.data||[];igInsights=ig.data||[];yts=yt.data||[]}
+async function ldCampD(id){const[e,w,s,r,b,ig,yt,tk]=await Promise.all([db.from('emails_campanha').select('*').eq('campanha_id',id).order('ordem'),db.from('whatsapp_campanha').select('*').eq('campanha_id',id).order('created_at'),db.from('social_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),db.from('resultados_campanha').select('*').eq('campanha_id',id).order('data'),db.from('banners').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false}),db.from('instagram_insights').select('*').eq('campanha_id',id).order('data_inicio',{ascending:false}),db.from('youtube_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false}),db.from('tiktok_campanha').select('*').eq('campanha_id',id).order('data_publicacao',{ascending:false})]);ems=e.data||[];wps=w.data||[];socs=s.data||[];ress=r.data||[];bans=b.data||[];igInsights=ig.data||[];yts=yt.data||[];tks=tk.data||[]}
 async function ldFeatD(id){const[l,f]=await Promise.all([db.from('feature_campanhas').select('*,campanhas(*)').eq('feature_id',id),db.from('feature_feedbacks').select('*').eq('feature_id',id).order('data',{ascending:false})]);fLinks=l.data||[];fFbs=f.data||[]}
 
 // HOME
@@ -145,13 +145,17 @@ function rCamp(){
   h+=`<div class="tabs no-print">
     <button class="tab ${cTab==='emails'?'active':''}" onclick="sT('emails')">📧 E-mails (${ems.length})</button>
     <button class="tab ${cTab==='whatsapp'?'active':''}" onclick="sT('whatsapp')">📱 WhatsApp (${wps.length})</button>
-    <button class="tab ${cTab==='social'?'active':''}" onclick="sT('social')">📸 Social (${socs.length})</button><button class="tab ${cTab==='banners'?'active':''}" onclick="sT('banners')">🖼️ Banners (${bans.length})</button><button class="tab ${cTab==='instagram'?'active':''}" onclick="sT('instagram')">📸 Instagram (${igInsights.length})</button><button class="tab ${cTab==='youtube'?'active':''}" onclick="sT('youtube')">🎬 YouTube (${yts.length})</button></div>`;
+    <button class="tab ${cTab==='banners'?'active':''}" onclick="sT('banners')">🖼️ Banners (${bans.length})</button>
+    <button class="tab ${cTab==='instagram'?'active':''}" onclick="sT('instagram')">📸 Instagram (${igInsights.length+socs.length})</button>
+    <button class="tab ${cTab==='youtube'?'active':''}" onclick="sT('youtube')">🎬 YouTube (${yts.length})</button>
+    <button class="tab ${cTab==='tiktok'?'active':''}" onclick="sT('tiktok')">🎵 TikTok (${(tks||[]).length})</button>
+  </div>`;
   if(cTab==='emails')h+=rEmails();
   else if(cTab==='whatsapp')h+=rWap();
-  else if(cTab==='social')h+=rSoc();
   else if(cTab==='banners')h+=rBanners();
   else if(cTab==='instagram')h+=rInstagram();
   else if(cTab==='youtube')h+=rYoutube();
+  else if(cTab==='tiktok')h+=rTiktok();
   h+='<div class="ft"><p>© 2026 Sismais · GMS</p></div>';
   $('app').innerHTML=h;
 }
@@ -336,7 +340,7 @@ async function upWp(id){const d={nome:$('mw-n').value,segmento:$('mw-sg').value,
 async function dWp(id){if(!confirm('Excluir?'))return;await db.from('whatsapp_campanha').delete().eq('id',id);tst('Excluído');await ldCampD(cCamp.id);rCamp()}
 
 // MODALS: SOCIAL
-function scForm(s){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="g2"><div><label>Nome</label><input id="ms-n" value="${s?s.nome:''}"></div><div><label>Tipo</label><select id="ms-tp"><option value="reel" ${s?.tipo==='reel'?'selected':''}>Reel</option><option value="story" ${s?.tipo==='story'?'selected':''}>Story</option></select></div></div><div><label>Descrição</label><textarea id="ms-ds">${s?.descricao||''}</textarea></div><div class="g2"><div><label>Data</label><input type="date" id="ms-d" value="${s?.data_publicacao||''}"></div><div><label>Status</label><select id="ms-s"><option value="pendente" ${s?.status==='pendente'?'selected':''}>Pendente</option><option value="publicado" ${s?.status==='publicado'?'selected':''}>Publicado</option></select></div></div><div class="sd">📊</div><div class="g3"><div><label>Alcance</label><input type="number" id="ms-al" value="${s?.alcance||0}"></div><div><label>Impressões</label><input type="number" id="ms-im" value="${s?.impressoes||0}"></div><div><label>Curtidas</label><input type="number" id="ms-cu" value="${s?.curtidas||0}"></div></div><div class="g3"><div><label>Comentários</label><input type="number" id="ms-co" value="${s?.comentarios||0}"></div><div><label>Compartilh.</label><input type="number" id="ms-cp" value="${s?.compartilhamentos||0}"></div><div><label>Salvamentos</label><input type="number" id="ms-sv" value="${s?.salvamentos||0}"></div></div><div class="g3"><div><label>Cliques</label><input type="number" id="ms-cl" value="${s?.cliques_link||0}"></div><div><label>Vis.compl.</label><input type="number" id="ms-vi" value="${s?.visualizacoes_completas||0}"></div><div><label>Seguidores</label><input type="number" id="ms-sg" value="${s?.seguidores_ganhos||0}"></div></div></div>`}
+function scForm(s){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="g2"><div><label>Nome</label><input id="ms-n" value="${s?s.nome:''}"></div><div><label>Tipo</label><select id="ms-tp"><option value="reel" ${s?.tipo==='reel'?'selected':''}>Reel</option><option value="story" ${s?.tipo==='story'?'selected':''}>Story</option><option value="feed" ${s?.tipo==='feed'?'selected':''}>Post no Feed</option></select></div></div><div><label>Descrição</label><textarea id="ms-ds">${s?.descricao||''}</textarea></div><div class="g2"><div><label>Data</label><input type="date" id="ms-d" value="${s?.data_publicacao||''}"></div><div><label>Status</label><select id="ms-s"><option value="pendente" ${s?.status==='pendente'?'selected':''}>Pendente</option><option value="publicado" ${s?.status==='publicado'?'selected':''}>Publicado</option></select></div></div><div class="sd">📊</div><div class="g3"><div><label>Alcance</label><input type="number" id="ms-al" value="${s?.alcance||0}"></div><div><label>Impressões</label><input type="number" id="ms-im" value="${s?.impressoes||0}"></div><div><label>Curtidas</label><input type="number" id="ms-cu" value="${s?.curtidas||0}"></div></div><div class="g3"><div><label>Comentários</label><input type="number" id="ms-co" value="${s?.comentarios||0}"></div><div><label>Compartilh.</label><input type="number" id="ms-cp" value="${s?.compartilhamentos||0}"></div><div><label>Salvamentos</label><input type="number" id="ms-sv" value="${s?.salvamentos||0}"></div></div><div class="g3"><div><label>Cliques</label><input type="number" id="ms-cl" value="${s?.cliques_link||0}"></div><div><label>Vis.compl.</label><input type="number" id="ms-vi" value="${s?.visualizacoes_completas||0}"></div><div><label>Seguidores</label><input type="number" id="ms-sg" value="${s?.seguidores_ganhos||0}"></div></div></div>`}
 function gScD(){return{campanha_id:cCamp.id,tipo:$('ms-tp').value,nome:$('ms-n').value,descricao:$('ms-ds').value,data_publicacao:$('ms-d').value||null,status:$('ms-s').value,alcance:+$('ms-al').value||0,impressoes:+$('ms-im').value||0,curtidas:+$('ms-cu').value||0,comentarios:+$('ms-co').value||0,compartilhamentos:+$('ms-cp').value||0,salvamentos:+$('ms-sv').value||0,cliques_link:+$('ms-cl').value||0,visualizacoes_completas:+$('ms-vi').value||0,seguidores_ganhos:+$('ms-sg').value||0}}
 function omNewSc(){om('Nova Publicação',scForm(),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="svSc()">Criar</button>`)}
 function omEditSc(id){om('Editar',scForm(socs.find(x=>x.id===id)),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="upSc('${id}')">Salvar</button>`)}
@@ -399,34 +403,71 @@ function pgVendas(){
   var byM={};allVendas.forEach(function(v){var m=v.data_contrato?v.data_contrato.substring(0,7):'?';if(!byM[m])byM[m]=[];byM[m].push(v)});
   var meses=Object.keys(byM).sort(function(a,b){return b.localeCompare(a)});
   var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  // Identificar lotes neste mês pra excluir
-  meses.forEach(function(m){
+  meses.forEach(function(m,idx){
     var items=byM[m];var p=m.split('-');var mLabel=mn[parseInt(p[1])]+' '+p[0];
     var mRc=items.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
     var mTicket=items.length>0?(mRc/items.length):0;
-    // Origens deste mês
+    // Mês anterior (próximo no array, pois está ordenado desc)
+    var prevM=meses[idx+1]?byM[meses[idx+1]]:null;
+    var prevRc=prevM?prevM.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0):0;
+    var prevTicket=prevM&&prevM.length>0?(prevRc/prevM.length):0;
+    var tVendas=tendencia(items.length,prevM?prevM.length:0);
+    var tReceita=tendencia(mRc,prevRc);
+    var tTicket=tendencia(mTicket,prevTicket);
+    // Origens
     var origens={};items.forEach(function(v){var o=v.origem||'Não identificado';origens[o]=(origens[o]||0)+1});
     var oriList=Object.entries(origens).sort(function(a,b){return b[1]-a[1]});
-    // Lotes deste mês
+    // Melhor dia (dia com mais vendas)
+    var byDay={};items.forEach(function(v){if(v.data_contrato)byDay[v.data_contrato]=(byDay[v.data_contrato]||0)+1});
+    var bestDay=Object.entries(byDay).sort(function(a,b){return b[1]-a[1]})[0];
+    // Maior venda
+    var biggestSale=items.slice().sort(function(a,b){return Number(b.valor_assinatura||0)-Number(a.valor_assinatura||0)})[0];
+    // Lotes
     var lotes={};items.forEach(function(v){var l=v.lote_importacao||'sem_lote';lotes[l]=(lotes[l]||0)+1});
     var loteList=Object.keys(lotes);
-    h+='<div class="card" style="margin-bottom:16px;overflow:hidden">';
-    // Header do mês
-    h+='<div style="padding:16px 20px;background:var(--navy);color:#fff;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
-    h+='<div><span style="font-size:16px;font-weight:700;font-family:Poppins,sans-serif">'+mLabel+'</span><span style="font-size:12px;opacity:.7;margin-left:12px">'+items.length+' vendas</span></div>';
-    h+='<div style="display:flex;gap:16px;align-items:center"><div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--cyan)">R$ '+fmtBR(mRc)+'</div><div style="font-size:9px;opacity:.6">receita</div></div><div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--cyan)">R$ '+fmtBR(mTicket)+'</div><div style="font-size:9px;opacity:.6">ticket médio</div></div></div>';
+    // Cores das tendências (claras pra fundo escuro)
+    function trendC(c){return c==='var(--ok)'?'#86efac':c==='var(--err)'?'#fca5a5':'rgba(255,255,255,.5)'}
+    h+='<div class="card" style="margin-bottom:20px;overflow:hidden">';
+    // ===== RESUMO EXECUTIVO =====
+    h+='<div style="padding:18px 20px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:10px 10px 0 0">';
+    h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);font-weight:700">📊 Resumo Executivo</span><span style="font-size:18px;font-weight:700;font-family:Poppins,sans-serif">'+mLabel+'</span></div>';
+    // 3 KPIs grandes
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">';
+    h+='<div><div style="font-size:11px;opacity:.7;margin-bottom:4px">🆕 Vendas</div><div style="font-size:28px;font-weight:700;color:var(--cyan);line-height:1">'+items.length+'</div><div style="font-size:11px;color:'+trendC(tVendas.c)+';font-weight:600;margin-top:4px">'+tVendas.t+'</div></div>';
+    h+='<div><div style="font-size:11px;opacity:.7;margin-bottom:4px">💵 Receita</div><div style="font-size:24px;font-weight:700;color:var(--cyan);line-height:1">R$ '+fmtBR(mRc)+'</div><div style="font-size:11px;color:'+trendC(tReceita.c)+';font-weight:600;margin-top:4px">'+tReceita.t+'</div></div>';
+    h+='<div><div style="font-size:11px;opacity:.7;margin-bottom:4px">🎯 Ticket Médio</div><div style="font-size:24px;font-weight:700;color:var(--cyan);line-height:1">R$ '+fmtBR(mTicket)+'</div><div style="font-size:11px;color:'+trendC(tTicket.c)+';font-weight:600;margin-top:4px">'+tTicket.t+'</div></div>';
     h+='</div>';
-    // Origens resumo
-    h+='<div style="padding:10px 20px;background:var(--g100);border-bottom:1px solid var(--g200);display:flex;flex-wrap:wrap;gap:6px">';
-    oriList.forEach(function(e){h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--w);border:1px solid var(--g200);color:var(--navy);font-weight:500">'+e[0]+': <strong>'+e[1]+'</strong></span>'});
+    // Top 3 origens
+    if(oriList.length){
+      h+='<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
+      h+='<span style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Top origens:</span>';
+      var medalsOri=['🥇','🥈','🥉'];
+      oriList.slice(0,5).forEach(function(e,i){
+        var pct=((e[1]/items.length)*100).toFixed(0);
+        h+='<span style="font-size:11px;padding:4px 10px;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;font-weight:500">'+(medalsOri[i]||'•')+' '+e[0]+' <strong>'+e[1]+'</strong> · '+pct+'%</span>';
+      });
+      h+='</div>';
+    }
     h+='</div>';
-    // Lotes (para excluir)
+    // ===== INSIGHTS =====
+    var insightParts=[];
+    if(bestDay){
+      var dp=bestDay[0].split('-');var dayLabel=dp[2]+'/'+dp[1];
+      insightParts.push('<div><span style="color:var(--g500)">📈 Melhor dia:</span> <strong style="color:var(--navy)">'+dayLabel+'</strong> <span style="color:var(--g500)">('+bestDay[1]+' venda'+(bestDay[1]>1?'s':'')+')</span></div>');
+    }
+    if(biggestSale&&biggestSale.cliente&&Number(biggestSale.valor_assinatura||0)>0){
+      insightParts.push('<div><span style="color:var(--g500)">💎 Maior venda:</span> <strong style="color:var(--navy)">'+biggestSale.cliente+'</strong> <span style="color:var(--em);font-weight:600">R$ '+fmtBR(Number(biggestSale.valor_assinatura||0))+'</span></div>');
+    }
+    if(insightParts.length){
+      h+='<div style="padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--g200);display:flex;flex-wrap:wrap;gap:18px;font-size:11px">'+insightParts.join('')+'</div>';
+    }
+    // ===== LOTES =====
     if(loteList.length>0){
-      h+='<div style="padding:8px 20px;background:var(--bg);border-bottom:1px solid var(--g200);display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:10px;color:var(--g500)">Importações:</span>';
+      h+='<div style="padding:8px 20px;background:var(--g100);border-bottom:1px solid var(--g200);display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:10px;color:var(--g500)">Importações:</span>';
       loteList.forEach(function(l){var lLabel=l==='sem_lote'?'Anterior':l;h+='<span class="no-print" style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--w);border:1px solid var(--g300);color:var(--g700);cursor:pointer;display:inline-flex;align-items:center;gap:4px" onclick="excluirLote(\''+l.replace(/'/g,"\\'")+'\')">'+lLabel+' <span style="color:var(--err);font-weight:700">×</span></span>'});
       h+='</div>';
     }
-    // Tabela
+    // ===== TABELA =====
     h+='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--bg)"><th style="padding:6px 12px;text-align:left">Data</th><th style="padding:6px 12px;text-align:left">Cliente</th><th style="padding:6px 12px;text-align:right">MRR</th><th style="padding:6px 12px">Origem</th><th style="padding:6px 12px">Vendedor</th></tr></thead><tbody>';
     items.forEach(function(v){
       h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:5px 12px">'+v.data_contrato+'</td><td style="padding:5px 12px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.cliente||'—')+'</td><td style="padding:5px 12px;text-align:right;font-weight:600;color:var(--em)">R$ '+fmtBR(Number(v.valor_assinatura||0))+'</td><td style="padding:5px 12px;font-size:10px">'+(v.origem||'—')+'</td><td style="padding:5px 12px;font-size:10px">'+(v.vendedor||'—')+'</td></tr>'});
@@ -538,151 +579,240 @@ async function delOc(id){if(!confirm('Excluir?'))return;await db.from('ocorrenci
 
 // ==================== COMPARATIVO MENSAL ====================
 function pgComp(){
-  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">O que fizemos em cada mês e qual foi o resultado</p>';
+  var h='<div class="st">📊 Comparativo Mensal</div><p style="font-size:12px;color:var(--g500);margin-bottom:16px">Visão rápida: vendas, ações e ocorrências de cada mês</p>';
+  // Agregar tudo por mês
   var months={};
-  allVendas.forEach(function(v){if(!v.data_contrato)return;var m=v.data_contrato.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};months[m].vendas++;months[m].receita+=Number(v.valor_assinatura||0)});
-  allEms.forEach(function(e){if(!e.data_envio)return;var m=e.data_envio.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};months[m].emails++});
-  allBanners.forEach(function(b){if(!b.data_inicio)return;var m=b.data_inicio.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};months[m].banners++});
-  allSocs.forEach(function(s){if(!s.data_publicacao)return;var m=s.data_publicacao.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};if(s.tipo==='reel')months[m].reels++;else months[m].stories++});
-  feats.forEach(function(f){if(!f.data_lancamento)return;var m=f.data_lancamento.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};months[m].features.push(f.nome+(f.versao?' v'+f.versao:''))});
-  camps.forEach(function(c){if(!c.data_inicio)return;var m=c.data_inicio.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};months[m].campanhas.push(c.nome)});
-  ocors.forEach(function(o){var m=o.data_inicio.substring(0,7);if(!months[m])months[m]={vendas:0,receita:0,emails:0,reels:0,stories:0,features:[],campanhas:[],ocorrencias:[],banners:0};var imp={positivo:'🟢',negativo:'🔴',neutro:'🔵'}[o.impacto]||'🔵';months[m].ocorrencias.push(imp+' '+o.titulo)});
+  function ensure(m){if(!months[m])months[m]={vendas:0,receita:0,emails:0,publicacoes:0,banners:0,ocorrencias:[]}}
+  allVendas.forEach(function(v){if(!v.data_contrato)return;var m=v.data_contrato.substring(0,7);ensure(m);months[m].vendas++;months[m].receita+=Number(v.valor_assinatura||0)});
+  allEms.forEach(function(e){if(!e.data_envio)return;var m=e.data_envio.substring(0,7);ensure(m);months[m].emails++});
+  allSocs.forEach(function(s){if(!s.data_publicacao)return;var m=s.data_publicacao.substring(0,7);ensure(m);months[m].publicacoes++});
+  allBanners.forEach(function(b){if(!b.data_inicio)return;var m=b.data_inicio.substring(0,7);ensure(m);months[m].banners++});
+  ocors.forEach(function(o){if(!o.data_inicio)return;var m=o.data_inicio.substring(0,7);ensure(m);var imp={positivo:'🟢',negativo:'🔴',neutro:'🔵'}[o.impacto]||'🔵';months[m].ocorrencias.push(imp+' '+o.titulo)});
   var sm=Object.keys(months).sort(function(a,b){return b.localeCompare(a)}).slice(0,12);
-  if(!sm.length)return h+'<div class="card emp"><span class="icon">compare_arrows</span><p>Nenhum dado</p></div>';
+  if(!sm.length) return h+'<div class="card emp"><span class="icon">compare_arrows</span><p>Nenhum dado</p></div>';
   var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  // Encontrar melhor mês
-  var bestM='',bestV=0;sm.forEach(function(m){if((months[m]?.vendas||0)>bestV){bestV=months[m].vendas;bestM=m}});
-  // Card destaque do melhor mês
-  if(bestM&&bestV>0&&sm.length>1){
-    var bd=months[bestM];var bp=bestM.split('-');var bLabel=mn[parseInt(bp[1])]+' '+bp[0];
-    h+='<div class="card" style="padding:24px;margin-bottom:20px;border-left:4px solid var(--ok);background:linear-gradient(135deg,#F0FDF4,#ECFDF5)">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><div>';
-    h+='<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ok);font-weight:700;margin-bottom:6px">🏆 Melhor Mês</div>';
-    h+='<div style="font-size:22px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+bLabel+'</div>';
-    h+='<div style="font-size:14px;color:var(--em);font-weight:600;margin-top:4px">'+bd.vendas+' vendas · R$ '+fmtBR(bd.receita)+'</div>';
-    h+='</div><div style="display:flex;gap:20px;align-items:center">';
-    h+='<div style="text-align:center"><div style="font-size:32px;font-weight:700;color:var(--em)">'+bd.vendas+'</div><div style="font-size:10px;color:var(--g500)">vendas</div></div>';
-    h+='<div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--ok)">R$ '+fmtBR(bd.receita)+'</div><div style="font-size:10px;color:var(--g500)">receita</div></div>';
-    h+='</div></div>';
-    // O que foi feito no melhor mês
-    h+='<div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(22,163,74,.2)">';
-    h+='<div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:8px">O que foi feito nesse mês:</div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    if(bd.campanhas.length)bd.campanhas.forEach(function(c){h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:var(--cl);color:var(--navy);font-weight:600">📢 '+c+'</span>'});
-    if(bd.emails)h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:var(--infobg);color:var(--info);font-weight:600">📧 '+bd.emails+' e-mail(s)</span>';
-    if(bd.reels)h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:#FDF2F8;color:var(--pink);font-weight:600">🎬 '+bd.reels+' reel(s)</span>';
-    if(bd.stories)h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:#F5F3FF;color:var(--purp);font-weight:600">📱 '+bd.stories+' story(ies)</span>';
-    if(bd.features.length)bd.features.forEach(function(f){h+='<span style="font-size:10px;padding:4px 10px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:600">🚀 '+f+'</span>'});
-    if(!bd.campanhas.length&&!bd.emails&&!bd.reels&&!bd.stories&&!bd.features.length)h+='<span style="font-size:10px;color:var(--g500);font-style:italic">Nenhuma ação registrada</span>';
-    h+='</div>';
-    if(bd.ocorrencias.length){h+='<div style="margin-top:8px;font-size:10px;color:var(--g700)">';bd.ocorrencias.forEach(function(o){h+='<span style="display:inline-block;margin-right:10px">'+o+'</span>'});h+='</div>'}
-    h+='</div></div>';
-  }
-  // Cards por mês
-  sm.forEach(function(m){
+  // KPIs consolidados
+  var totV=sm.reduce(function(a,m){return a+months[m].vendas},0);
+  var totRc=sm.reduce(function(a,m){return a+months[m].receita},0);
+  var media=sm.length>0?(totV/sm.length):0;
+  h+='<div class="kg" style="margin-bottom:18px">';
+  [{l:'📅 Meses',v:sm.length,c:'var(--cyan)'},{l:'🆕 Vendas',v:totV,c:'var(--em)'},{l:'💵 Receita',v:'R$ '+fmtBR(totRc),c:'var(--ok)',raw:true},{l:'📊 Média/mês',v:media.toFixed(1),c:'var(--purp)',raw:true}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+(k.raw?k.v:F(k.v))+'</div></div>'});
+  h+='</div>';
+  // Tabela
+  h+='<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  h+='<thead><tr style="background:var(--navy);color:#fff"><th style="padding:10px 14px;text-align:left">Mês</th><th style="padding:10px 14px;text-align:center">Vendas</th><th style="padding:10px 14px;text-align:right">Receita</th><th style="padding:10px 14px;text-align:left">Ações</th><th style="padding:10px 14px;text-align:left">Ocorrências</th></tr></thead><tbody>';
+  sm.forEach(function(m,idx){
     var d=months[m];var p=m.split('-');var mLabel=mn[parseInt(p[1])]+' '+p[0];
-    var isBest=m===bestM&&sm.length>1&&d.vendas>0;
-    h+='<div class="card" style="padding:20px;margin-bottom:12px;border-left:4px solid '+(isBest?'var(--ok)':'var(--g300)')+(isBest?';background:var(--okbg)':'')+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif">'+mLabel+'</span>'+(isBest?'<span class="badge b-ok">🏆 Melhor</span>':'')+'</div><div style="display:flex;gap:16px;align-items:baseline"><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--em)">'+d.vendas+'</div><div style="font-size:10px;color:var(--g500)">vendas</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--ok)">R$ '+fmtBR(d.receita)+'</div><div style="font-size:10px;color:var(--g500)">receita</div></div></div></div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
-    if(d.campanhas.length)d.campanhas.forEach(function(c){h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--cl);color:var(--navy);font-weight:600">📢 '+c+'</span>'});
-    if(d.emails)h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--infobg);color:var(--info);font-weight:600">📧 '+d.emails+' e-mail(s)</span>';
-    if(d.reels)h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:#FDF2F8;color:var(--pink);font-weight:600">🎬 '+d.reels+' reel(s)</span>';
-    if(d.stories)h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:#F5F3FF;color:var(--purp);font-weight:600">📱 '+d.stories+' story(ies)</span>';
-    if(d.features.length)d.features.forEach(function(f){h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:600">🚀 '+f+'</span>'});
-    if(d.banners)h+='<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:#FFF7ED;color:var(--orange);font-weight:600">🖼️ '+d.banners+' banner(s)</span>';
-    if(!d.campanhas.length&&!d.emails&&!d.reels&&!d.stories&&!d.features.length&&!d.banners)h+='<span style="font-size:10px;color:var(--g500);font-style:italic">Nenhuma ação registrada</span>';
-    h+='</div>';
-    if(d.ocorrencias.length){h+='<div style="font-size:10px;color:var(--g700)">';d.ocorrencias.forEach(function(o){h+='<span style="display:inline-block;margin-right:10px">'+o+'</span>'});h+='</div>'}
-    h+='</div>';
+    // Tendência vs mês anterior
+    var prev=sm[idx+1]?months[sm[idx+1]]:null;
+    var trend='';
+    if(prev){
+      var tr=tendencia(d.vendas,prev.vendas);
+      trend=' <span style="font-size:10px;color:'+tr.c+';font-weight:600">'+tr.t+'</span>';
+    }
+    // Resumo de ações
+    var acoes=[];
+    if(d.emails)acoes.push('📧 '+d.emails);
+    if(d.publicacoes)acoes.push('📸 '+d.publicacoes);
+    if(d.banners)acoes.push('🖼️ '+d.banners);
+    var acoesStr=acoes.length?acoes.join(' · '):'<span style="color:var(--g500);font-style:italic">—</span>';
+    var ocStr=d.ocorrencias.length?d.ocorrencias.slice(0,3).join(' · ')+(d.ocorrencias.length>3?' <span style="color:var(--g500)">+'+(d.ocorrencias.length-3)+'</span>':''):'<span style="color:var(--g500)">—</span>';
+    h+='<tr style="border-bottom:1px solid var(--g100)">';
+    h+='<td style="padding:10px 14px;font-weight:600;color:var(--navy)">'+mLabel+'</td>';
+    h+='<td style="padding:10px 14px;text-align:center"><span style="font-size:16px;font-weight:700;color:var(--em)">'+d.vendas+'</span>'+trend+'</td>';
+    h+='<td style="padding:10px 14px;text-align:right;font-weight:600;color:var(--ok)">R$ '+fmtBR(d.receita)+'</td>';
+    h+='<td style="padding:10px 14px;color:var(--g700)">'+acoesStr+'</td>';
+    h+='<td style="padding:10px 14px;color:var(--g700);font-size:11px">'+ocStr+'</td>';
+    h+='</tr>';
   });
-  // Gráfico
-  h+='<div class="card" style="padding:20px;margin-top:4px"><div class="st" style="margin:0 0 12px">📈 Ações × Vendas</div><canvas id="ch-comp" height="280"></canvas></div>';
+  h+='</tbody></table></div>';
+  // Gráfico simples — vendas por mês
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📈 Vendas por Mês</div><canvas id="ch-comp" height="240"></canvas></div>';
   setTimeout(function(){
     var sms=sm.slice().reverse();var cx=document.getElementById('ch-comp');
-    if(cx&&sms.length)new Chart(cx,{type:'bar',data:{labels:sms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+'/'+p[0].slice(2)}),datasets:[
-      {label:'Vendas',data:sms.map(function(m){return months[m]?.vendas||0}),backgroundColor:'rgba(5,150,105,0.8)',borderRadius:4},
-      {label:'E-mails',data:sms.map(function(m){return months[m]?.emails||0}),backgroundColor:'rgba(37,99,235,0.5)',borderRadius:4},
-      {label:'Reels',data:sms.map(function(m){return months[m]?.reels||0}),backgroundColor:'rgba(219,39,119,0.5)',borderRadius:4}
-    ]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});
+    if(cx&&sms.length)new Chart(cx,{type:'bar',data:{labels:sms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+'/'+p[0].slice(2)}),datasets:[{label:'Vendas',data:sms.map(function(m){return months[m]?.vendas||0}),backgroundColor:'rgba(5,150,105,0.8)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
   },100);
   return h;
 }
 
 // ==================== DASHBOARD ====================
 function pgDash(){
-  var now=new Date();var curM=now.toISOString().substring(0,7);
-  var lastM=curM;if(allVendas.length&&allVendas[0].data_contrato)lastM=allVendas[0].data_contrato.substring(0,7);
-  var selM=document.getElementById('dash-m')?.value||lastM;
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div class="st" style="margin:0">🏠 Dashboard</div><div><input type="month" id="dash-m" value="'+selM+'" onchange="rHome()" style="width:auto;padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid var(--g300)"></div></div>';
-  var mS=selM+'-01',mE=selM+'-31';
-  // Vendas mês atual
-  var mV=allVendas.filter(function(v){return v.data_contrato>=mS&&v.data_contrato<=mE});
-  var mRc=mV.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
-  var ticket=mV.length>0?(mRc/mV.length):0;
-  // Vendas mês anterior (para tendência)
-  var pm=prevMonth(selM);var pmS=pm+'-01',pmE=pm+'-31';
-  var pmV=allVendas.filter(function(v){return v.data_contrato>=pmS&&v.data_contrato<=pmE});
-  var pmRc=pmV.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
-  var pmTicket=pmV.length>0?(pmRc/pmV.length):0;
-  // Tendências
-  var tVendas=tendencia(mV.length,pmV.length);
-  var tReceita=tendencia(mRc,pmRc);
-  var tTicket=tendencia(ticket,pmTicket);
-  // KPIs com tendência
-  h+='<div class="kg">';
-  h+='<div class="card kpi" style="border-top-color:var(--em)"><div class="kl">🆕 Vendas</div><div class="kv">'+mV.length+'</div><div class="ks" style="color:'+tVendas.c+'">'+tVendas.t+'</div></div>';
-  h+='<div class="card kpi" style="border-top-color:var(--ok)"><div class="kl">💵 Receita</div><div class="kv">R$ '+fmtBR(mRc)+'</div><div class="ks" style="color:'+tReceita.c+'">'+tReceita.t+'</div></div>';
-  h+='<div class="card kpi" style="border-top-color:var(--purp)"><div class="kl">💰 Ticket Médio</div><div class="kv">R$ '+fmtBR(ticket)+'</div><div class="ks" style="color:'+tTicket.c+'">'+tTicket.t+'</div></div>';
-  h+='</div>';
-  // Gráfico por Origem + Evolução
-  h+='<div class="g2" style="margin-top:20px">';
-  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📊 Vendas por Origem</div><canvas id="dash-orig" height="220"></canvas>';
-  if(!mV.length)h+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:16px">Nenhuma venda no período</p>';
-  h+='</div>';
-  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📈 Evolução Mensal</div><canvas id="dash-evo" height="220"></canvas></div>';
-  h+='</div>';
-  // Destaques do mês
-  h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">🏆 Destaques do Mês</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">';
-  // Melhor e-mail
-  var mEms=allEms.filter(function(e){return e.data_envio&&e.data_envio>=mS&&e.data_envio<=mE&&e.enviados>0});
-  if(mEms.length){var be=mEms.reduce(function(a,b){return(b.aberturas/b.enviados)>(a.aberturas/a.enviados)?b:a});h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--cyan)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">📧 Melhor E-mail</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+be.nome+'</div><div style="font-size:11px;color:var(--cyan);font-weight:600;margin-top:2px">'+P(be.aberturas,be.enviados)+'% abertura · '+F(be.vendas||0)+' vendas</div></div>'}
-  else{h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px"><div style="font-size:10px;color:var(--g500)">📧 Nenhum e-mail no mês</div></div>'}
-  // Melhor reel
-  var mR=allSocs.filter(function(s){return s.tipo==='reel'&&s.data_publicacao>=mS&&s.data_publicacao<=mE&&s.alcance>0});
-  if(mR.length){var br=mR.reduce(function(a,b){return engRate(b)>engRate(a)?b:a});h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--pink)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">🎬 Melhor Reel</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+br.nome+'</div><div style="font-size:11px;color:var(--pink);font-weight:600;margin-top:2px">'+engRate(br).toFixed(1)+'% engaj. · '+F(br.alcance)+' alcance</div></div>'}
-  else{h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px"><div style="font-size:10px;color:var(--g500)">🎬 Nenhum reel no mês</div></div>'}
-  // Melhor story
-  var mSt=allSocs.filter(function(s){return s.tipo==='story'&&s.data_publicacao>=mS&&s.data_publicacao<=mE&&s.alcance>0});
-  if(mSt.length){var bs=mSt.reduce(function(a,b){return engRate(b)>engRate(a)?b:a});h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--purp)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">📱 Melhor Story</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+bs.nome+'</div><div style="font-size:11px;color:var(--purp);font-weight:600;margin-top:2px">'+engRate(bs).toFixed(1)+'% engaj.</div></div>'}
-  else{h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px"><div style="font-size:10px;color:var(--g500)">📱 Nenhum story no mês</div></div>'}
-  // Feature lançada
-  var mF=feats.filter(function(f){return f.data_lancamento&&f.data_lancamento>=mS&&f.data_lancamento<=mE});
-  if(mF.length){mF.forEach(function(f){h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--ok)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">🚀 Feature</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+f.nome+'</div><div style="font-size:11px;color:var(--ok);font-weight:600;margin-top:2px">'+(f.versao?'v'+f.versao+' · ':'')+(f.data_lancamento||'')+'</div></div>'})}
-  else{h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px"><div style="font-size:10px;color:var(--g500)">🚀 Nenhuma feature no mês</div></div>'}
+  // Header com filtro de período
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">';
+  h+='<div class="st" style="margin:0">🏠 Dashboard — Resultado por Campanha</div>';
+  var periods=[{k:'mes',l:'Este mês'},{k:'3m',l:'Últimos 3M'},{k:'12m',l:'Últimos 12M'},{k:'tudo',l:'Tudo'}];
+  h+='<div style="display:flex;gap:2px;background:var(--g100);padding:3px;border-radius:8px;flex-wrap:wrap">';
+  periods.forEach(function(p){
+    var active=dashPeriod===p.k;
+    h+='<button onclick="setDashPeriod(\''+p.k+'\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:'+(active?'var(--navy)':'transparent')+';color:'+(active?'#fff':'var(--g700)')+';font-family:inherit">'+p.l+'</button>';
+  });
   h+='</div></div>';
-  // Correlação rápida
-  h+='<div class="card" style="padding:20px;margin-top:16px"><div class="st" style="margin:0 0 12px">🔗 Correlação: Ações × Vendas</div>';
-  var corr=calcCorr();
-  var corrItems=[
-    {l:'📧 E-mails',com:corr.emCom,sem:corr.emSem,c:'var(--cyan)',icon:'📧'},
-    {l:'🎬 Reels',com:corr.rlCom,sem:corr.rlSem,c:'var(--pink)',icon:'🎬'},
-    {l:'📱 Stories',com:corr.stCom,sem:corr.stSem,c:'var(--purp)',icon:'📱'},
-    {l:'🚀 Features',com:corr.ftCom,sem:corr.ftSem,c:'var(--ok)',icon:'🚀'},
-    {l:'🖼️ Banners',com:corr.bnCom,sem:corr.bnSem,c:'var(--orange)',icon:'🖼️'}
+  if(!camps.length) return h+'<div class="card emp"><span class="icon">campaign</span><p style="font-weight:500">Nenhuma campanha cadastrada</p><p style="font-size:12px">Cadastre uma campanha em "Campanhas" pra ver os resultados aqui</p></div>';
+  var per=getDashPeriod();
+  var prev=getPrevPeriod();
+  // Filtragem por período
+  var fVendas=allVendas.filter(function(v){return v.data_contrato&&v.data_contrato>=per.start&&v.data_contrato<=per.end});
+  var fSocs=allSocs.filter(function(s){return s.data_publicacao&&s.data_publicacao>=per.start&&s.data_publicacao<=per.end});
+  var fEms=allEms.filter(function(e){return e.data_envio&&e.data_envio>=per.start&&e.data_envio<=per.end});
+  var fCamps=camps.filter(function(c){if(!c.data_inicio)return false;var df=c.data_fim||per.end;return c.data_inicio<=per.end&&df>=per.start});
+  // Período anterior
+  var pVendas=prev?allVendas.filter(function(v){return v.data_contrato&&v.data_contrato>=prev.start&&v.data_contrato<=prev.end}):[];
+  var pSocs=prev?allSocs.filter(function(s){return s.data_publicacao&&s.data_publicacao>=prev.start&&s.data_publicacao<=prev.end}):[];
+  var pCamps=prev?camps.filter(function(c){if(!c.data_inicio)return false;var df=c.data_fim||prev.end;return c.data_inicio<=prev.end&&df>=prev.start}):[];
+  // === MELHOR CANAL DO PERÍODO ===
+  var canais={};
+  fVendas.forEach(function(v){var o=v.origem||'Não identificado';if(!canais[o])canais[o]={vendas:0,receita:0};canais[o].vendas++;canais[o].receita+=Number(v.valor_assinatura||0)});
+  var bestCh=Object.entries(canais).sort(function(a,b){return b[1].vendas-a[1].vendas})[0];
+  if(bestCh){
+    var totalP=fVendas.length||1;
+    h+='<div style="padding:18px 22px;margin-bottom:18px;background:linear-gradient(135deg,#10293F,#1a3d5c);color:#fff;border-radius:10px;box-shadow:var(--shl)">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">';
+    h+='<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);font-weight:700;margin-bottom:6px">🏆 Melhor canal — '+per.label+'</div><div style="font-size:22px;font-weight:700;color:#fff;font-family:Poppins,sans-serif">'+bestCh[0]+'</div></div>';
+    h+='<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">';
+    h+='<div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--cyan);line-height:1">'+bestCh[1].vendas+'</div><div style="font-size:10px;opacity:.6">vendas</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--cyan);line-height:1">R$ '+fmtBR(bestCh[1].receita)+'</div><div style="font-size:10px;opacity:.6">receita</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--cyan);line-height:1">'+((bestCh[1].vendas/totalP)*100).toFixed(0)+'%</div><div style="font-size:10px;opacity:.6">do total</div></div>';
+    h+='</div></div></div>';
+  }
+  // === KPIS COM TENDÊNCIA + SPARKLINE ===
+  var totV=fVendas.length;
+  var totRc=fVendas.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
+  var totAlc=fSocs.reduce(function(a,s){return a+(s.alcance||0)},0);
+  var totCamps=fCamps.length;
+  var pV=pVendas.length;
+  var pRc=pVendas.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
+  var pAlc=pSocs.reduce(function(a,s){return a+(s.alcance||0)},0);
+  var pCps=pCamps.length;
+  function trend(atual,anterior){
+    if(!prev)return null;
+    if(anterior===0)return atual>0?{t:'Novo',c:'var(--ok)'}:{t:'—',c:'var(--g500)'};
+    var pct=((atual-anterior)/anterior*100).toFixed(0);
+    if(pct>0)return{t:'↑ '+pct+'%',c:'var(--ok)'};
+    if(parseFloat(pct)<0)return{t:'↓ '+Math.abs(parseFloat(pct))+'%',c:'var(--err)'};
+    return{t:'= igual',c:'var(--g500)'};
+  }
+  var kpis=[
+    {l:'📢 Campanhas ativas',v:totCamps,t:trend(totCamps,pCps),c:'var(--cyan)',spark:'kpi-camps'},
+    {l:'👁️ Alcance',v:totAlc,t:trend(totAlc,pAlc),c:'var(--info)',spark:'kpi-alc'},
+    {l:'🆕 Vendas',v:totV,t:trend(totV,pV),c:'var(--em)',spark:'kpi-ven'},
+    {l:'💵 Receita',v:'R$ '+fmtBR(totRc),raw:true,t:trend(totRc,pRc),c:'var(--ok)',spark:'kpi-rec'}
   ];
-  corrItems.forEach(function(x){
-    if(x.com===0&&x.sem===0)return;
-    var diff=x.sem>0?((x.com-x.sem)/x.sem*100).toFixed(0):'—';
-    var frase='';
-    if(diff==='—'){frase='Sem dados suficientes para comparar'}
-    else if(parseFloat(diff)>0){frase='Quando você faz '+x.icon+', vende em média <strong style="color:var(--ok)">'+Math.abs(parseFloat(diff))+'% a mais</strong>'}
-    else if(parseFloat(diff)<0){frase='Meses com '+x.icon+' tiveram <strong style="color:var(--err)">'+Math.abs(parseFloat(diff))+'% menos</strong> vendas'}
-    else{frase='Vendas iguais com ou sem '+x.icon}
-    if(frase)h+='<div style="padding:10px 14px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid '+x.c+';margin-bottom:8px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">'+x.icon+'</span><div><div style="font-size:12px;color:var(--g700)">'+frase+'</div><div style="font-size:10px;color:var(--g500);margin-top:2px">Média com: '+x.com.toFixed(0)+' vendas · Média sem: '+x.sem.toFixed(0)+' vendas</div></div></div>';
+  h+='<div class="kg" style="margin-bottom:18px">';
+  kpis.forEach(function(k){
+    h+='<div class="card kpi" style="border-top-color:'+k.c+'">';
+    h+='<div class="kl">'+k.l+'</div>';
+    h+='<div class="kv">'+(k.raw?k.v:F(k.v))+'</div>';
+    if(k.t)h+='<div class="ks" style="color:'+k.t.c+'">'+k.t.t+(prev?' vs anterior':'')+'</div>';
+    h+='<div style="height:32px;margin-top:8px;position:relative"><canvas id="'+k.spark+'"></canvas></div>';
+    h+='</div>';
   });
   h+='</div>';
-return h;
+  // === MINI-COMPARATIVO PERÍODO ATUAL VS ANTERIOR ===
+  if(prev){
+    var topOriAtual=Object.entries(canais).sort(function(a,b){return b[1].vendas-a[1].vendas})[0];
+    var pCanais={};pVendas.forEach(function(v){var o=v.origem||'Não identificado';pCanais[o]=(pCanais[o]||0)+1});
+    var topOriAnt=Object.entries(pCanais).sort(function(a,b){return b[1]-a[1]})[0];
+    var ticketA=totV>0?(totRc/totV):0;
+    var ticketP=pV>0?(pRc/pV):0;
+    h+='<div class="card" style="padding:16px 20px;margin-bottom:18px"><div class="st" style="margin:0 0 10px;font-size:13px">📊 '+per.label+' vs Período Anterior</div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="font-size:10px;color:var(--g500);text-transform:uppercase"><th style="padding:6px 8px;text-align:left">Métrica</th><th style="padding:6px 8px;text-align:right">Anterior</th><th style="padding:6px 8px;text-align:right">Atual</th><th style="padding:6px 8px;text-align:center">Variação</th></tr></thead><tbody>';
+    var rows=[
+      {l:'Vendas',a:pV,n:totV,_a:pV,_n:totV},
+      {l:'Receita',a:'R$ '+fmtBR(pRc),n:'R$ '+fmtBR(totRc),_a:pRc,_n:totRc},
+      {l:'Ticket Médio',a:'R$ '+fmtBR(ticketP),n:'R$ '+fmtBR(ticketA),_a:ticketP,_n:ticketA},
+      {l:'Top Origem',a:topOriAnt?topOriAnt[0]:'—',n:topOriAtual?topOriAtual[0]:'—',_str:true}
+    ];
+    rows.forEach(function(r){
+      var diff='—',diffC='var(--g500)';
+      if(!r._str){
+        if(r._a===0)diff=r._n>0?'Novo':'—';
+        else{
+          var pct=((r._n-r._a)/r._a*100).toFixed(0);
+          diff=(parseFloat(pct)>0?'↑ ':parseFloat(pct)<0?'↓ ':'')+(pct==='0'?'igual':Math.abs(parseFloat(pct))+'%');
+          diffC=parseFloat(pct)>0?'var(--ok)':parseFloat(pct)<0?'var(--err)':'var(--g500)';
+        }
+      }
+      h+='<tr style="border-top:1px solid var(--g100)"><td style="padding:8px;font-weight:500;color:var(--g700)">'+r.l+'</td><td style="padding:8px;text-align:right;color:var(--g700)">'+r.a+'</td><td style="padding:8px;text-align:right;font-weight:600;color:var(--navy)">'+r.n+'</td><td style="padding:8px;text-align:center;font-weight:600;color:'+diffC+'">'+diff+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  // ===== GRÁFICOS GERAIS =====
+  h+='<div class="g2" style="margin-bottom:20px">';
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">🎯 Vendas por Origem</div><canvas id="dash-origem" height="220"></canvas></div>';
+  h+='<div class="card" style="padding:20px"><div class="st" style="margin:0 0 12px">📈 Evolução Mensal de Vendas</div><canvas id="dash-evo" height="220"></canvas></div>';
+  h+='</div>';
+  // Receita por Canal
+  h+='<div class="card" style="padding:20px;margin-bottom:20px"><div class="st" style="margin:0 0 12px">💰 Receita por Canal</div><canvas id="dash-rev" height="220"></canvas></div>';
+  // Top Campanhas
+  h+='<div class="card" style="padding:20px;margin-bottom:20px"><div class="st" style="margin:0 0 12px">🏆 Top Campanhas — Alcance × Vendas</div><canvas id="dash-rank" height="240"></canvas></div>';
+  // Ordenar campanhas: ativas primeiro, depois mais recentes
+  var campSorted=camps.slice().sort(function(a,b){
+    var sa=a.status==='ativa'?0:1;
+    var sb=b.status==='ativa'?0:1;
+    if(sa!==sb)return sa-sb;
+    return (b.data_inicio||'').localeCompare(a.data_inicio||'');
+  });
+  var hoje=new Date().toISOString().substring(0,10);
+  campSorted.forEach(function(c){
+    var di=c.data_inicio||'';
+    var df=c.data_fim||hoje;
+    // Vendas no período da campanha
+    var cVendas=di?allVendas.filter(function(v){return v.data_contrato>=di&&v.data_contrato<=df}):[];
+    var cRc=cVendas.reduce(function(a,v){return a+Number(v.valor_assinatura||0)},0);
+    // Ações da campanha
+    var cEms=allEms.filter(function(e){return e.campanha_id===c.id});
+    var cSocs=allSocs.filter(function(s){return s.campanha_id===c.id});
+    var alcSocs=cSocs.reduce(function(a,s){return a+(s.alcance||0)},0);
+    // Melhores
+    var cEmsEnv=cEms.filter(function(e){return e.enviados>0});
+    var bestEm=cEmsEnv.length?cEmsEnv.reduce(function(a,b){return(b.aberturas/b.enviados)>(a.aberturas/a.enviados)?b:a}):null;
+    var cReels=cSocs.filter(function(s){return s.tipo==='reel'&&s.alcance>0});
+    var bestReel=cReels.length?cReels.reduce(function(a,b){return engRate(b)>engRate(a)?b:a}):null;
+    var cStories=cSocs.filter(function(s){return s.tipo==='story'&&s.alcance>0});
+    var bestStory=cStories.length?cStories.reduce(function(a,b){return engRate(b)>engRate(a)?b:a}):null;
+    var cFeeds=cSocs.filter(function(s){return s.tipo==='feed'&&s.alcance>0});
+    var bestFeed=cFeeds.length?cFeeds.reduce(function(a,b){return engRate(b)>engRate(a)?b:a}):null;
+    var stColor={ativa:'var(--ok)',concluida:'var(--info)',pausada:'var(--yellow)',rascunho:'var(--purp)'}[c.status]||'var(--g500)';
+    var stBadge={ativa:'b-ok',concluida:'b-info',pausada:'b-warn',rascunho:'b-purp'}[c.status]||'b-info';
+    h+='<div class="card" style="margin-bottom:20px;overflow:hidden;border-left:4px solid '+stColor+'">';
+    // Header
+    h+='<div style="padding:18px 20px;border-bottom:1px solid var(--g200);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">';
+    h+='<div style="cursor:pointer;flex:1" onclick="oCamp(\''+c.id+'\')"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="font-size:17px;font-weight:700;color:var(--navy);font-family:Poppins,sans-serif;margin:0">'+c.nome+'</h3><span class="badge '+stBadge+'">'+c.status+'</span></div>';
+    if(c.descricao)h+='<p style="font-size:12px;color:var(--g500);margin-top:4px">'+c.descricao+'</p>';
+    if(di)h+='<div style="font-size:11px;color:var(--g500);margin-top:6px">📅 '+di+(c.data_fim?' → '+c.data_fim:' → ativo')+'</div>';
+    else h+='<div style="font-size:11px;color:var(--err);margin-top:6px">⚠️ Sem período definido — vendas não atribuídas</div>';
+    h+='</div>';
+    h+='<button class="btn bo bs no-print" onclick="oCamp(\''+c.id+'\')"><span class="icon icon-sm">arrow_forward</span> Detalhes</button>';
+    h+='</div>';
+    // KPIs
+    h+='<div style="padding:16px 20px;background:var(--bg);border-bottom:1px solid var(--g200)"><div class="kg">';
+    [{l:'👁️ Alcance',v:alcSocs,c:'var(--info)'},{l:'🆕 Vendas no período',v:cVendas.length,c:'var(--em)'},{l:'💵 Receita',v:'R$ '+fmtBR(cRc),c:'var(--ok)',raw:true},{l:'📧 E-mails',v:cEms.length,c:'var(--cyan)'},{l:'📸 Publicações',v:cSocs.length,c:'var(--pink)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+(k.raw?k.v:F(k.v))+'</div></div>'});
+    h+='</div></div>';
+    // Melhores
+    var hasAny=bestEm||bestReel||bestStory||bestFeed;
+    if(hasAny){
+      h+='<div style="padding:16px 20px"><div style="font-size:12px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🏆 Melhores Resultados</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">';
+      if(bestEm){
+        h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--cyan)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">📧 Melhor E-mail</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+bestEm.nome+'</div><div style="font-size:11px;color:var(--cyan2);font-weight:600;margin-top:2px">'+P(bestEm.aberturas,bestEm.enviados)+'% abertura · '+F(bestEm.vendas||0)+' vendas</div></div>';
+      }
+      if(bestReel){
+        h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--pink)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">🎬 Melhor Reel</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+bestReel.nome+'</div><div style="font-size:11px;color:var(--pink);font-weight:600;margin-top:2px">'+engRate(bestReel).toFixed(1)+'% engaj. · '+F(bestReel.alcance)+' alcance</div></div>';
+      }
+      if(bestStory){
+        h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--purp)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">📱 Melhor Story</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+bestStory.nome+'</div><div style="font-size:11px;color:var(--purp);font-weight:600;margin-top:2px">'+engRate(bestStory).toFixed(1)+'% engaj. · '+F(bestStory.alcance)+' alcance</div></div>';
+      }
+      if(bestFeed){
+        h+='<div style="padding:12px;border:1px solid var(--g200);border-radius:8px;border-left:3px solid var(--cyan2)"><div style="font-size:10px;color:var(--g500);font-weight:600;margin-bottom:4px">🖼️ Melhor Post no Feed</div><div style="font-size:13px;font-weight:600;color:var(--navy)">'+bestFeed.nome+'</div><div style="font-size:11px;color:var(--cyan2);font-weight:600;margin-top:2px">'+engRate(bestFeed).toFixed(1)+'% engaj. · '+F(bestFeed.alcance)+' alcance</div></div>';
+      }
+      h+='</div></div>';
+    }else{
+      h+='<div style="padding:14px 20px;text-align:center"><span style="font-size:11px;color:var(--g500);font-style:italic">Cadastre publicações ou e-mails na campanha pra ver os melhores resultados aqui</span></div>';
+    }
+    h+='</div>';
+  });
+  return h;
 }
 
 // Helpers do Dashboard
@@ -702,21 +832,105 @@ function calcCorr(){
   return{emCom:avg(emM,true),emSem:avg(emM,false),rlCom:avg(rlM,true),rlSem:avg(rlM,false),stCom:avg(stM,true),stSem:avg(stM,false),ftCom:avg(ftM,true),ftSem:avg(ftM,false),bnCom:avg(bnM,true),bnSem:avg(bnM,false)};
 }
 
+// Helpers de período do Dashboard
+function getDashPeriod(){
+  var period=dashPeriod||'mes';
+  var hoje=new Date();
+  var endDate=hoje.toISOString().substring(0,10);
+  var startDate;
+  if(period==='mes'){var d=new Date(hoje.getFullYear(),hoje.getMonth(),1);startDate=d.toISOString().substring(0,10)}
+  else if(period==='3m'){var d=new Date(hoje);d.setMonth(d.getMonth()-3);startDate=d.toISOString().substring(0,10)}
+  else if(period==='12m'){var d=new Date(hoje);d.setMonth(d.getMonth()-12);startDate=d.toISOString().substring(0,10)}
+  else{startDate='2000-01-01'}
+  var labels={mes:'Este mês','3m':'Últimos 3 meses','12m':'Últimos 12 meses',tudo:'Tudo'};
+  return{start:startDate,end:endDate,label:labels[period]};
+}
+function getPrevPeriod(){
+  var period=dashPeriod||'mes';
+  if(period==='tudo')return null;
+  var hoje=new Date();
+  if(period==='mes'){
+    var dE=new Date(hoje.getFullYear(),hoje.getMonth(),0);
+    var dS=new Date(hoje.getFullYear(),hoje.getMonth()-1,1);
+    return{start:dS.toISOString().substring(0,10),end:dE.toISOString().substring(0,10)};
+  }
+  var months=period==='3m'?3:12;
+  var dE=new Date(hoje);dE.setMonth(dE.getMonth()-months);
+  var dS=new Date(hoje);dS.setMonth(dS.getMonth()-months*2);
+  return{start:dS.toISOString().substring(0,10),end:dE.toISOString().substring(0,10)};
+}
+function setDashPeriod(p){dashPeriod=p;rHome()}
+// Calcula série dos últimos N meses pra sparklines
+function lastNMonthsKeys(n){
+  var keys=[];var hoje=new Date();
+  for(var i=n-1;i>=0;i--){
+    var d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+    keys.push(d.toISOString().substring(0,7));
+  }
+  return keys;
+}
 function chDash(){
-  var selM=document.getElementById('dash-m')?.value||(new Date().toISOString().substring(0,7));
-  var mS=selM+'-01',mE=selM+'-31';
-  var mV=allVendas.filter(function(v){return v.data_contrato>=mS&&v.data_contrato<=mE});
-  // Donut por origem
-  var po={};mV.forEach(function(v){var o=v.origem||'Não identificado';po[o]=(po[o]||0)+1});
-  var colors=['#2563EB','#16A34A','#DB2777','#7C3AED','#EA580C','#45E5E5','#FFB800','#666','#10293F','#DC2626'];
-  var cx=document.getElementById('dash-orig');
-  if(cx&&Object.keys(po).length)new Chart(cx,{type:'doughnut',data:{labels:Object.keys(po),datasets:[{data:Object.values(po),backgroundColor:colors.slice(0,Object.keys(po).length),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
-  // Evolução
+  if(!camps.length)return;
+  var per=getDashPeriod();
+  var colors=['#45E5E5','#7C3AED','#DB2777','#EA580C','#FFB800','#16A34A','#2563EB','#10293F','#DC2626','#2ecece','#F59E0B','#8B5CF6'];
+  // Vendas filtradas
+  var fVendas=allVendas.filter(function(v){return v.data_contrato&&v.data_contrato>=per.start&&v.data_contrato<=per.end});
+  var fSocs=allSocs.filter(function(s){return s.data_publicacao&&s.data_publicacao>=per.start&&s.data_publicacao<=per.end});
+  // ===== SPARKLINES (últimos 6 meses, sempre) =====
+  var sparkKeys=lastNMonthsKeys(6);
+  var hoje2=new Date().toISOString().substring(0,10);
+  var sparkVen={},sparkRec={},sparkAlc={},sparkCps={};
+  sparkKeys.forEach(function(k){sparkVen[k]=0;sparkRec[k]=0;sparkAlc[k]=0;sparkCps[k]=0});
+  allVendas.forEach(function(v){if(!v.data_contrato)return;var m=v.data_contrato.substring(0,7);if(sparkVen[m]!==undefined){sparkVen[m]++;sparkRec[m]+=Number(v.valor_assinatura||0)}});
+  allSocs.forEach(function(s){if(!s.data_publicacao)return;var m=s.data_publicacao.substring(0,7);if(sparkAlc[m]!==undefined)sparkAlc[m]+=(s.alcance||0)});
+  // Campanhas: contar campanhas com sobreposição em cada mês
+  sparkKeys.forEach(function(k){
+    var ms=k+'-01';var me=k+'-31';
+    var n=camps.filter(function(c){if(!c.data_inicio)return false;var df=c.data_fim||hoje2;return c.data_inicio<=me&&df>=ms}).length;
+    sparkCps[k]=n;
+  });
+  function spark(id,data,color){
+    var cx=document.getElementById(id);
+    if(!cx)return;
+    new Chart(cx,{type:'line',data:{labels:sparkKeys,datasets:[{data:data,borderColor:color,backgroundColor:color+'30',fill:true,tension:0.4,borderWidth:1.5,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false,beginAtZero:true}},elements:{line:{borderJoinStyle:'round'}}}});
+  }
+  spark('kpi-camps',sparkKeys.map(function(k){return sparkCps[k]}),'#45E5E5');
+  spark('kpi-alc',sparkKeys.map(function(k){return sparkAlc[k]}),'#2563EB');
+  spark('kpi-ven',sparkKeys.map(function(k){return sparkVen[k]}),'#059669');
+  spark('kpi-rec',sparkKeys.map(function(k){return sparkRec[k]}),'#16A34A');
+  // ===== 1) Donut: Vendas por Origem (filtrado) =====
+  var po={};fVendas.forEach(function(v){var o=v.origem||'Não identificado';po[o]=(po[o]||0)+1});
+  var oriList=Object.entries(po).sort(function(a,b){return b[1]-a[1]});
+  var cx1=document.getElementById('dash-origem');
+  if(cx1){
+    if(oriList.length)new Chart(cx1,{type:'doughnut',data:{labels:oriList.map(function(x){return x[0]}),datasets:[{data:oriList.map(function(x){return x[1]}),backgroundColor:colors.slice(0,oriList.length),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}}}}});
+    else cx1.parentElement.innerHTML+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:30px 16px">Nenhuma venda no período</p>';
+  }
+  // ===== 2) Linha: Evolução Mensal (sempre últimos 12 meses) =====
   var pm={};allVendas.forEach(function(v){if(!v.data_contrato)return;var m=v.data_contrato.substring(0,7);pm[m]=(pm[m]||0)+1});
-  var ms=Object.keys(pm).sort().slice(-8);
+  var ms12=Object.keys(pm).sort().slice(-12);
   var mn=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   var cx2=document.getElementById('dash-evo');
-  if(cx2&&ms.length)new Chart(cx2,{type:'bar',data:{labels:ms.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+'/'+p[0].slice(2)}),datasets:[{label:'Vendas',data:ms.map(function(m){return pm[m]}),backgroundColor:'rgba(5,150,105,0.7)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  if(cx2&&ms12.length)new Chart(cx2,{type:'line',data:{labels:ms12.map(function(m){var p=m.split('-');return mn[parseInt(p[1])]+'/'+p[0].slice(2)}),datasets:[{label:'Vendas',data:ms12.map(function(m){return pm[m]}),borderColor:'#16A34A',backgroundColor:'rgba(22,163,74,0.15)',fill:true,tension:0.35,borderWidth:2,pointRadius:4,pointBackgroundColor:'#16A34A'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  // ===== 3) Bar horizontal: Receita por Canal (filtrado) =====
+  var receitas={};fVendas.forEach(function(v){var o=v.origem||'Não identificado';receitas[o]=(receitas[o]||0)+Number(v.valor_assinatura||0)});
+  var revList=Object.entries(receitas).sort(function(a,b){return b[1]-a[1]});
+  var cx3=document.getElementById('dash-rev');
+  if(cx3){
+    if(revList.length)new Chart(cx3,{type:'bar',data:{labels:revList.map(function(x){return x[0]}),datasets:[{label:'Receita (R$)',data:revList.map(function(x){return x[1]}),backgroundColor:colors.slice(0,revList.length),borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return'R$ '+fmtBR(ctx.parsed.x)}}}},scales:{x:{beginAtZero:true,ticks:{callback:function(v){return'R$ '+v}}}}}});
+    else cx3.parentElement.innerHTML+='<p style="font-size:12px;color:var(--g500);text-align:center;padding:30px 16px">Nenhuma receita no período</p>';
+  }
+  // ===== 4) Top Campanhas — Alcance × Vendas (todas, agnóstico de período) =====
+  var campStats=camps.map(function(c){
+    var di=c.data_inicio||'';
+    var df=c.data_fim||hoje2;
+    var vendas=di?allVendas.filter(function(v){return v.data_contrato>=di&&v.data_contrato<=df}).length:0;
+    var alcance=allSocs.filter(function(s){return s.campanha_id===c.id}).reduce(function(a,s){return a+(s.alcance||0)},0);
+    return{nome:c.nome,vendas:vendas,alcance:alcance};
+  });
+  var top=campStats.slice().sort(function(a,b){return(b.alcance+b.vendas*1000)-(a.alcance+a.vendas*1000)}).slice(0,8).reverse();
+  var cx4=document.getElementById('dash-rank');
+  if(cx4&&top.length)new Chart(cx4,{type:'bar',data:{labels:top.map(function(x){return x.nome.length>30?x.nome.substring(0,28)+'…':x.nome}),datasets:[{label:'Alcance',data:top.map(function(x){return x.alcance}),backgroundColor:'rgba(37,99,235,0.7)',borderRadius:4,yAxisID:'y'},{label:'Vendas',data:top.map(function(x){return x.vendas}),backgroundColor:'rgba(5,150,105,0.85)',borderRadius:4,yAxisID:'y1'}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{font:{size:11}}},y1:{display:false}}}});
 }
 
 // ==================== BANNERS ====================
@@ -756,26 +970,73 @@ async function dBan(id){if(!confirm('Excluir banner?'))return;await db.from('ban
 
 // ==================== INSTAGRAM INSIGHTS ====================
 function rInstagram(){
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">📸 Instagram — Insights da Conta</div><button class="btn bp bs no-print" onclick="omNewIg()"><span class="icon icon-sm">add</span> Novo Período</button></div>';
-  if(!igInsights.length) return h+'<div class="card emp"><span class="icon">photo_camera</span><p style="font-weight:500">Nenhum insight cadastrado</p><p style="font-size:12px">Cadastre os insights do Instagram por período</p></div>';
-  // KPIs consolidados
-  var tAlc=0,tImp=0,tVis=0,tCl=0,tSeg=0;
-  igInsights.forEach(function(ig){tAlc+=ig.alcance;tImp+=ig.impressoes;tVis+=ig.visitas_perfil;tCl+=ig.cliques_link_bio;if(ig.seguidores_fim>ig.seguidores_inicio)tSeg+=ig.seguidores_fim-ig.seguidores_inicio});
-  h+='<div class="kg" style="margin-bottom:16px">';
-  [{l:'📈 Seguidores ganhos',v:tSeg,c:'var(--em)'},{l:'👁️ Alcance total',v:tAlc,c:'var(--info)'},{l:'📊 Impressões',v:tImp,c:'var(--cyan)'},{l:'👤 Visitas perfil',v:tVis,c:'var(--purp)'},{l:'🔗 Cliques bio',v:tCl,c:'var(--ok)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+F(k.v)+'</div></div>'});
-  h+='</div>';
-  // Cards por período
-  igInsights.forEach(function(ig){
-    var segDiff=ig.seguidores_fim-ig.seguidores_inicio;
-    var segColor=segDiff>0?'var(--ok)':segDiff<0?'var(--err)':'var(--g500)';
-    var segIcon=segDiff>0?'↑':segDiff<0?'↓':'=';
-    h+='<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--pink)"><div style="display:flex;justify-content:space-between"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:600;color:var(--navy)">📅 '+ig.data_inicio+(ig.data_fim?' → '+ig.data_fim:'')+'</span></div>';
-    if(ig.observacoes)h+='<p style="font-size:12px;color:var(--g500);margin-top:4px">'+ig.observacoes+'</p>';
-    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:10px">';
-    h+='<div class="mc"><div class="ml">Seguidores</div><div class="mv" style="color:var(--navy)">'+F(ig.seguidores_inicio)+' → '+F(ig.seguidores_fim)+'</div><div class="ms" style="color:'+segColor+'">'+segIcon+' '+Math.abs(segDiff)+'</div></div>';
-    [{l:'Alcance',v:ig.alcance,c:'var(--info)'},{l:'Impressões',v:ig.impressoes,c:'var(--cyan)'},{l:'Visitas',v:ig.visitas_perfil,c:'var(--purp)'},{l:'Cliques bio',v:ig.cliques_link_bio,c:'var(--ok)'}].forEach(function(m){h+='<div class="mc"><div class="ml">'+m.l+'</div><div class="mv" style="color:'+m.c+'">'+F(m.v)+'</div></div>'});
-    h+='</div></div><div style="display:flex;gap:4px;flex-shrink:0" class="no-print"><button class="btn bi bo bs" onclick="omEditIg(\''+ig.id+'\')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dIg(\''+ig.id+'\')"><span class="icon icon-sm">delete</span></button></div></div></div>';
-  });
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><div class="st" style="margin:0">📸 Instagram</div><div style="display:flex;gap:6px" class="no-print"><button class="btn bo bs" onclick="omNewIg()"><span class="icon icon-sm">analytics</span> Novo Período</button><button class="btn bp bs" onclick="omNewSc()"><span class="icon icon-sm">add</span> Nova Publicação</button></div></div>';
+  if(!igInsights.length&&!socs.length) return h+'<div class="card emp"><span class="icon">photo_camera</span><p style="font-weight:500">Nada cadastrado ainda</p><p style="font-size:12px">Cadastre insights da conta e suas publicações (Reels, Stories, Posts no Feed)</p></div>';
+  // ===== INSIGHTS DA CONTA =====
+  if(igInsights.length){
+    var tAlcCt=0,tImpCt=0,tVisCt=0,tClBio=0,tSeg=0;
+    igInsights.forEach(function(ig){tAlcCt+=ig.alcance;tImpCt+=ig.impressoes;tVisCt+=ig.visitas_perfil;tClBio+=ig.cliques_link_bio;if(ig.seguidores_fim>ig.seguidores_inicio)tSeg+=ig.seguidores_fim-ig.seguidores_inicio});
+    h+='<div class="sd">📊 Insights da Conta</div>';
+    h+='<div class="kg" style="margin-bottom:14px">';
+    [{l:'📈 Seguidores ganhos',v:tSeg,c:'var(--em)'},{l:'👁️ Alcance da conta',v:tAlcCt,c:'var(--info)'},{l:'📊 Impressões',v:tImpCt,c:'var(--cyan)'},{l:'👤 Visitas perfil',v:tVisCt,c:'var(--purp)'},{l:'🔗 Cliques bio',v:tClBio,c:'var(--ok)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+F(k.v)+'</div></div>'});
+    h+='</div>';
+    igInsights.forEach(function(ig){
+      var segDiff=ig.seguidores_fim-ig.seguidores_inicio;
+      var segColor=segDiff>0?'var(--ok)':segDiff<0?'var(--err)':'var(--g500)';
+      var segIcon=segDiff>0?'↑':segDiff<0?'↓':'=';
+      h+='<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--pink)"><div style="display:flex;justify-content:space-between"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:600;color:var(--navy)">📅 '+ig.data_inicio+(ig.data_fim?' → '+ig.data_fim:'')+'</span></div>';
+      if(ig.observacoes)h+='<p style="font-size:12px;color:var(--g500);margin-top:4px">'+ig.observacoes+'</p>';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:10px">';
+      h+='<div class="mc"><div class="ml">Seguidores</div><div class="mv" style="color:var(--navy)">'+F(ig.seguidores_inicio)+' → '+F(ig.seguidores_fim)+'</div><div class="ms" style="color:'+segColor+'">'+segIcon+' '+Math.abs(segDiff)+'</div></div>';
+      [{l:'Alcance',v:ig.alcance,c:'var(--info)'},{l:'Impressões',v:ig.impressoes,c:'var(--cyan)'},{l:'Visitas',v:ig.visitas_perfil,c:'var(--purp)'},{l:'Cliques bio',v:ig.cliques_link_bio,c:'var(--ok)'}].forEach(function(m){h+='<div class="mc"><div class="ml">'+m.l+'</div><div class="mv" style="color:'+m.c+'">'+F(m.v)+'</div></div>'});
+      h+='</div></div><div style="display:flex;gap:4px;flex-shrink:0" class="no-print"><button class="btn bi bo bs" onclick="omEditIg(\''+ig.id+'\')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dIg(\''+ig.id+'\')"><span class="icon icon-sm">delete</span></button></div></div></div>';
+    });
+  }
+  // ===== PUBLICAÇÕES (Reels, Stories, Posts no Feed) =====
+  if(socs.length){
+    h+='<div class="sd" style="margin-top:24px">🎬 Publicações</div>';
+    var ts={al:0,im:0,cu:0,co:0,cp:0,sv:0,cl:0,vi:0,sg:0};
+    socs.forEach(function(s){ts.al+=s.alcance;ts.im+=s.impressoes;ts.cu+=s.curtidas;ts.co+=s.comentarios;ts.cp+=s.compartilhamentos;ts.sv+=s.salvamentos;ts.cl+=s.cliques_link;ts.vi+=s.visualizacoes_completas;ts.sg+=s.seguidores_ganhos});
+    h+='<div class="kg" style="margin-bottom:14px">';
+    [{l:'Alcance',v:ts.al,c:'var(--info)'},{l:'Curtidas',v:ts.cu,c:'var(--err)'},{l:'Comentários',v:ts.co,c:'var(--purp)'},{l:'Compartilh.',v:ts.cp,c:'var(--ok)'},{l:'Salvamentos',v:ts.sv,c:'var(--orange)'},{l:'Vis. Completas',v:ts.vi,c:'var(--pink)'},{l:'Seguidores',v:ts.sg,c:'var(--em)'},{l:'Cliques Link',v:ts.cl,c:'var(--navy)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+F(k.v)+'</div></div>'});
+    h+='</div>';
+    var withEng=socs.filter(function(s){return s.alcance>0}).map(function(s){var eng=s.curtidas+s.comentarios+s.compartilhamentos+s.salvamentos;return Object.assign({},s,{eng:eng,engRate:s.alcance>0?(eng/s.alcance*100):0})}).sort(function(a,b){return b.engRate-a.engRate});
+    var reels=withEng.filter(function(s){return s.tipo==='reel'});
+    var stories=withEng.filter(function(s){return s.tipo==='story'});
+    var feeds=withEng.filter(function(s){return s.tipo==='feed'});
+    if(reels.length||stories.length||feeds.length){
+      h+='<div class="g3" style="margin-bottom:14px">';
+      h+='<div class="card" style="padding:16px;border-left:4px solid var(--pink)"><div class="st" style="margin:0 0 8px;font-size:13px">🎬 Melhor Reel</div>';
+      if(reels.length){var r=reels[0];h+='<div style="font-size:13px;font-weight:600;color:var(--navy)">'+r.nome+'</div><div style="font-size:11px;color:var(--pink);font-weight:600;margin-top:4px">'+r.engRate.toFixed(1)+'% engaj. · '+F(r.alcance)+' alcance</div>'}
+      else h+='<p style="font-size:11px;color:var(--g500)">Nenhum reel</p>';
+      h+='</div>';
+      h+='<div class="card" style="padding:16px;border-left:4px solid var(--purp)"><div class="st" style="margin:0 0 8px;font-size:13px">📱 Melhor Story</div>';
+      if(stories.length){var st=stories[0];h+='<div style="font-size:13px;font-weight:600;color:var(--navy)">'+st.nome+'</div><div style="font-size:11px;color:var(--purp);font-weight:600;margin-top:4px">'+st.engRate.toFixed(1)+'% engaj. · '+F(st.alcance)+' alcance</div>'}
+      else h+='<p style="font-size:11px;color:var(--g500)">Nenhum story</p>';
+      h+='</div>';
+      h+='<div class="card" style="padding:16px;border-left:4px solid var(--cyan)"><div class="st" style="margin:0 0 8px;font-size:13px">🖼️ Melhor Post no Feed</div>';
+      if(feeds.length){var fd=feeds[0];h+='<div style="font-size:13px;font-weight:600;color:var(--navy)">'+fd.nome+'</div><div style="font-size:11px;color:var(--cyan2);font-weight:600;margin-top:4px">'+fd.engRate.toFixed(1)+'% engaj. · '+F(fd.alcance)+' alcance</div>'}
+      else h+='<p style="font-size:11px;color:var(--g500)">Nenhum post no feed</p>';
+      h+='</div>';
+      h+='</div>';
+      if(withEng.length>1){
+        h+='<div class="card" style="padding:20px;margin-bottom:14px"><div class="st" style="margin:0 0 12px">📊 Ranking por Engajamento</div>';
+        h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">Publicação</th><th style="padding:8px 12px">Tipo</th><th style="padding:8px 12px;text-align:center">Alcance</th><th style="padding:8px 12px;text-align:center">Engajamento</th><th style="padding:8px 12px;text-align:center">Taxa</th></tr></thead><tbody>';
+        var medals=['🥇','🥈','🥉'];
+        var tipoLabel={reel:'Reel',story:'Story',feed:'Post no Feed'};
+        var tipoBadge={reel:'b-purp',story:'b-info',feed:'b-ok'};
+        withEng.forEach(function(s,i){h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-size:16px">'+(medals[i]||(i+1)+'º')+'</td><td style="padding:8px 12px;font-weight:'+(i===0?'700':'400')+'">'+s.nome+'</td><td style="padding:8px 12px"><span class="badge '+(tipoBadge[s.tipo]||'b-info')+'">'+(tipoLabel[s.tipo]||s.tipo)+'</span></td><td style="padding:8px 12px;text-align:center">'+F(s.alcance)+'</td><td style="padding:8px 12px;text-align:center;font-weight:600">'+F(s.eng)+'</td><td style="padding:8px 12px;text-align:center;font-weight:700;color:'+(i===0?'var(--ok)':'var(--g900)')+'">'+s.engRate.toFixed(1)+'%</td></tr>'});
+        h+='</tbody></table></div>';
+      }
+    }
+    [['🎬 Reels','reel','var(--pink)'],['📱 Stories','story','var(--purp)'],['🖼️ Posts no Feed','feed','var(--cyan)']].forEach(function(g){
+      var label=g[0],tipo=g[1],color=g[2];
+      var items=socs.filter(function(s){return s.tipo===tipo});
+      h+='<div class="sd">'+label+' ('+items.length+')</div>';
+      if(!items.length){h+='<div class="card emp" style="padding:20px"><p style="font-size:12px">Nenhum</p></div>';return}
+      items.forEach(function(s){h+='<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid '+color+'"><div style="display:flex;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--navy)">'+s.nome+'</span><span class="badge b-'+(s.status==='publicado'?'ok':'warn')+'">'+s.status+'</span></div>'+(s.data_publicacao?'<div style="font-size:11px;color:var(--g500);margin-top:3px">📅 '+s.data_publicacao+'</div>':'')+'</div><div style="display:flex;gap:4px" class="no-print"><button class="btn bi bo bs" onclick="omEditSc(\''+s.id+'\')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dSc(\''+s.id+'\')"><span class="icon icon-sm">delete</span></button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:5px;margin-top:12px">'+[{l:'Alcance',v:s.alcance,c:'var(--info)'},{l:'Curtidas',v:s.curtidas,c:'var(--err)'},{l:'Coment.',v:s.comentarios,c:'var(--purp)'},{l:'Comp.',v:s.compartilhamentos,c:'var(--ok)'},{l:'Salvam.',v:s.salvamentos,c:'var(--orange)'},{l:'Cliques',v:s.cliques_link,c:'var(--navy)'},{l:'Vis.Compl.',v:s.visualizacoes_completas,c:'var(--pink)'},{l:'Seguid.',v:s.seguidores_ganhos,c:'var(--em)'}].map(function(m){return '<div class="mc"><div class="ml">'+m.l+'</div><div class="mv" style="color:'+m.c+';font-size:14px">'+F(m.v)+'</div></div>'}).join('')+'</div></div>'});
+    });
+  }
   return h;
 }
 function igForm(ig){return`<div style="display:flex;flex-direction:column;gap:10px"><div class="g2"><div><label>Data início</label><input type="date" id="mig-di" value="${ig?.data_inicio||''}"></div><div><label>Data fim</label><input type="date" id="mig-df" value="${ig?.data_fim||''}"></div></div><div class="sd">👥 Seguidores</div><div class="g2"><div><label>Seguidores no início</label><input type="number" id="mig-si" value="${ig?.seguidores_inicio||0}"></div><div><label>Seguidores no fim</label><input type="number" id="mig-sf" value="${ig?.seguidores_fim||0}"></div></div><div class="sd">📊 Métricas do Período</div><div class="g2"><div><label>Alcance</label><input type="number" id="mig-al" value="${ig?.alcance||0}"></div><div><label>Impressões</label><input type="number" id="mig-im" value="${ig?.impressoes||0}"></div></div><div class="g2"><div><label>Visitas ao perfil</label><input type="number" id="mig-vp" value="${ig?.visitas_perfil||0}"></div><div><label>Cliques link da bio</label><input type="number" id="mig-cl" value="${ig?.cliques_link_bio||0}"></div></div><div><label>Observações</label><textarea id="mig-ob" style="width:100%;padding:8px 12px;border-radius:7px;border:1px solid var(--g300);font-size:13px;font-family:inherit;resize:vertical;min-height:60px">${ig?.observacoes||''}</textarea></div></div>`}
@@ -821,6 +1082,50 @@ function omEditYt(id){om('Editar',ytForm(yts.find(function(x){return x.id===id})
 async function svYt(){var d=gYtD();if(!d.nome){tst('Preencha o nome');return}await db.from('youtube_campanha').insert(d);cm();tst('Criado!');await ldCampD(cCamp.id);rCamp()}
 async function upYt(id){var d=gYtD();delete d.campanha_id;await db.from('youtube_campanha').update(d).eq('id',id);cm();tst('Atualizado!');await ldCampD(cCamp.id);rCamp()}
 async function dYt(id){if(!confirm('Excluir?'))return;await db.from('youtube_campanha').delete().eq('id',id);tst('Excluído');await ldCampD(cCamp.id);rCamp()}
+
+// ==================== TIKTOK ====================
+function rTiktok(){
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="st" style="margin:0">🎵 TikTok</div><button class="btn bp bs no-print" onclick="omNewTk()"><span class="icon icon-sm">add</span> Novo Vídeo</button></div>';
+  if(!tks||!tks.length) return h+'<div class="card emp"><span class="icon">music_video</span><p style="font-weight:500">Nenhum vídeo cadastrado</p><p style="font-size:12px">Cadastre os vídeos do TikTok publicados nesta campanha</p></div>';
+  // KPIs
+  var tVis=0,tCu=0,tCo=0,tCp=0,tSv=0,tSg=0,tCl=0;
+  tks.forEach(function(t){tVis+=t.visualizacoes;tCu+=t.curtidas;tCo+=t.comentarios;tCp+=t.compartilhamentos;tSv+=t.salvamentos;tSg+=t.seguidores_ganhos;tCl+=t.cliques_link_bio});
+  h+='<div class="kg" style="margin-bottom:16px">';
+  [{l:'👁️ Visualizações',v:tVis,c:'var(--info)'},{l:'❤️ Curtidas',v:tCu,c:'var(--err)'},{l:'💬 Comentários',v:tCo,c:'var(--purp)'},{l:'🔁 Compartilh.',v:tCp,c:'var(--ok)'},{l:'🔖 Salvamentos',v:tSv,c:'var(--orange)'},{l:'📈 Seguidores',v:tSg,c:'var(--em)'},{l:'🔗 Cliques bio',v:tCl,c:'var(--navy)'}].forEach(function(k){h+='<div class="card kpi" style="border-top-color:'+k.c+'"><div class="kl">'+k.l+'</div><div class="kv">'+F(k.v)+'</div></div>'});
+  h+='</div>';
+  // Engajamento e ranking
+  var withEng=tks.filter(function(t){return t.visualizacoes>0}).map(function(t){var eng=t.curtidas+t.comentarios+t.compartilhamentos+t.salvamentos;return Object.assign({},t,{eng:eng,engRate:t.visualizacoes>0?(eng/t.visualizacoes*100):0})}).sort(function(a,b){return b.engRate-a.engRate});
+  if(withEng.length){
+    h+='<div class="card" style="padding:20px;margin-bottom:14px;border-left:4px solid var(--cyan)"><div class="st" style="margin:0 0 12px">🏆 Melhor Vídeo</div>';
+    var t=withEng[0];
+    h+='<div style="font-size:14px;font-weight:600;color:var(--navy)">'+t.nome+'</div><div style="font-size:12px;color:var(--cyan2);font-weight:600;margin-top:4px">'+t.engRate.toFixed(1)+'% engajamento · '+F(t.visualizacoes)+' visualizações</div>';
+    h+='</div>';
+    if(withEng.length>1){
+      h+='<div class="card" style="padding:20px;margin-bottom:14px"><div class="st" style="margin:0 0 12px">📊 Ranking por Engajamento</div>';
+      h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--navy);color:#fff"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">Vídeo</th><th style="padding:8px 12px;text-align:center">Vis.</th><th style="padding:8px 12px;text-align:center">Engaj.</th><th style="padding:8px 12px;text-align:center">Taxa</th></tr></thead><tbody>';
+      var medals=['🥇','🥈','🥉'];
+      withEng.forEach(function(t,i){h+='<tr style="border-bottom:1px solid var(--g100)"><td style="padding:8px 12px;font-size:16px">'+(medals[i]||(i+1)+'º')+'</td><td style="padding:8px 12px;font-weight:'+(i===0?'700':'400')+'">'+t.nome+'</td><td style="padding:8px 12px;text-align:center">'+F(t.visualizacoes)+'</td><td style="padding:8px 12px;text-align:center;font-weight:600">'+F(t.eng)+'</td><td style="padding:8px 12px;text-align:center;font-weight:700;color:'+(i===0?'var(--ok)':'var(--g900)')+'">'+t.engRate.toFixed(1)+'%</td></tr>'});
+      h+='</tbody></table></div>';
+    }
+  }
+  // Cards
+  tks.forEach(function(t){
+    h+='<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid var(--cyan)"><div style="display:flex;justify-content:space-between"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:14px;font-weight:600;color:var(--navy)">'+t.nome+'</span><span class="badge b-'+(t.status==='publicado'?'ok':'warn')+'">'+t.status+'</span></div>';
+    if(t.descricao)h+='<p style="font-size:12px;color:var(--g500);margin-top:4px">'+t.descricao+'</p>';
+    if(t.data_publicacao)h+='<div style="font-size:11px;color:var(--g500);margin-top:4px">📅 '+t.data_publicacao+'</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-top:10px">';
+    [{l:'Vis.',v:t.visualizacoes,c:'var(--info)'},{l:'Curtidas',v:t.curtidas,c:'var(--err)'},{l:'Coment.',v:t.comentarios,c:'var(--purp)'},{l:'Comp.',v:t.compartilhamentos,c:'var(--ok)'},{l:'Salvam.',v:t.salvamentos,c:'var(--orange)'},{l:'Seguid.',v:t.seguidores_ganhos,c:'var(--em)'},{l:'Cl. bio',v:t.cliques_link_bio,c:'var(--navy)'}].forEach(function(m){h+='<div class="mc"><div class="ml">'+m.l+'</div><div class="mv" style="color:'+m.c+'">'+F(m.v)+'</div></div>'});
+    h+='</div></div><div style="display:flex;gap:4px;flex-shrink:0" class="no-print"><button class="btn bi bo bs" onclick="omEditTk(\''+t.id+'\')"><span class="icon icon-sm">edit</span></button><button class="btn bi bd bs" onclick="dTk(\''+t.id+'\')"><span class="icon icon-sm">delete</span></button></div></div>';
+  });
+  return h;
+}
+function tkForm(t){return`<div style="display:flex;flex-direction:column;gap:10px"><div><label>Nome</label><input id="mtk-n" value="${t?t.nome:''}"></div><div><label>Descrição</label><textarea id="mtk-ds" style="width:100%;padding:8px 12px;border-radius:7px;border:1px solid var(--g300);font-size:13px;font-family:inherit;resize:vertical;min-height:60px">${t?.descricao||''}</textarea></div><div class="g2"><div><label>Data publicação</label><input type="date" id="mtk-d" value="${t?.data_publicacao||''}"></div><div><label>Status</label><select id="mtk-st"><option value="publicado" ${t?.status==='publicado'?'selected':''}>Publicado</option><option value="pendente" ${t?.status==='pendente'?'selected':''}>Pendente</option><option value="privado" ${t?.status==='privado'?'selected':''}>Privado</option></select></div></div><div class="sd">📊 Métricas</div><div class="g3"><div><label>Visualizações</label><input type="number" id="mtk-vi" value="${t?.visualizacoes||0}"></div><div><label>Curtidas</label><input type="number" id="mtk-cu" value="${t?.curtidas||0}"></div><div><label>Comentários</label><input type="number" id="mtk-co" value="${t?.comentarios||0}"></div></div><div class="g3"><div><label>Compartilh.</label><input type="number" id="mtk-cp" value="${t?.compartilhamentos||0}"></div><div><label>Salvamentos</label><input type="number" id="mtk-sv" value="${t?.salvamentos||0}"></div><div><label>Seguidores ganhos</label><input type="number" id="mtk-sg" value="${t?.seguidores_ganhos||0}"></div></div><div><label>Cliques link da bio</label><input type="number" id="mtk-cl" value="${t?.cliques_link_bio||0}"></div></div>`}
+function gTkD(){return{campanha_id:cCamp.id,nome:$('mtk-n').value,descricao:$('mtk-ds').value,data_publicacao:$('mtk-d').value||null,status:$('mtk-st').value,visualizacoes:+$('mtk-vi').value||0,curtidas:+$('mtk-cu').value||0,comentarios:+$('mtk-co').value||0,compartilhamentos:+$('mtk-cp').value||0,salvamentos:+$('mtk-sv').value||0,seguidores_ganhos:+$('mtk-sg').value||0,cliques_link_bio:+$('mtk-cl').value||0}}
+function omNewTk(){om('Novo Vídeo TikTok',tkForm(),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="svTk()">Criar</button>`)}
+function omEditTk(id){om('Editar',tkForm(tks.find(function(x){return x.id===id})),`<button class="btn bo" onclick="cm()">Cancelar</button><button class="btn bp" onclick="upTk('${id}')">Salvar</button>`)}
+async function svTk(){var d=gTkD();if(!d.nome){tst('Preencha o nome');return}await db.from('tiktok_campanha').insert(d);cm();tst('Criado!');await ldCampD(cCamp.id);rCamp()}
+async function upTk(id){var d=gTkD();delete d.campanha_id;await db.from('tiktok_campanha').update(d).eq('id',id);cm();tst('Atualizado!');await ldCampD(cCamp.id);rCamp()}
+async function dTk(id){if(!confirm('Excluir?'))return;await db.from('tiktok_campanha').delete().eq('id',id);tst('Excluído');await ldCampD(cCamp.id);rCamp()}
 
 </script>
 </body>
