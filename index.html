@@ -185,6 +185,28 @@
   .a-nego{background:var(--c-nego);}   .a-sup{background:var(--c-sup);}
   .dica{font-size:12px;color:var(--muted);margin:11px 0 0;}
 
+  /* data do contato — lançamento retroativo. Prefixo rx- de propósito:
+     nada aqui pode ter a classe .acao, que o validar() varre. */
+  .rx-data{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .rx-data input[type="date"]{width:auto;flex:0 0 auto;font-variant-numeric:tabular-nums;}
+  .rx-atalho{padding:9px 12px;border:2px solid var(--line-2);background:var(--card);border-radius:6px;
+    font-weight:600;cursor:pointer;font-size:13px;}
+  .rx-atalho[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .rx-dia{font-size:12.5px;color:var(--muted);}
+  .rx-erro{color:var(--alerta);font-size:12.5px;font-weight:600;margin-top:6px;}
+  /* data passada: o card inteiro avisa, para ninguém esquecer a data antiga marcada */
+  .card.rx-passado{--acento:var(--c-tent);border-color:var(--c-tent);}
+  .card.rx-passado input[type="date"]{border-color:var(--c-tent);border-width:2px;font-weight:700;}
+  .rx-aviso{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+    margin:-2px 0 14px;padding:11px 14px;border-radius:10px;font-size:13px;color:var(--ink-2);
+    border:1px solid var(--c-tent);background:color-mix(in srgb,var(--c-tent) 10%,var(--card));}
+  .rx-aviso[hidden],.rx-erro[hidden]{display:none;}
+  .rx-aviso b{color:var(--ink);}
+  .rx-aviso button{background:var(--card);border:1px solid var(--c-tent);color:var(--ink);
+    border-radius:6px;padding:6px 12px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;}
+  .rx-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;
+    border:1px solid var(--c-tent);color:var(--c-tent);margin-left:6px;letter-spacing:.03em;white-space:nowrap;}
+
   /* histórico do lead, aparece ao digitar os 4 dígitos */
   .hist{margin:-2px 0 14px;padding:11px 14px;border-radius:10px;font-size:12.5px;
         border:1px solid var(--line);background:var(--surface);color:var(--ink-2);}
@@ -227,6 +249,8 @@
   th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;}
   th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;}
   td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;}
+  .pt{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:9px;}
+  .fraco{color:var(--muted);}
   tfoot td{font-weight:700;border-top:2px solid var(--line-2);border-bottom:none;}
   .apagar{background:none;border:none;color:var(--alerta);cursor:pointer;font-size:17px;line-height:1;}
   .pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;
@@ -236,6 +260,18 @@
   .filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
   .filtros .campo{min-width:auto;flex:0 0 auto;}
   .filtros select,.filtros input{width:auto;}
+  /* ----- aba Registros ----- */
+  .fgrupo{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .campo.cp{flex:0 0 auto;min-width:0;}
+  .campo.cp input,.campo.cp select{min-width:142px;padding:9px 11px;}
+  /* Dois campos de data lado a lado. Sem largura automática eles não cabem na
+     coluna e invadem o filtro vizinho — input[type=date] não encolhe além do
+     próprio conteúdo. */
+  .parData{display:flex;gap:6px;}
+  .parData input{width:auto;}
+  .rolagem.alta{max-height:none;}
+  .rgVazio{color:var(--muted);font-size:13.5px;padding:26px 0;text-align:center;}
+
   .periodos{display:flex;gap:5px;flex-wrap:wrap;}
   .periodos button{padding:9px 15px;border:1px solid var(--line-2);background:var(--card);
                    border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;
@@ -369,6 +405,40 @@
   .legenda{display:flex;gap:15px;flex-wrap:wrap;margin:0 0 12px;font-size:12px;color:var(--ink-2);}
   .legenda i{width:11px;height:11px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px;}
 
+  /* ----- gráficos SVG ----- */
+  .graf{width:100%;height:auto;display:block;}
+  /* Gráfico que rola: a largura passa a vir do nº de dias, não do container.
+     Sem isto o CSS width:100% venceria o atributo width e o SVG encolheria
+     de volta, empilhando os rótulos. */
+  .rolaX{overflow-x:auto;overflow-y:hidden;padding-bottom:6px;}
+  .rolaX .graf{width:auto;max-width:none;}
+  .rolaX::-webkit-scrollbar{height:9px;}
+  .rolaX::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:5px;}
+  .rolaX::-webkit-scrollbar-track{background:transparent;}
+  .graf .gd{stroke:var(--line);stroke-width:1;}
+  .graf .eixo{fill:var(--muted);font-size:10px;font-weight:600;}
+  .graf .rotX{fill:var(--ink-2);font-size:10.5px;font-weight:600;}
+  .graf .barra{cursor:pointer;}
+  .graf .barra:hover{opacity:.82;}
+  .graf .melhor{fill:none;stroke:var(--ok);stroke-width:2;stroke-dasharray:3 2;}
+  .dicaG{position:fixed;pointer-events:none;z-index:60;background:var(--navy);color:#fff;
+         padding:8px 11px;border-radius:7px;font-size:12px;line-height:1.5;
+         box-shadow:var(--sombra-alta);opacity:0;transition:opacity .1s;max-width:240px;}
+  .dicaG.on{opacity:1;}
+  .dicaG i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;}
+
+  /* ----- composição das atividades ----- */
+  .comp{display:flex;flex-direction:column;gap:7px;}
+  .cpx{display:grid;grid-template-columns:158px 1fr auto;gap:11px;align-items:center;font-size:13px;}
+  .cpx .rot{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cpx.filho .rot{padding-left:16px;font-weight:500;font-size:12.5px;color:var(--ink-2);}
+  .cpx.neto  .rot{padding-left:32px;font-weight:500;font-size:12.5px;color:var(--ink-2);}
+  .cpx .bar{height:22px;border-radius:4px;display:flex;align-items:center;padding:0 9px;
+            color:#fff;font-weight:800;font-size:11.5px;min-width:28px;}
+  .cpx .q{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .cpx.sep{border-top:1px solid var(--line);padding-top:9px;margin-top:3px;}
+  @media (max-width:560px){ .cpx{grid-template-columns:118px 1fr auto;gap:8px;} }
+
   .cl{display:grid;grid-template-columns:112px 1fr auto;gap:11px;align-items:center;
       padding:9px 0;border-bottom:1px solid var(--line);}
   .cl:last-child{border-bottom:none;}
@@ -501,6 +571,7 @@
     </div>
     <div class="abas" role="tablist">
       <button role="tab" id="abaReg" aria-selected="true">Registrar</button>
+      <button role="tab" id="abaRegs" aria-selected="false">Registros</button>
       <button role="tab" id="abaDash" aria-selected="false">Dashboard</button>
     </div>
     <div class="acoesTopo">
@@ -515,8 +586,26 @@
     <div class="painel ativo" id="painelReg">
       <div class="cols">
 
-        <div class="card" style="--acento:var(--ac-azul)">
+        <div class="card" id="cardReg" style="--acento:var(--ac-azul)">
           <h2>Registrar contato</h2>
+
+          <div class="linha">
+            <div class="campo" style="flex:1 1 100%">
+              <label for="dataContato">Data do contato</label>
+              <div class="rx-data">
+                <input type="date" id="dataContato">
+                <button type="button" class="rx-atalho" id="btnDataHoje">Hoje</button>
+                <button type="button" class="rx-atalho" id="btnDataOntem">Ontem</button>
+                <span class="rx-dia" id="rxDia"></span>
+              </div>
+              <div class="rx-erro" id="rxErro" hidden></div>
+            </div>
+          </div>
+
+          <div class="rx-aviso" id="rxAviso" hidden>
+            <span id="rxAvisoTxt"></span>
+            <button type="button" id="rxVoltar">Voltar para hoje</button>
+          </div>
 
           <div class="linha">
             <div class="campo" style="flex:1 1 100%">
@@ -569,7 +658,9 @@
 
           <p class="dica">Preenche o nome e os 4 dígitos, e clica. No segmento dá pra digitar
           um pedaço ("pet", "oficina", "cons") e escolher com as setas + Enter — sem acento
-          funciona igual. O segmento e o canal ficam guardados do último registro.</p>
+          funciona igual. O segmento e o canal ficam guardados do último registro.
+          Esqueceu de lançar? Muda a data do contato: vai até 7 dias para trás, e volta
+          sozinha para hoje quando a tela abre de novo.</p>
 
           <details class="mais">
             <summary>Na dúvida, é o quê? — casos de borda</summary>
@@ -601,8 +692,8 @@
           </details>
         </div>
 
-        <div class="card" style="--acento:var(--ac-verde)">
-          <h2>Meu dia — <span class="leve" id="rotHoje"></span></h2>
+        <div class="card" id="cardDia" style="--acento:var(--ac-verde)">
+          <h2><span id="rotTitDia">Meu dia</span> — <span class="leve" id="rotHoje"></span></h2>
 
           <div class="dupla dois">
             <div class="big cont"><b id="dCont">0</b><span>Contatos feitos</span></div>
@@ -624,7 +715,7 @@
             <div class="sub" style="border-top-color:var(--c-sup)"><b id="dSup">0</b><span>Suporte</span></div>
           </div>
 
-          <h2 style="margin:18px 0 8px">Registros de hoje
+          <h2 style="margin:18px 0 8px"><span id="rotListaDia">Registros de hoje</span>
             <span class="leve" id="contaDia"></span></h2>
           <div class="rolagem">
             <table>
@@ -637,6 +728,32 @@
       </div>
     </div>
 
+    <!-- ======= REGISTROS ======= -->
+    <div class="painel" id="painelRegs">
+
+      <div class="barraFiltro">
+        <div class="fgrupo">
+          <div class="campo cp"><label for="rgIni">De</label><input type="date" id="rgIni"></div>
+          <div class="campo cp"><label for="rgFim">Até</label><input type="date" id="rgFim"></div>
+          <div class="campo cp" id="boxRgVend"><label for="rgVend">Vendedora</label>
+            <select id="rgVend"></select></div>
+          <div class="campo cp"><label for="rgTipo">Tipo</label><select id="rgTipo"></select></div>
+          <div class="campo" style="flex:1 1 180px"><label for="rgBusca">Buscar lead</label>
+            <input id="rgBusca" placeholder="nome ou 4 dígitos" autocomplete="off"></div>
+        </div>
+        <div class="janela" id="rgConta"></div>
+      </div>
+
+      <div class="card" style="--acento:var(--ac-violeta)">
+        <h2 id="rgTitulo">Registros</h2>
+        <div class="periodos" id="grpRgVisao" style="margin-bottom:14px;width:max-content">
+          <button data-v="lead" aria-pressed="true">Por lead</button>
+          <button data-v="reg">Por registro</button>
+        </div>
+        <div class="rolagem alta" id="rgTabela"></div>
+      </div>
+    </div>
+
     <!-- ======= DASHBOARD ======= -->
     <div class="painel" id="painelDash">
 
@@ -646,10 +763,16 @@
           <button data-p="7">7 dias</button>
           <button data-p="30" aria-pressed="true">30 dias</button>
           <button data-p="mes">Este mês</button>
+          <button data-p="mesant">Mês passado</button>
           <button data-p="custom">Personalizado</button>
         </div>
-        <div class="campo" id="boxDatas" style="display:none">
-          <div style="display:flex;gap:6px"><input type="date" id="dtIni"><input type="date" id="dtFim"></div>
+        <div class="campo cp" id="boxDatas" style="display:none">
+          <label for="dtIni">De / até</label>
+          <div class="parData"><input type="date" id="dtIni"><input type="date" id="dtFim"></div>
+        </div>
+        <div class="campo cp" id="boxDashVend">
+          <label for="fVend">Vendedora</label>
+          <select id="fVend"></select>
         </div>
         <div class="janela" id="rotJanela"></div>
       </div>
@@ -657,6 +780,29 @@
       <div class="card" style="--acento:var(--navy-2)">
         <h2>Resumo do período <span class="leve" id="rotPer"></span></h2>
         <div class="hero" id="heroResumo"></div>
+      </div>
+
+      <div class="card" style="--acento:var(--ac-azul)">
+        <h2>Ritmo do período <span class="leve">— tentativas e contatos por dia</span></h2>
+        <div class="destaques" id="destRitmo"></div>
+        <div class="legenda" id="legRitmo"></div>
+        <div class="rolaX" id="boxRitmo">
+          <svg class="graf" id="gRitmo" role="img" aria-label="Tentativas e contatos por dia"></svg>
+        </div>
+        <details class="mais">
+          <summary>Ver como tabela</summary>
+          <div class="in" id="tbRitmo"></div>
+        </details>
+      </div>
+
+      <div class="card" style="--acento:var(--ac-mostarda)">
+        <h2>Composição das atividades <span class="leve">— no que o esforço se transformou</span></h2>
+        <div class="comp" id="gComp"></div>
+      </div>
+
+      <div class="card" style="--acento:var(--ac-violeta)">
+        <h2>Picos do período <span class="leve">— em que dia cada etapa aconteceu mais</span></h2>
+        <div id="tbPicos"></div>
       </div>
 
       <div class="card" style="--acento:var(--ac-verde)">
@@ -783,6 +929,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="dicaG" id="dicaG"></div>
 
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -814,6 +961,7 @@ var TIPOS   = ["Tentativa","Ativação","Follow-up","Pitch","Negociação","Supo
 var CONTATO = ["Ativação","Follow-up","Pitch","Negociação","Suporte"];
 var VAR_COR = { "Tentativa":"--c-tent","Ativação":"--c-ativ","Follow-up":"--c-follow",
                 "Pitch":"--c-pitch","Negociação":"--c-nego","Suporte":"--c-sup" };
+var DIA_SEM = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
 /* Só preferência de tela continua local — não é dado, é conforto. */
 var K_PREF="sismais_pref_sb", K_MAPA="sismais_mapa_vendas_sb", K_URLPLAN="sismais_url_plan_sb";
@@ -881,17 +1029,44 @@ function mapAtiv(r){
     fone4: r.fone4,
     segmento: segNomePorId[r.segmento_id] || "—",
     canal: canNomePorId[r.canal_id] || "—",
-    tipo: r.tipo
+    tipo: r.tipo,
+    /* lançado depois: gravado num dia posterior ao do contato */
+    retro: !!(r.criado_em && iso(new Date(r.criado_em)) > r.data)
   };
 }
 
+var COLS_ATIV="id,data,ocorrido_em,criado_em,perfil_id,lead_nome,fone4,segmento_id,canal_id,tipo";
+
+/* O PostgREST devolve no máximo 1000 linhas por resposta e NÃO avisa que
+   cortou. Um mês com três vendedoras já passa disso, e o efeito seria o pior
+   possível: todo número do dashboard menor que a realidade, calado, sem erro
+   nenhum na tela. Então busca em páginas até a última vir curta.
+
+   Ordena por ocorrido_em E por id: sem o segundo critério, dois registros com
+   o mesmo carimbo podem trocar de lugar entre páginas e um deles se repetir
+   enquanto o outro desaparece. */
+async function buscarAtividades(ini, fim, crescente){
+  var PAG=1000, de=0, tudo=[];
+  for(;;){
+    var res = await sb.from("atividades").select(COLS_ATIV)
+      .gte("data", ini).lte("data", fim)
+      .order("ocorrido_em", {ascending:!!crescente})
+      .order("id",         {ascending:!!crescente})
+      .range(de, de+PAG-1);
+    if(res.error) return { error:res.error };
+    var lote=res.data||[];
+    tudo=tudo.concat(lote);
+    if(lote.length<PAG) break;
+    de+=PAG;
+    if(de>=60000) break;                 /* trava: nunca deve chegar aqui */
+  }
+  return { data:tudo };
+}
+
 async function carregarAtividades(ini, fim){
-  var res = await sb.from("atividades")
-    .select("id,data,ocorrido_em,perfil_id,lead_nome,fone4,segmento_id,canal_id,tipo")
-    .gte("data", ini).lte("data", fim)
-    .order("ocorrido_em", {ascending:true});
+  var res = await buscarAtividades(ini, fim, true);
   if(res.error){ toast("Erro ao carregar: "+res.error.message); return; }
-  CACHE = { ini:ini, fim:fim, rows:(res.data||[]).map(mapAtiv) };
+  CACHE = { ini:ini, fim:fim, rows:res.data.map(mapAtiv) };
 }
 
 async function carregarVendas(ini, fim){
@@ -902,10 +1077,12 @@ async function carregarVendas(ini, fim){
   });
 }
 
-/* Garante que o cache cobre o período pedido E o dia de hoje (para o "Meu dia"). */
+/* Garante que o cache cobre o período pedido, o dia de hoje e o dia escolhido
+   na data do contato (para o "Meu dia" mostrar o dia que está sendo lançado). */
 async function recarregar(){
-  var j=janela();
+  var j=janela(), d=dataContato();
   var ini = j.ini < hoje() ? j.ini : hoje();
+  if(d < ini) ini = d;
   var fim = j.fim > hoje() ? j.fim : hoje();
   await carregarAtividades(ini, fim);
   await carregarVendas(ini, fim);
@@ -1070,6 +1247,12 @@ function entrar(u){
     ? "Os dados são compartilhados: o que a Josilane registra aparece aqui na hora. O “Importar CSV” serve só para trazer o histórico da versão antiga, que ficava no navegador."
     : "Seus registros vão direto para a base da empresa. Não precisa mais exportar nada toda sexta.";
 
+  /* Aqui e não em carregarReferencias(): lá o sessao ainda é null. */
+  montarFiltroVendedora();
+
+  /* toda entrada começa lançando em hoje */
+  $("dataContato").value=hoje(); atualizarDataContato();
+
   /* ---- o que só o gestor enxerga ---- */
   $("ctrlVendas").style.display    = gestor ? "" : "none";   // conectar planilha
   $("boxConfigMeta").style.display = gestor ? "" : "none";   // definir metas
@@ -1096,20 +1279,62 @@ $("btnSair").addEventListener("click", async function(){
   await sb.auth.signOut(); location.reload();
 });
 
+var ABAS = { reg:["abaReg","painelReg"], regs:["abaRegs","painelRegs"], dash:["abaDash","painelDash"] };
 function irPara(q){
-  var r = q==="reg";
-  $("abaReg").setAttribute("aria-selected",String(r));
-  $("abaDash").setAttribute("aria-selected",String(!r));
-  $("painelReg").classList.toggle("ativo",r);
-  $("painelDash").classList.toggle("ativo",!r);
-  if(r) $("lead").focus(); else renderDash();
+  Object.keys(ABAS).forEach(function(k){
+    var sel = (k===q);
+    $(ABAS[k][0]).setAttribute("aria-selected", String(sel));
+    $(ABAS[k][1]).classList.toggle("ativo", sel);
+  });
+  if(q==="reg") $("lead").focus();
+  else if(q==="dash") renderDash();
 }
 $("abaReg").addEventListener("click", function(){ irPara("reg"); });
 $("abaDash").addEventListener("click", async function(){ irPara("dash"); await recarregar(); });
+$("abaRegs").addEventListener("click", async function(){ irPara("regs"); await buscarRegistros(); });
 
 /* ================= REGISTRO ================= */
 var pref={}; try{ pref=JSON.parse(localStorage.getItem(K_PREF))||{}; }catch(e){ pref={}; }
 var canalAtual = "Ligação";
+
+/* ----- data do contato: lançamento retroativo -----
+   Abre sempre em hoje (de propósito, sem lembrar a última escolha) e aceita até
+   DIAS_RETRO dias para trás, nunca para a frente. O banco confere o mesmo limite
+   (supabase/004-lancamento-retroativo.sql). */
+var DIAS_RETRO = 7;
+var SEMANA = ["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+function diasAntes(n){ var d=new Date(); d.setDate(d.getDate()-n); return iso(d); }
+function dataValida(v){ return !!v && v>=diasAntes(DIAS_RETRO) && v<=hoje(); }
+/* a data que vale para gravar e para o "Meu dia"; inválida cai em hoje */
+function dataContato(){ var v=$("dataContato").value; return dataValida(v) ? v : hoje(); }
+
+function atualizarDataContato(){
+  var inp=$("dataContato"), v=inp.value, ok=dataValida(v), passado=ok && v<hoje();
+  inp.min=diasAntes(DIAS_RETRO); inp.max=hoje();
+  $("rxErro").hidden=ok;
+  if(!ok) $("rxErro").textContent = !v ? "Escolha a data do contato."
+    : v>hoje() ? "Não dá para lançar em data futura."
+    : "Só dá para lançar até "+br(diasAntes(DIAS_RETRO))+" ("+DIAS_RETRO+" dias para trás).";
+  $("btnDataHoje").setAttribute("aria-pressed", v===hoje() ? "true" : "false");
+  $("btnDataOntem").setAttribute("aria-pressed", v===diasAntes(1) ? "true" : "false");
+  var w=ok ? new Date(v+"T12:00:00").getDay() : -1;
+  $("rxDia").textContent = ok ? SEMANA[w]+(w===0||w===6 ? " · fim de semana" : "") : "";
+  $("cardReg").classList.toggle("rx-passado", passado);
+  $("rxAviso").hidden=!passado;
+  if(passado) $("rxAvisoTxt").innerHTML="Você está lançando no dia <b>"+br(v)+" ("+SEMANA[w]+")</b>, não hoje. "+
+    "Tudo o que gravar agora entra nesse dia.";
+  validar();
+}
+async function mudarDataContato(){
+  atualizarDataContato();
+  if(!sessao) return;
+  if(dataContato() < CACHE.ini) await recarregar(); else renderDia();
+}
+$("dataContato").value = hoje();
+$("dataContato").addEventListener("change", mudarDataContato);
+$("btnDataHoje").addEventListener("click", function(){ $("dataContato").value=hoje(); mudarDataContato(); });
+$("btnDataOntem").addEventListener("click", function(){ $("dataContato").value=diasAntes(1); mudarDataContato(); $("lead").focus(); });
+$("rxVoltar").addEventListener("click", function(){ $("dataContato").value=hoje(); mudarDataContato(); });
 
 /* Segmentos e canais agora vêm do banco — a Glenda pode acrescentar sem mexer no código. */
 function montarSegmentos(){
@@ -1192,10 +1417,16 @@ function fecharSeg(){
   $("segmento").setAttribute("aria-expanded","false");
 }
 function escolherSeg(nome, irPraFone){
+  var mudou = (nome !== segAtual);
   segAtual = nome;
   var e=$("segmento");
   e.value = nome; e.classList.remove("invalido");
   fecharSeg(); salvarPref(); validar();
+  /* O segmento faz parte da identidade do lead, então trocá-lo muda de qual
+     lead estamos falando. Só consulta se mudou de verdade: firmarSeg() passa
+     por aqui a cada blur, e sem a guarda seria uma ida ao banco por saída
+     de campo. */
+  if(mudou) mostrarHistorico();
   if(irPraFone) $("fone4").focus();
 }
 
@@ -1273,11 +1504,19 @@ $("segLista").addEventListener("mousemove", function(e){
 function validar(){
   var ok = $("lead").value.trim().length>=2
         && /^\d{4}$/.test($("fone4").value.trim())
-        && segDoTexto()!=="";     /* segmento pela metade não grava: segmento_id é FK */
+        && segDoTexto()!==""      /* segmento pela metade não grava: segmento_id é FK */
+        && dataValida($("dataContato").value);
   Array.prototype.forEach.call(document.querySelectorAll(".acao"), function(b){ b.disabled=!ok; });
   return ok;
 }
-$("lead").addEventListener("input", validar);
+/* O lead agora é fone + nome + segmento, então mudar QUALQUER um dos três
+   muda de qual lead estamos falando — e o aviso da hora de discar tem que
+   acompanhar. No nome vai com atraso para não consultar a cada tecla. */
+var tHist=null;
+function mostrarHistoricoEmBreve(){
+  clearTimeout(tHist); tHist=setTimeout(mostrarHistorico, 350);
+}
+$("lead").addEventListener("input", function(){ validar(); mostrarHistoricoEmBreve(); });
 $("fone4").addEventListener("input", function(){
   this.value=this.value.replace(/\D/g,"").slice(0,4); validar(); mostrarHistorico();
 });
@@ -1287,14 +1526,29 @@ $("fone4").addEventListener("input", function(){
    na hora de discar, não no relatório do fim do mês. */
 function lerCfg(){ return CFG; }
 
-/* Consulta o histórico COMPLETO do lead no banco, não só o período em cache. */
-async function historicoDoLead(fone4){
+/* Consulta o histórico COMPLETO do lead no banco, não só o período em cache.
+
+   Busca por fone4 porque é só isso que o banco indexa, e recorta aqui pelo
+   lead de verdade (fone + nome + segmento). O que sobra do mesmo telefone
+   são OUTROS leads — vale avisar, porque quase sempre é nome digitado
+   diferente da vez passada. */
+async function historicoDoLead(fone4, nome, segmento){
   if(!/^\d{4}$/.test(fone4)) return null;
-  var res = await sb.from("atividades")
-    .select("id,data,ocorrido_em,perfil_id,lead_nome,fone4,segmento_id,canal_id,tipo")
+  /* Um lead só não chega a 1000 toques, então aqui não precisa paginar. */
+  var res = await sb.from("atividades").select(COLS_ATIV)
     .eq("fone4", fone4).order("ocorrido_em", {ascending:true});
   if(res.error || !res.data || !res.data.length) return null;
-  var regs = res.data.map(mapAtiv);
+  var todos = res.data.map(mapAtiv);
+
+  var alvo = chaveLead({fone4:fone4, lead:nome, segmento:segmento});
+  var regs = todos.filter(function(r){ return chaveLead(r)===alvo; });
+
+  var vistos={};
+  todos.forEach(function(r){ if(chaveLead(r)!==alvo) vistos[chaveLead(r)]=r.lead; });
+  var outros = Object.keys(vistos).map(function(k){ return vistos[k]; });
+
+  /* Telefone conhecido, mas nome/segmento novos: não é o mesmo lead. */
+  if(!regs.length) return outros.length ? { soOutros:true, outros:outros } : null;
 
   var c=contar(regs), ult=regs[regs.length-1];
   var canaisUsados={}; regs.forEach(function(r){ canaisUsados[r.canal]=(canaisUsados[r.canal]||0)+1; });
@@ -1305,7 +1559,7 @@ async function historicoDoLead(fone4){
     if(regs[i].tipo==="Tentativa") seguidas++; else break;
   }
   return { regs:regs, c:c, ultimo:ult, canais:canaisUsados, seguidas:seguidas,
-           nome:ult.lead, jaFalou:c.contatos>0 };
+           nome:ult.lead, jaFalou:c.contatos>0, outros:outros };
 }
 
 var seqHist=0;
@@ -1314,9 +1568,23 @@ async function mostrarHistorico(){
   var meu=++seqHist;                       // ignora resposta de digitação antiga
   if(!/^\d{4}$/.test(fone)){ box.style.display="none"; box.className="hist"; return; }
 
-  var h=await historicoDoLead(fone);
+  var h=await historicoDoLead(fone, $("lead").value, segDoTexto()||segAtual);
   if(meu!==seqHist) return;
   if(!h){ box.style.display="none"; box.className="hist"; return; }
+
+  /* Telefone já visto, mas com outro nome/segmento. Não some com o aviso:
+     na prática costuma ser o mesmo cliente com o nome escrito diferente. */
+  if(h.soOutros){
+    box.className="hist";
+    box.innerHTML='<div class="cab">Este final de telefone já foi usado</div>'+
+      'Em '+(h.outros.length===1?'outro lead':h.outros.length+' outros leads')+': '+
+      h.outros.slice(0,3).map(esc).join(", ")+
+      (h.outros.length>3 ? ' e mais '+(h.outros.length-3) : '')+
+      '. Se for o mesmo cliente, escreva o nome igual ao de antes para o '+
+      'histórico não se partir em dois.';
+    box.style.display="block";
+    return;
+  }
 
   var lim=lerCfg().maxTentativas;
   var classe="hist";
@@ -1353,6 +1621,14 @@ async function mostrarHistorico(){
        canais.map(function(k){ return '<span class="mk">'+esc(k)+' '+h.canais[k]+'</span>'; }).join("")+
        '</div>';
 
+  if(h.outros.length){
+    txt+='<div style="margin-top:7px;font-size:11.5px;color:var(--muted)">'+
+         'O mesmo final de telefone aparece em '+
+         (h.outros.length===1?'outro lead':h.outros.length+' outros leads')+': '+
+         h.outros.slice(0,3).map(esc).join(", ")+
+         (h.outros.length>3 ? ' e mais '+(h.outros.length-3) : '')+'.</div>';
+  }
+
   box.className=classe; box.innerHTML=txt; box.style.display="block";
 }
 $("lead").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); $("fone4").focus(); } });
@@ -1365,25 +1641,30 @@ document.querySelector(".acoes").addEventListener("click", function(e){
 var gravando=false;
 async function registrar(tipo){
   if(gravando) return;
-  if(!validar()){ toast("Falta o nome do lead ou os 4 dígitos"); return; }
+  if(!validar()){ toast(dataValida($("dataContato").value) ? "Falta o nome do lead ou os 4 dígitos" : "Confira a data do contato"); return; }
+  var dataSel=dataContato();
 
   gravando=true;
   Array.prototype.forEach.call(document.querySelectorAll(".acao"), function(b){ b.disabled=true; });
 
-  var res = await sb.from("atividades").insert({
+  var novo = {
     perfil_id:   sessao.id,
-    data:        hoje(),
+    data:        dataSel,
     lead_nome:   $("lead").value.trim(),
     fone4:       $("fone4").value.trim(),
     segmento_id: segIdPorNome[segDoTexto()],
     canal_id:    canIdPorNome[canalAtual],
     tipo:        tipo
-  });
+  };
+  /* Hoje: ocorrido_em fica com o now() do banco. Lançado depois não tem hora
+     real: entra ao meio-dia (Salvador), para não inventar pico de horário no dashboard. */
+  if(dataSel<hoje()) novo.ocorrido_em = dataSel+"T12:00:00-03:00";
+  var res = await sb.from("atividades").insert(novo);
 
   gravando=false;
   if(res.error){ toast("Não gravou: "+res.error.message); validar(); return; }
 
-  toast(tipo+" gravado");
+  toast(tipo+" gravado"+(dataSel<hoje() ? " em "+br(dataSel) : ""));
   $("lead").value=""; $("fone4").value="";
   validar(); mostrarHistorico(); $("lead").focus();
   await recarregar();
@@ -1396,14 +1677,29 @@ async function registrar(tipo){
      tentativas          todos os lançamentos
      leadsTentados       leads DIFERENTES tentados (contados uma vez por dia)
      tentRepetidas       o excedente — repetição no mesmo lead, no mesmo dia  */
+/* ---------- identidade do lead ----------
+   Dois leads só são o mesmo se baterem TELEFONE + NOME + SEGMENTO.
+   Só o fone4 não serve: são 4 dígitos, e dois clientes diferentes colidem
+   com facilidade — o histórico de um aparecia na tela do outro.
+
+   Normaliza acento, caixa e espaço repetido, senão "Padaria do Zé" e
+   "padaria do ze" viram dois leads e a contagem de tentativas se parte
+   justamente no caso que a tela existe para pegar. */
+function chaveLead(r){
+  var nome = semAcento(String(r.lead||"").replace(/\s+/g," ").trim());
+  var seg  = semAcento(String(r.segmento||"").trim());
+  return r.fone4+"|"+nome+"|"+seg;
+}
+
 function contar(regs){
   var c={}; TIPOS.forEach(function(t){ c[t]=0; });
   var diaLead={}, leads={};
   regs.forEach(function(r){
+    var k=chaveLead(r);
     c[r.tipo]=(c[r.tipo]||0)+1;
-    if(r.tipo==="Tentativa") diaLead[r.data+"|"+r.fone4]=1;
-    if(!leads[r.fone4]) leads[r.fone4]=false;
-    if(r.tipo!=="Tentativa") leads[r.fone4]=true;
+    if(r.tipo==="Tentativa") diaLead[r.data+"|"+k]=1;
+    if(!leads[k]) leads[k]=false;
+    if(r.tipo!=="Tentativa") leads[k]=true;
   });
   c.contatos      = CONTATO.reduce(function(a,t){ return a+c[t]; },0);
   c.total         = regs.length;
@@ -1420,9 +1716,13 @@ function contar(regs){
 
 /* ================= MEU DIA ================= */
 function renderDia(){
-  var regs=ler().filter(function(r){ return r.data===hoje() && r.vendedora===sessao.nome; });
+  var dia=dataContato(), eHoje=dia===hoje();
+  var regs=ler().filter(function(r){ return r.data===dia && r.vendedora===sessao.nome; });
   var c=contar(regs);
-  $("rotHoje").textContent=br(hoje());
+  $("rotTitDia").textContent = eHoje ? "Meu dia" : "Dia lançado";
+  $("rotHoje").textContent=br(dia)+" · "+SEMANA[new Date(dia+"T12:00:00").getDay()];
+  $("rotListaDia").textContent = eHoje ? "Registros de hoje" : "Registros de "+br(dia).slice(0,5);
+  $("cardDia").style.setProperty("--acento", eHoje ? "var(--ac-verde)" : "var(--c-tent)");
   $("dTent").textContent=c.Tentativa;
   $("dCont").textContent=c.contatos;
   $("dLeadsTent").textContent=c.leadsTentados;
@@ -1437,17 +1737,18 @@ function renderDia(){
   $("contaDia").textContent = regs.length
     ? "— "+regs.length+" registro"+(regs.length===1?"":"s") : "";
   if(!regs.length){
-    tb.innerHTML='<tr><td colspan="5" class="vazio">Nenhum contato registrado hoje.</td></tr>';
+    tb.innerHTML='<tr><td colspan="5" class="vazio">Nenhum contato registrado '+(eHoje?"hoje":"em "+br(dia))+".</td></tr>";
   } else {
     regs.slice().reverse().forEach(function(r){
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>"+esc(r.hora)+"</td><td>"+esc(r.lead||"—")+"</td><td>••••"+esc(r.fone4)+"</td>"+
+      tr.innerHTML="<td>"+esc(r.hora)+(r.retro?'<span class="rx-tag" title="Lançado depois do dia do contato">lançado depois</span>':"")+"</td><td>"+esc(r.lead||"—")+"</td><td>••••"+esc(r.fone4)+"</td>"+
         '<td><span class="pill" style="background:'+cor(r.tipo)+'">'+esc(r.tipo)+"</span></td>";
       var td=document.createElement("td"); td.style.textAlign="right";
       var b=document.createElement("button"); b.className="apagar"; b.textContent="×"; b.title="Apagar";
       b.addEventListener("click", async function(){
-        var res=await sb.from("atividades").delete().eq("id", r.id);
+        var res=await sb.from("atividades").delete().eq("id", r.id).select("id");
         if(res.error){ toast("Não removeu: "+res.error.message); return; }
+        if(!res.data || !res.data.length){ toast("Não removeu: só dá para apagar o que foi gravado hoje ou ontem"); return; }
         toast("Removido"); await recarregar();
       });
       td.appendChild(b); tr.appendChild(td); tb.appendChild(tr);
@@ -1461,10 +1762,140 @@ function renderDia(){
   });
 }
 
+/* ================= REGISTROS =================
+   Consulta própria, de propósito. O CACHE do dashboard é governado pelo
+   janela() daquele painel; se as duas telas dividissem o mesmo cache, mudar
+   a data aqui mexeria nos números de lá sem ninguém entender por quê. */
+var REGS=[], rgVisao="lead";
+
+function montarFiltrosRegistros(){
+  $("rgTipo").innerHTML='<option value="">Todos os tipos</option>'+
+    TIPOS.map(function(x){ return '<option value="'+esc(x)+'">'+esc(x)+'</option>'; }).join("");
+
+  /* A RLS já entrega só as linhas dela para quem não é gestor — o seletor
+     de vendedora não teria o que escolher. */
+  if(sessao.papel==="gestor"){
+    /* Todas as vendedoras, sempre. nomesVendedoras() já vem cortada pelo
+       filtro do Dashboard — usá-la aqui deixaria Registros preso na vendedora
+       escolhida lá, sem opção de voltar para "Todas". */
+    var sel=$("rgVend").value;
+    $("rgVend").innerHTML='<option value="">Todas as vendedoras</option>'+
+      PERFIS.filter(function(p){ return p.vende; })
+            .map(function(p){ return '<option value="'+esc(p.nome)+'">'+esc(p.nome)+'</option>'; }).join("");
+    $("rgVend").value=sel;   /* rebuild não pode zerar o que a gestora escolheu aqui */
+    $("boxRgVend").style.display="";
+  } else {
+    $("boxRgVend").style.display="none";
+  }
+
+  if(!$("rgFim").value){
+    $("rgFim").value = hoje();
+    $("rgIni").value = iso(new Date(Date.now()-29*864e5));
+  }
+}
+
+async function buscarRegistros(){
+  montarFiltrosRegistros();
+  var ini=$("rgIni").value||hoje(), fim=$("rgFim").value||hoje();
+  if(ini>fim){ var t=ini; ini=fim; fim=t; $("rgIni").value=ini; $("rgFim").value=fim; }
+
+  var res = await buscarAtividades(ini, fim, false);   /* paginado: aqui é "todos" */
+  if(res.error){ toast("Erro ao carregar: "+res.error.message); return; }
+  REGS=res.data.map(mapAtiv);
+  renderRegistros();
+}
+
+function registrosFiltrados(){
+  var vend = sessao.papel==="gestor" ? $("rgVend").value : "";
+  var tipo = $("rgTipo").value;
+  var q    = semAcento(($("rgBusca").value||"").trim());
+  return REGS.filter(function(r){
+    if(vend && r.vendedora!==vend) return false;
+    if(tipo && r.tipo!==tipo)      return false;
+    if(q && semAcento(r.lead||"").indexOf(q)<0 && r.fone4.indexOf(q)<0) return false;
+    return true;
+  });
+}
+
+function renderRegistros(){
+  var regs=registrosFiltrados();
+  $("rgConta").textContent = br($("rgIni").value)+" a "+br($("rgFim").value)+
+    "  ·  "+regs.length+" registro"+(regs.length===1?"":"s");
+  var host=$("rgTabela");
+  if(!regs.length){
+    host.innerHTML='<div class="rgVazio">Nenhum registro com esses filtros.</div>'; return;
+  }
+  host.innerHTML = rgVisao==="lead" ? tabelaPorLead(regs) : tabelaPorRegistro(regs);
+}
+
+/* "Quantas tentativas fiz para este lead" — agrupado pela identidade nova. */
+function tabelaPorLead(regs){
+  var porLead={};
+  regs.forEach(function(r){
+    var k=chaveLead(r);
+    if(!porLead[k]) porLead[k]={nome:r.lead, fone4:r.fone4, seg:r.segmento, vend:r.vendedora,
+                                tent:0, cont:0, ult:"", prim:"9999-99-99", canais:{}};
+    var L=porLead[k];
+    if(r.tipo==="Tentativa") L.tent++; else L.cont++;
+    L.canais[r.canal]=1;
+    if(r.data>L.ult)  L.ult=r.data;
+    if(r.data<L.prim) L.prim=r.data;
+  });
+
+  var ls=Object.keys(porLead).map(function(k){ return porLead[k]; })
+          .sort(function(a,b){ return b.tent-a.tent || b.cont-a.cont; });
+  var lim=lerCfg().maxTentativas;
+
+  var h='<table><thead><tr><th>Lead</th><th>Fone</th><th>Segmento</th><th>Vendedora</th>'+
+        '<th class="n">Tentativas</th><th class="n">Contatos</th><th class="n">Total</th>'+
+        '<th>Canais</th><th>1ª</th><th>Última</th></tr></thead><tbody>';
+  ls.forEach(function(L){
+    var alerta = L.cont===0 && L.tent>=lim;
+    h+='<tr><td>'+esc(L.nome||"—")+'</td><td>••••'+esc(L.fone4)+'</td>'+
+       '<td>'+esc(L.seg)+'</td><td>'+esc(L.vend)+'</td>'+
+       '<td class="n"'+(alerta?' style="color:var(--alerta);font-weight:700"':'')+'>'+
+         L.tent+(alerta?' ■':'')+'</td>'+
+       '<td class="n"><b>'+L.cont+'</b></td><td class="n">'+(L.tent+L.cont)+'</td>'+
+       '<td>'+esc(Object.keys(L.canais).join(", "))+'</td>'+
+       '<td>'+br(L.prim)+'</td><td>'+br(L.ult)+'</td></tr>';
+  });
+  return h+'</tbody></table>'+
+    '<p class="dica">'+ls.length+' lead'+(ls.length===1?"":"s")+' no período. '+
+    'É o mesmo lead quando telefone, nome e segmento batem — nome escrito diferente '+
+    'vira lead separado. ■ passou de '+lim+' tentativas sem nunca ter atendido.</p>';
+}
+
+function tabelaPorRegistro(regs){
+  var h='<table><thead><tr><th>Data</th><th>Hora</th><th>Vendedora</th><th>Lead</th>'+
+        '<th>Fone</th><th>Segmento</th><th>Canal</th><th>Tipo</th></tr></thead><tbody>';
+  regs.forEach(function(r){
+    h+='<tr><td>'+br(r.data)+'</td><td>'+esc(r.hora)+'</td><td>'+esc(r.vendedora)+'</td>'+
+       '<td>'+esc(r.lead||"—")+'</td><td>••••'+esc(r.fone4)+'</td>'+
+       '<td>'+esc(r.segmento)+'</td><td>'+esc(r.canal)+'</td>'+
+       '<td><span class="pill" style="background:'+cor(r.tipo)+'">'+esc(r.tipo)+'</span></td></tr>';
+  });
+  return h+'</tbody></table>';
+}
+
+["rgIni","rgFim"].forEach(function(id){ $(id).addEventListener("change", buscarRegistros); });
+["rgVend","rgTipo"].forEach(function(id){ $(id).addEventListener("change", renderRegistros); });
+$("rgBusca").addEventListener("input", renderRegistros);
+$("grpRgVisao").addEventListener("click", function(e){
+  var b=e.target.closest("button[data-v]"); if(!b) return;
+  rgVisao=b.getAttribute("data-v");
+  Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+    x.setAttribute("aria-pressed", String(x.getAttribute("data-v")===rgVisao));
+  });
+  renderRegistros();
+});
+
 /* ================= DASHBOARD ================= */
 var periodo="30";
 
-$("grpPeriodo").addEventListener("click", function(e){
+/* Trocar o período precisa ir ao banco, não só re-filtrar: o CACHE só tem as
+   linhas do período anterior, então ampliar a janela sem recarregar mostra
+   zero onde há movimento. */
+$("grpPeriodo").addEventListener("click", async function(e){
   var b=e.target.closest("button[data-p]"); if(!b) return;
   periodo=b.getAttribute("data-p");
   Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
@@ -1474,9 +1905,29 @@ $("grpPeriodo").addEventListener("click", function(e){
   if(periodo==="custom" && !$("dtIni").value){
     $("dtFim").value=hoje(); $("dtIni").value=iso(new Date(Date.now()-29*864e5));
   }
-  renderDash();
+  await recarregar();
 });
-["dtIni","dtFim"].forEach(function(id){ $(id).addEventListener("change", renderDash); });
+["dtIni","dtFim"].forEach(function(id){
+  $(id).addEventListener("change", async function(){
+    /* Datas invertidas devolveriam janela vazia sem avisar. */
+    var a=$("dtIni").value, b=$("dtFim").value;
+    if(a && b && a>b){ $("dtIni").value=b; $("dtFim").value=a; }
+    await recarregar();
+  });
+});
+$("fVend").addEventListener("change", function(){ filtroVend=this.value; renderDash(); });
+
+/* A largura das colunas do ritmo é calculada a partir do container, então
+   redimensionar a janela precisa refazer a conta. Com atraso, porque resize
+   dispara dezenas de vezes durante um arrasto. */
+var tResize=null;
+addEventListener("resize", function(){
+  esconderDicaG();
+  clearTimeout(tResize);
+  tResize=setTimeout(function(){
+    if($("painelDash").classList.contains("ativo")) renderDash();
+  }, 250);
+});
 
 function janela(){
   var fim=hoje(), ini;
@@ -1484,6 +1935,13 @@ function janela(){
   else if(periodo==="7") ini=iso(new Date(Date.now()-6*864e5));
   else if(periodo==="30") ini=iso(new Date(Date.now()-29*864e5));
   else if(periodo==="mes"){ var d=new Date(); ini=iso(new Date(d.getFullYear(),d.getMonth(),1)); }
+  /* Mês fechado, para a reunião: "este mês" no dia 5 é meio mês e engana.
+     Dia 0 do mês atual = último dia do anterior, e o Date resolve virada de ano. */
+  else if(periodo==="mesant"){
+    var dm=new Date();
+    ini=iso(new Date(dm.getFullYear(), dm.getMonth()-1, 1));
+    fim=iso(new Date(dm.getFullYear(), dm.getMonth(), 0));
+  }
   else { ini=$("dtIni").value||fim; fim=$("dtFim").value||hoje(); }
   return {ini:ini,fim:fim};
 }
@@ -1494,9 +1952,26 @@ function visiveis(){
   return sessao.papel==="gestor" ? todos : todos.filter(function(r){ return r.vendedora===sessao.nome; });
 }
 
+/* Uma variável só governa o filtro de vendedora do dashboard. Como ranking,
+   andamento da meta e o detalhe todos passam por aqui, filtrar neste ponto
+   mantém os três coerentes — não dá para o ranking mostrar três nomes
+   enquanto o resumo já está falando de uma. */
+var filtroVend="";
+
+function montarFiltroVendedora(){
+  var s=$("fVend");
+  if(sessao.papel!=="gestor"){ $("boxDashVend").style.display="none"; return; }
+  $("boxDashVend").style.display="";
+  var todas=PERFIS.filter(function(p){ return p.vende; }).map(function(p){ return p.nome; });
+  s.innerHTML='<option value="">Todas as vendedoras</option>'+
+    todas.map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join("");
+  s.value=filtroVend;
+}
+
 function nomesVendedoras(){
   if(sessao.papel!=="gestor") return [sessao.nome];
-  return PERFIS.filter(function(p){ return p.vende; }).map(function(p){ return p.nome; });
+  var todas=PERFIS.filter(function(p){ return p.vende; }).map(function(p){ return p.nome; });
+  return filtroVend ? todas.filter(function(n){ return n===filtroVend; }) : todas;
 }
 
 function perfilPorNome(nome){
@@ -1745,7 +2220,7 @@ function renderSemResposta(regs){
   var lim=lerCfg().maxTentativas, host=$("semResposta");
   var porLead={};
   regs.forEach(function(r){
-    var k=r.fone4;
+    var k=chaveLead(r);
     if(!porLead[k]) porLead[k]={fone4:r.fone4, nome:r.lead, seg:r.segmento, vend:r.vendedora,
                                 tent:0, cont:0, ult:"", canais:{}};
     var L=porLead[k];
@@ -1797,7 +2272,8 @@ function renderSemResposta(regs){
 /* ---------- vendas ---------- */
 function vendasNoPeriodo(j){
   var v=lerVendas().filter(function(x){ return x.data>=j.ini && x.data<=j.fim; });
-  if(sessao.papel!=="gestor") v=v.filter(function(x){ return x.vendedora===sessao.nome; });
+  if(sessao.papel!=="gestor")  v=v.filter(function(x){ return x.vendedora===sessao.nome; });
+  else if(filtroVend)          v=v.filter(function(x){ return x.vendedora===filtroVend; });
   return v;
 }
 
@@ -2175,13 +2651,15 @@ function renderResumo(regs, j){
   var c=contar(regs);
   var vendas=vendasNoPeriodo(j);
   var taxa = c.total ? Math.round(c.contatos/c.total*100) : 0;
+  /* Ordem pedida: o esforço total primeiro, depois como ele se reparte,
+     e a venda no fim — que é o resultado, não a atividade. */
   var itens=[
-    {v:c.contatos,      r:"Contatos feitos", s:taxa+"% das atividades", cor:cor("Pitch")},
-    {v:c.Tentativa,     r:"Tentativas",      s:c.tentRepetidas+" repetidas", cor:cor("Tentativa")},
+    {v:c.total,         r:"Atividades",       s:"tudo que foi registrado"},
+    {v:c.contatos,      r:"Contatos feitos",  s:taxa+"% das atividades", cor:cor("Pitch")},
+    {v:c.Tentativa,     r:"Tentativas",       s:c.tentRepetidas+" repetidas", cor:cor("Tentativa")},
+    {v:vendas.length,   r:"Vendas",           s:"no período", cor:cor("Negociação")},
     {v:c.leadsTentados, r:"Leads diferentes tentados"},
-    {v:c.Pitch,         r:"Pitches",         cor:cor("Pitch")},
-    {v:vendas.length,   r:"Vendas"},
-    {v:c.total,         r:"Atividades no total"}
+    {v:c.Pitch,         r:"Pitches",          cor:cor("Pitch")}
   ];
   var host=$("heroResumo"); host.innerHTML="";
   itens.forEach(function(k){
@@ -2192,6 +2670,244 @@ function renderResumo(regs, j){
   });
 }
 
+/* ---------- gráfico de barras agrupadas, em SVG e sem biblioteca ---------- */
+var dicaG=$("dicaG");
+function mostrarDicaG(e, html){
+  dicaG.innerHTML=html; dicaG.classList.add("on");
+  var x=e.clientX+14, y=e.clientY+14, r=dicaG.getBoundingClientRect();
+  if(x+r.width  > innerWidth -10) x=e.clientX-r.width -14;
+  if(y+r.height > innerHeight-10) y=e.clientY-r.height-14;
+  dicaG.style.left=x+"px"; dicaG.style.top=y+"px";
+}
+function esconderDicaG(){ dicaG.classList.remove("on"); }
+
+function barrasDuplas(svgEl, dados, opts){
+  opts=opts||{};
+  var L=34, R=8, T=12, B=26, H=opts.altura||210;
+  var n=dados.length || 1;
+
+  /* Cada dia ganha uma largura MÍNIMA fixa, porque o rótulo "Qua 15/07" tem
+     tamanho próprio e não pode encolher junto com o gráfico. Se sobrar espaço
+     no card, as colunas esticam para preencher; se faltar, o SVG fica mais
+     largo que o container e o .rolaX rola para a direita. */
+  var minFaixa = opts.minFaixa || 0;
+  var disp = (svgEl.parentElement && svgEl.parentElement.clientWidth) || 760;
+  var faixa = minFaixa ? Math.max(minFaixa, (disp-L-R)/n) : (760-L-R)/n;
+  var W = minFaixa ? Math.round(L + faixa*n + R) : 760;
+  var pw = W-L-R, ph = H-T-B;
+
+  var max=0; dados.forEach(function(d){ max=Math.max(max,d.a,d.b); });
+  svgEl.setAttribute("viewBox","0 0 "+W+" "+H);
+  if(minFaixa) svgEl.setAttribute("width", W);
+  if(!max){
+    svgEl.innerHTML='<text x="'+(W/2)+'" y="'+(H/2)+'" text-anchor="middle" class="eixo">'+
+                    'Sem atividade no período.</text>';
+    return;
+  }
+  var topo=Math.max(1,Math.ceil(max/4))*4;      /* escala em 4 passos inteiros */
+  /* A barra cresce com a coluna. Sem isto, um período de 5 dias dá coluna de
+     200px com barra de 17px: o gráfico fica vazio e o contorno do melhor dia
+     fica do tamanho de um cartão. largMax passa a ser o piso, não o teto. */
+  var tetoL=Math.max(opts.largMax||16, faixa*0.28);
+  var larg=Math.max(2.5, Math.min(tetoL, (faixa-8)/2-1));
+
+  var s="";
+  for(var g=0; g<=4; g++){
+    var yv=topo/4*g, y=T+ph-(yv/topo)*ph;
+    s+='<line class="gd" x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+
+       '" stroke-opacity="'+(g?".6":"1")+'"/>'+
+       '<text class="eixo" x="'+(L-7)+'" y="'+(y+3.5)+'" text-anchor="end">'+yv+'</text>';
+  }
+  /* topo arredondado, base reta: a barra fica ancorada na linha do zero */
+  function tampa(x,y,w,h,r){
+    if(h<=0.4) return "";
+    r=Math.min(r,w/2,h);
+    return "M"+x+","+(y+h)+" L"+x+","+(y+r)+" Q"+x+","+y+" "+(x+r)+","+y+
+           " L"+(x+w-r)+","+y+" Q"+(x+w)+","+y+" "+(x+w)+","+(y+r)+" L"+(x+w)+","+(y+h)+" Z";
+  }
+
+  var base=T+ph, ct=cor("Tentativa"), cc=cor("Pitch");
+  var rotLarg=opts.rotLarg || 34;                  /* largura do rótulo em px */
+  var passoRot=faixa>=rotLarg ? 1 : Math.ceil(rotLarg/faixa);
+  dados.forEach(function(d,i){
+    var cx=L+faixa*i+faixa/2, xa=cx-larg-1, xb=cx+1;   /* 2px de respiro no meio */
+    if(d.a>0) s+='<path class="barra" d="'+tampa(xa, base-(d.a/topo)*ph, larg, (d.a/topo)*ph, 4)+
+                 '" fill="'+ct+'" data-i="'+i+'"/>';
+    if(d.b>0) s+='<path class="barra" d="'+tampa(xb, base-(d.b/topo)*ph, larg, (d.b/topo)*ph, 4)+
+                 '" fill="'+cc+'" data-i="'+i+'"/>';
+    /* O contorno abraça o PAR de barras, não a coluna inteira — numa coluna
+       larga ele viraria uma caixa solta em volta de quase nada. */
+    if(d.melhor){
+      var mw=larg*2+2+12;
+      s+='<rect class="melhor" x="'+(cx-mw/2)+'" y="'+(T-4)+
+         '" width="'+mw+'" height="'+(ph+8)+'" rx="5"/>';
+    }
+    /* Pula rótulo só se a coluna for estreita demais para ele. Com largura
+       mínima garantida isto nunca pula — é a rede para o modo sem rolagem. */
+    if(i % passoRot === 0)
+      s+='<text class="rotX" x="'+cx+'" y="'+(base+14)+'" text-anchor="middle">'+esc(d.rot)+'</text>';
+  });
+  svgEl.innerHTML=s;
+
+  Array.prototype.forEach.call(svgEl.querySelectorAll(".barra"), function(el){
+    el.addEventListener("mousemove", function(e){
+      var d=dados[+el.getAttribute("data-i")], tot=d.a+d.b;
+      mostrarDicaG(e, "<b>"+esc(d.titulo||d.rot)+"</b><br>"+
+        '<i style="background:'+ct+'"></i>'+d.a+" tentativa"+(d.a===1?"":"s")+"<br>"+
+        '<i style="background:'+cc+'"></i>'+d.b+" contato"+(d.b===1?"":"s")+" feito"+(d.b===1?"":"s")+
+        (tot ? "<br>"+Math.round(d.b/tot*100)+"% viraram conversa" : ""));
+    });
+    el.addEventListener("mouseleave", esconderDicaG);
+  });
+}
+
+/* ---------- ritmo do período: qual foi o melhor dia ---------- */
+function renderRitmo(regs, j){
+  var dias={}, d=new Date(j.ini+"T12:00:00"), fim=new Date(j.fim+"T12:00:00");
+  while(d<=fim){ dias[iso(d)]={a:0,b:0}; d.setDate(d.getDate()+1); }
+  regs.forEach(function(r){ if(dias[r.data]) dias[r.data][r.tipo==="Tentativa"?"a":"b"]++; });
+
+  /* Dia útil entra sempre — o buraco É a informação. Sábado e domingo só
+     entram se alguém tiver trabalhado, senão viram 8 colunas vazias que
+     empurram a média para baixo sem querer dizer nada. */
+  var serie=Object.keys(dias).sort().map(function(k){
+    var dt=new Date(k+"T12:00:00"), fds=(dt.getDay()===0||dt.getDay()===6);
+    return { rot:DIA_SEM[dt.getDay()]+" "+br(k).slice(0,5),   /* "Qua 15/07" */
+             titulo:DIA_SEM[dt.getDay()]+", "+br(k),
+             a:dias[k].a, b:dias[k].b, fds:fds };
+  }).filter(function(x){ return !x.fds || (x.a+x.b)>0; });
+
+  var comAlgo=serie.filter(function(x){ return x.a+x.b>0; });
+  var melhorC=comAlgo.slice().sort(function(x,y){ return y.b-x.b; })[0];
+  var melhorT=comAlgo.slice().sort(function(x,y){ return y.a-x.a; })[0];
+  if(melhorC) melhorC.melhor=true;
+
+  $("destRitmo").innerHTML = comAlgo.length
+    ? '<div class="dest" style="border-left-color:'+cor("Pitch")+'"><span>Melhor dia em contatos</span><b>'+
+        esc(melhorC.titulo)+'</b><small>'+melhorC.b+' contato'+(melhorC.b===1?"":"s")+
+        ' feito'+(melhorC.b===1?"":"s")+'</small></div>'+
+      '<div class="dest" style="border-left-color:'+cor("Tentativa")+'"><span>Mais tentativas</span><b>'+
+        esc(melhorT.titulo)+'</b><small>'+melhorT.a+' tentativa'+(melhorT.a===1?"":"s")+'</small></div>'+
+      '<div class="dest"><span>Dias com registro</span><b>'+comAlgo.length+' de '+serie.length+'</b>'+
+        '<small>'+(serie.length-comAlgo.length)+' sem nenhuma atividade</small></div>'
+    : '';
+
+  $("legRitmo").innerHTML =
+    '<span><i style="background:'+cor("Tentativa")+'"></i>Tentativas</span>'+
+    '<span><i style="background:'+cor("Pitch")+'"></i>Contatos feitos</span>';
+
+  /* minFaixa 58 = espaço do rótulo "Qua 15/07" (~50px) mais respiro.
+     Mês inteiro passa da largura do card e rola; 7 dias esticam e não rolam. */
+  barrasDuplas($("gRitmo"), serie, {largMax:17, altura:210, minFaixa:58, rotLarg:54});
+
+  var h='<table><thead><tr><th>Dia</th><th class="n">Tentativas</th><th class="n">Contatos</th>'+
+        '<th class="n">Total</th></tr></thead><tbody>';
+  serie.forEach(function(x){
+    h+='<tr><td>'+esc(x.titulo)+'</td><td class="n">'+x.a+'</td><td class="n"><b>'+x.b+
+       '</b></td><td class="n">'+(x.a+x.b)+'</td></tr>';
+  });
+  $("tbRitmo").innerHTML=h+'</tbody></table>';
+}
+
+/* ---------- composição: de X atividades, o que saiu ---------- */
+function renderComposicao(regs, vendas){
+  var c=contar(regs), tot=c.total||1;
+  var linhas=[
+    {rot:"Atividades",          n:c.total,         cor:"var(--navy-2)",   nivel:"",     q:"tudo no período"},
+    {rot:"Tentativas",          n:c.Tentativa,     cor:cor("Tentativa"),  nivel:"filho"},
+    {rot:"Contatos feitos",     n:c.contatos,      cor:cor("Pitch"),      nivel:"filho"},
+    {rot:"Ativação 1º contato", n:c["Ativação"],   cor:cor("Ativação"),   nivel:"neto"},
+    {rot:"Follow-up",           n:c["Follow-up"],  cor:cor("Follow-up"),  nivel:"neto"},
+    {rot:"Pitch",               n:c.Pitch,         cor:cor("Pitch"),      nivel:"neto"},
+    {rot:"Negociação",          n:c["Negociação"], cor:cor("Negociação"), nivel:"neto"},
+    {rot:"Suporte",             n:c.Suporte,       cor:cor("Suporte"),    nivel:"neto"}
+  ];
+
+  var h=linhas.map(function(l){
+    return '<div class="cpx'+(l.nivel?" "+l.nivel:"")+'">'+
+      '<div class="rot">'+esc(l.rot)+'</div>'+
+      '<div><div class="bar" style="width:'+Math.max(l.n/tot*100,2.5)+'%;background:'+l.cor+'">'+
+        (l.n||"")+'</div></div>'+
+      '<div class="q">'+(l.q || (c.total?Math.round(l.n/c.total*100):0)+"% das atividades")+'</div></div>';
+  }).join("");
+
+  /* Venda não é atividade: vem da planilha e é resultado, não esforço.
+     Fica separada por um filete de propósito — na mesma pilha pareceria
+     mais uma fatia do mesmo bolo, e não é a mesma unidade. */
+  h+='<div class="cpx sep"><div class="rot">Vendas</div>'+
+     '<div><div class="bar" style="width:'+Math.max(vendas.length/tot*100,2.5)+
+       '%;background:var(--ac-terra)">'+(vendas.length||"")+'</div></div>'+
+     '<div class="q">'+(c.contatos ? (vendas.length/c.contatos*100).toFixed(1) : "0")+
+       '% dos contatos feitos</div></div>';
+
+  $("gComp").innerHTML=h;
+}
+
+/* ---------- picos do período ----------
+   Não é "quanto no mês", é "QUANDO no mês": o dia de maior pitch, de maior
+   venda e de maior suporte. Serve para a reunião perguntar o que houve
+   naquele dia, que é a única pergunta que muda comportamento. */
+function renderPicos(regs, vendas){
+  function porDia(lista, filtro){
+    var m={};
+    lista.forEach(function(r){ if(!filtro || filtro(r)) m[r.data]=(m[r.data]||0)+1; });
+    /* Empate desempata pelo dia mais recente — e o empate é DITO, não
+       escondido: na reunião alguém sempre pergunta "foi só esse dia?". */
+    return Object.keys(m).map(function(k){ return {data:k, n:m[k]}; })
+             .sort(function(a,b){ return b.n-a.n || (a.data>b.data ? -1 : 1); });
+  }
+
+  /* Na ordem do funil, com Suporte no fim — ele fica fora da meta. */
+  var metricas=[
+    { rot:"Ativação 1º contato", cor:cor("Ativação"),
+      r:porDia(regs, function(r){ return r.tipo==="Ativação"; }) },
+    { rot:"Follow-up", cor:cor("Follow-up"),
+      r:porDia(regs, function(r){ return r.tipo==="Follow-up"; }) },
+    { rot:"Pitch", cor:cor("Pitch"),
+      r:porDia(regs, function(r){ return r.tipo==="Pitch"; }) },
+    { rot:"Venda", cor:"var(--ac-terra)",
+      r:porDia(vendas, null) },
+    { rot:"Suporte", cor:cor("Suporte"),
+      r:porDia(regs, function(r){ return r.tipo==="Suporte"; }) }
+  ];
+
+  var h='<table><thead><tr><th>Etapa</th><th>Melhor dia</th><th class="n">No dia</th>'+
+        '<th class="n">Total no período</th></tr></thead><tbody>';
+
+  metricas.forEach(function(m){
+    var total=m.r.reduce(function(a,x){ return a+x.n; },0);
+    var etapa='<span class="pt" style="background:'+m.cor+'"></span>'+esc(m.rot);
+
+    if(!m.r.length){
+      h+='<tr><td>'+etapa+'</td><td class="fraco">nada no período</td>'+
+         '<td class="n">—</td><td class="n">0</td></tr>';
+      return;
+    }
+
+    var t=m.r[0], dt=new Date(t.data+"T12:00:00");
+    var empatados=m.r.filter(function(x){ return x.n===t.n; }).length;
+    var dia, noDia;
+
+    /* Topo igual a 1 com vários dias empatados não é pico: são N eventos em
+       N dias. Eleger um dia aí é escolher no desempate e levar para a reunião
+       uma conclusão que o dado não sustenta. */
+    if(t.n===1 && empatados>1){
+      dia='<span class="fraco">sem pico — um por dia em '+empatados+' dias</span>';
+      noDia='—';
+    } else {
+      dia='<b>'+DIA_SEM[dt.getDay()]+', '+br(t.data)+'</b>'+
+          (empatados>1 ? ' <span class="fraco">· empatado com '+(empatados-1)+
+                         (empatados-1===1?" outro dia":" outros dias")+'</span>' : '');
+      noDia=t.n;
+    }
+
+    h+='<tr><td>'+etapa+'</td><td>'+dia+'</td>'+
+       '<td class="n">'+noDia+'</td><td class="n"><b>'+total+'</b></td></tr>';
+  });
+
+  $("tbPicos").innerHTML=h+'</tbody></table>';
+}
+
 function renderDash(){
   var j=janela(), base=visiveis();
   var uteis=diasUteis(j.ini, j.fim);
@@ -2199,8 +2915,14 @@ function renderDash(){
   $("rotJanela").textContent=br(j.ini)+" a "+br(j.fim)+"  ·  "+uteis+
     " dia"+(uteis===1?"":"s")+" útil"+(uteis===1?"":"eis");
 
-  var regs=base.filter(function(r){ return r.data>=j.ini && r.data<=j.fim; });
+  var regs=base.filter(function(r){
+    return r.data>=j.ini && r.data<=j.fim && (!filtroVend || r.vendedora===filtroVend);
+  });
+  $("rotPer").textContent += filtroVend ? "  ·  "+filtroVend : "";
   renderResumo(regs, j);
+  renderRitmo(regs, j);
+  renderComposicao(regs, vendasNoPeriodo(j));
+  renderPicos(regs, vendasNoPeriodo(j));
   renderAndamento(regs, j);
   var porV=renderVendas(regs, j);
   ranking($("rkPeriodo"), regs, porV, j);
